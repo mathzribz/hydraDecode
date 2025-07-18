@@ -20,9 +20,14 @@ import com.rowanmcalpin.nextftc.pedro.PedroOpMode;
 
 import config.pedro.constants.FConstants;
 import config.pedro.constants.LConstants;
+import config.subsystems.Claw;
+import config.subsystems.Lift;
 
 @Autonomous
 public class lol  extends PedroOpMode {
+    public lol() {
+        super(Claw.INSTANCE, Lift.INSTANCE);
+    }
 
     private final Pose start = new Pose(4, 24, Math.toRadians(180));
     private final Pose score   = new Pose(30, 60, Math.toRadians(180));
@@ -67,6 +72,7 @@ public class lol  extends PedroOpMode {
 
     public Command firstRoutine() {
         return new SequentialGroup(
+                Claw.INSTANCE.open(),
       new FollowPath(PathToScore),
       new FollowPath(Slideone),
       new FollowPath(Slidetwo)
