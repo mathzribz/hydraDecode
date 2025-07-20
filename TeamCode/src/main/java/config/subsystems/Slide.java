@@ -8,22 +8,22 @@ import com.rowanmcalpin.nextftc.core.command.Command;
 import com.rowanmcalpin.nextftc.ftc.OpModeData;
 import com.rowanmcalpin.nextftc.ftc.hardware.ServoToPosition;
 
-public class Claw extends Subsystem {
-    public static final Claw INSTANCE = new Claw();
-    private Claw() { }
-    public Servo servoG;
-    public String name = "servoG";
+public class Slide extends Subsystem {
+    public static final Slide INSTANCE = new Slide();
+    private Slide() { }
+    public Servo servoS;
+    public String name = "servoS";
     Double openPos = 0.0;
     Double closePos = 0.5;
 
     public Command open() {
-        return new ServoToPosition(servoG, // SERVO TO MOVE
+        return new ServoToPosition(servoS, // SERVO TO MOVE
                 openPos, // POSITION TO MOVE TO
                 this); // IMPLEMENTED SUBSYSTEM
     }
 
     public Command close() {
-        return new ServoToPosition(servoG, // SERVO TO MOVE
+        return new ServoToPosition(servoS, // SERVO TO MOVE
                 closePos, // POSITION TO MOVE TO
                 this); // IMPLEMENTED SUBSYSTEM
     }
@@ -34,7 +34,7 @@ public class Claw extends Subsystem {
 
     @Override
     public void initialize() {
-        servoG = OpModeData.INSTANCE.getHardwareMap().get(Servo.class, name);
+        servoS = OpModeData.INSTANCE.getHardwareMap().get(Servo.class, name);
     }
 
 
