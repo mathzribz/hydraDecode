@@ -8,9 +8,9 @@ import com.rowanmcalpin.nextftc.core.command.Command;
 import com.rowanmcalpin.nextftc.ftc.OpModeData;
 import com.rowanmcalpin.nextftc.ftc.hardware.ServoToPosition;
 
-public class IntakePulse extends Subsystem {
-    public static final IntakePulse INSTANCE = new IntakePulse();
-    private IntakePulse() { }
+public class Pulse extends Subsystem {
+    public static final Pulse INSTANCE = new Pulse();
+    private Pulse() { }
     public Servo IntakePulse;
     public String name = "IntakePulse";
     Double openPos = 0.0;

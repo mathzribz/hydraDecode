@@ -1,10 +1,12 @@
 package opmode.testes;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -14,12 +16,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import config.pedro.constants.FConstants;
 import config.pedro.constants.LConstants;
-
+@Config
 @TeleOp
 public class feirasenai extends LinearOpMode {
     private DcMotor AR, RMF, RMB, LMF, LMB;
     private Servo servoG;
+    private CRServo intakeL, intakeR;
     double speed = 0.8;
+
+    public static double posOpen;
+    public static double posClose;
 
     boolean lastShareState = false;
 
@@ -35,12 +41,12 @@ public class feirasenai extends LinearOpMode {
             /** This method is call once when init is played, it initializes the follower **/
 
             if (gamepad1.left_trigger > 0.1) {
-                AR.setPower(0.5);
+                AR.setPower(1);
 
             }
 
-            else if (gamepad1.right_trigger > 0.1) {
-                AR.setPower(-0.5);
+            else if (gamepad1.dpad_up ) {
+                AR.setPower(-1);
 
             }
             else {
@@ -49,14 +55,32 @@ public class feirasenai extends LinearOpMode {
 
 
 
+            if (gamepad1.dpad_up ) {
+                intakeL.setPower(1);
+                intakeR.setPower(-1);
+
+            }
+
+            else if (gamepad1.dpad_down ) {
+                intakeL.setPower(-1);
+                intakeR.setPower(1);
+
+            }
+            else {
+                intakeL.setPower(0);
+                intakeR.setPower(0);
+            }
+
+
+
 
 
             if (gamepad1.left_bumper) {
-                servoG.setPosition(0.7);
+                servoG.setPosition(posClose);
 
             }
             if (gamepad1.right_bumper) {
-                servoG.setPosition(0);
+                servoG.setPosition(posOpen);
 
             }
 
@@ -83,6 +107,8 @@ public class feirasenai extends LinearOpMode {
 
         AR = hardwareMap.get(DcMotor.class, "Kit"); // porta 0
         servoG = hardwareMap.get(Servo.class, "servoG"); // porta 0
+        intakeL = hardwareMap.get(CRServo.class, "intakeL");
+        intakeR = hardwareMap.get(CRServo.class, "intakeR");
 
         RMF.setDirection(DcMotor.Direction.FORWARD);
         RMB.setDirection(DcMotor.Direction.FORWARD);
@@ -94,15 +120,6 @@ public class feirasenai extends LinearOpMode {
 
 
     public void loc() {
-        IMU imu = hardwareMap.get(IMU.class, "imu");
-        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.DOWN,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
-
-        imu.initialize(parameters);
-        if (gamepad1.dpad_right) {
-            imu.resetYaw();
-        }
 
         // Leitura dos controles do joystick
         double drive = -gamepad1.left_stick_y; // Movimento para frente/trás
@@ -123,16 +140,14 @@ public class feirasenai extends LinearOpMode {
         // Mudar angulo com base na aliança
 
 
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) ;
-        double rotX = strafe * Math.cos(-botHeading) - drive * Math.sin(-botHeading);
-        double rotY = strafe * Math.sin(-botHeading) + drive * Math.cos(-botHeading);
 
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(turn), 1);
 
-        double powerLMF = (rotY + rotX + turn) / denominator;
-        double powerLMB = (rotY - rotX + turn) / denominator;
-        double powerRMF = (rotY - rotX - turn) / denominator;
-        double powerRMB = (rotY + rotX - turn) / denominator;
+        double denominator = Math.max(Math.abs(drive) + Math.abs(strafe) + Math.abs(turn), 1);
+
+        double powerLMF = (drive + strafe + turn) / denominator;
+        double powerLMB = (drive - strafe + turn) / denominator;
+        double powerRMF = (drive - strafe - turn) / denominator;
+        double powerRMB = (drive + strafe - turn) / denominator;
 
         // Alternar velocidade
         boolean fastMode = false; // Variável global
