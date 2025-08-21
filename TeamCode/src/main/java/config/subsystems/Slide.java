@@ -12,7 +12,7 @@ public class Slide extends Subsystem {
     public static final Slide INSTANCE = new Slide();
     private Slide() { }
     public Servo servoS;
-    public String name = "servoS";
+    public String name = "slide";
     Double openPos = 0.0;
     Double closePos = 0.5;
 
@@ -38,4 +38,5 @@ public class Slide extends Subsystem {
     }
 
 
+}
 }
