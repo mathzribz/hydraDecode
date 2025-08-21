@@ -8,22 +8,22 @@ import com.rowanmcalpin.nextftc.core.command.Command;
 import com.rowanmcalpin.nextftc.ftc.OpModeData;
 import com.rowanmcalpin.nextftc.ftc.hardware.ServoToPosition;
 
-public class Slide extends Subsystem {
-    public static final Slide INSTANCE = new Slide();
-    private Slide() { }
-    public Servo servoS;
-    public String name = "slide";
+public class Pulse extends Subsystem {
+    public static final Pulse INSTANCE = new Pulse();
+    private Pulse() { }
+    public Servo IntakePulse;
+    public String name = "pulse";
     Double openPos = 0.0;
     Double closePos = 0.5;
 
-    public Command open() {
-        return new ServoToPosition(servoS, // SERVO TO MOVE
+    public Command toLow() {
+        return new ServoToPosition(IntakePulse, // SERVO TO MOVE
                 openPos, // POSITION TO MOVE TO
                 this); // IMPLEMENTED SUBSYSTEM
     }
 
-    public Command close() {
-        return new ServoToPosition(servoS, // SERVO TO MOVE
+    public Command toUp() {
+        return new ServoToPosition(IntakePulse, // SERVO TO MOVE
                 closePos, // POSITION TO MOVE TO
                 this); // IMPLEMENTED SUBSYSTEM
     }
@@ -34,9 +34,8 @@ public class Slide extends Subsystem {
 
     @Override
     public void initialize() {
-        servoS = OpModeData.INSTANCE.getHardwareMap().get(Servo.class, name);
+        IntakePulse = OpModeData.INSTANCE.getHardwareMap().get(Servo.class, name);
     }
 
 
-}
 }
