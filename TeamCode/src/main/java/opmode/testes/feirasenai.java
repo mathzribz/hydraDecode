@@ -19,7 +19,7 @@ import config.pedro.constants.LConstants;
 public class feirasenai extends LinearOpMode {
     private DcMotor AR, RMF, RMB, LMF, LMB;
     private Servo servoG;
-    double speed = 0.65;
+    double speed = 0.8;
 
     boolean lastShareState = false;
 
@@ -34,20 +34,13 @@ public class feirasenai extends LinearOpMode {
 
             /** This method is call once when init is played, it initializes the follower **/
 
-
-
-
-
-
-
-
             if (gamepad1.left_trigger > 0.1) {
-                AR.setPower(1);
+                AR.setPower(0.5);
 
             }
 
             else if (gamepad1.right_trigger > 0.1) {
-                AR.setPower(-1);
+                AR.setPower(-0.5);
 
             }
             else {
@@ -71,6 +64,7 @@ public class feirasenai extends LinearOpMode {
 
             telemetry.addData("AR", AR.getPower());
             telemetry.addData("garra", servoG.getPosition());
+            telemetry.addData("speed", speed);
 
 
             telemetry.update();
@@ -112,7 +106,7 @@ public class feirasenai extends LinearOpMode {
 
         // Leitura dos controles do joystick
         double drive = -gamepad1.left_stick_y; // Movimento para frente/trás
-        double strafe = gamepad1.left_stick_x; // Movimento lateral (strafe)
+        double strafe = -gamepad1.left_stick_x; // Movimento lateral (strafe)
         double turn = gamepad1.right_stick_x; // Rotação
 
 
@@ -145,7 +139,7 @@ public class feirasenai extends LinearOpMode {
         if (gamepad1.share && !lastShareState) { // Detecta apenas a transição do botão
             fastMode = !fastMode; // Alterna entre rápido e lento
         }
-        speed = fastMode ? 1.0 : 0.5; // Define a velocidade
+        speed = fastMode ? 1.0 : 0.75; // Define a velocidade
 
         // Aplicação das potências com ajuste de velocidade
         RMF.setPower(powerRMF * speed);
