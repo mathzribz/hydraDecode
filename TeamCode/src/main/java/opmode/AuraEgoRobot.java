@@ -1,9 +1,11 @@
 package opmode;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.rowanmcalpin.nextftc.core.command.Command;
 import com.rowanmcalpin.nextftc.core.command.CommandManager;
 import com.rowanmcalpin.nextftc.core.command.groups.SequentialGroup;
@@ -24,8 +26,11 @@ public class AuraEgoRobot  extends PedroOpMode {
     public AuraEgoRobot() {
         super(Claw.INSTANCE, Lift.INSTANCE, Slide.INSTANCE, Pulse.INSTANCE, Outtake.INSTANCE);
     }
+
+    boolean a;
     CRServo intakeL, intakeR;
     DcMotorEx Kit;
+    public IMU imu;
     public String frontLeftName = "LMF";
     public String frontRightName = "RMF";
     public String backLeftName = "LMB";
@@ -54,6 +59,11 @@ public class AuraEgoRobot  extends PedroOpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         motors = new MotorEx[]{frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor};
+        imu = hardwareMap.get(IMU. class, "imu");
+        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.DOWN,
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)));
+        imu.resetYaw();
 
         intakeL = hardwareMap.get(CRServo.class, "intakeL");
 
@@ -71,6 +81,10 @@ public class AuraEgoRobot  extends PedroOpMode {
         driverControlled.invoke();
         intake();
         outtake();
+
+        if (gamepad1.options){
+            imu.resetYaw();
+        }
     }
 
 
