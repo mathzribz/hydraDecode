@@ -20,17 +20,18 @@ import config.pedro.constants.LConstants;
 @TeleOp
 public class feirasenai extends LinearOpMode {
     private DcMotor AR, RMF, RMB, LMF, LMB;
-    private Servo servoG;
+    private Servo servoG, slide;
     private CRServo intakeL, intakeR;
     double speed = 0.8;
 
-    public static double posOpen;
-    public static double posClose;
+    public static double posOpen = 0;
+    public static double posClose = 0.58;
 
     boolean lastShareState = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
+
 
         waitForStart();
         while (opModeIsActive()) {
@@ -41,30 +42,14 @@ public class feirasenai extends LinearOpMode {
             /** This method is call once when init is played, it initializes the follower **/
 
             if (gamepad1.left_trigger > 0.1) {
-                AR.setPower(1);
-
-            }
-
-            else if (gamepad1.dpad_up ) {
-                AR.setPower(-1);
-
-            }
-            else {
-                AR.setPower(0);
-            }
-
-
-
-            if (gamepad1.dpad_up ) {
-                intakeL.setPower(1);
-                intakeR.setPower(-1);
-
-            }
-
-            else if (gamepad1.dpad_down ) {
                 intakeL.setPower(-1);
                 intakeR.setPower(1);
 
+            }
+
+            else if (gamepad1.right_trigger > 0.1 ) {
+                intakeL.setPower(1);
+                intakeR.setPower(-1);
             }
             else {
                 intakeL.setPower(0);
@@ -73,14 +58,33 @@ public class feirasenai extends LinearOpMode {
 
 
 
+            if (gamepad1.dpad_up ) {
+                AR.setPower(1);
+
+            }
+
+            else if (gamepad1.dpad_down ) {
+                AR.setPower(-1);
+
+            }
+            else {
+                AR.setPower(0);
+
+            }
+
+
+
 
 
             if (gamepad1.left_bumper) {
-                servoG.setPosition(posClose);
+                slide.setPosition(1);
+                servoG.setPosition(0.58);
+
 
             }
             if (gamepad1.right_bumper) {
-                servoG.setPosition(posOpen);
+                servoG.setPosition(0);
+                slide.setPosition(0);
 
             }
 
@@ -106,7 +110,8 @@ public class feirasenai extends LinearOpMode {
         LMB = hardwareMap.get(DcMotorEx.class, "LMB"); // porta 2 control
 
         AR = hardwareMap.get(DcMotor.class, "Kit"); // porta 0
-        servoG = hardwareMap.get(Servo.class, "servoG"); // porta 0
+        servoG = hardwareMap.get(Servo.class, "pulse"); // porta 0
+        slide = hardwareMap.get(Servo.class, "slide"); // porta 0
         intakeL = hardwareMap.get(CRServo.class, "intakeL");
         intakeR = hardwareMap.get(CRServo.class, "intakeR");
 
@@ -123,7 +128,7 @@ public class feirasenai extends LinearOpMode {
 
         // Leitura dos controles do joystick
         double drive = -gamepad1.left_stick_y; // Movimento para frente/trás
-        double strafe = -gamepad1.left_stick_x; // Movimento lateral (strafe)
+        double strafe = gamepad1.left_stick_x; // Movimento lateral (strafe)
         double turn = gamepad1.right_stick_x; // Rotação
 
 

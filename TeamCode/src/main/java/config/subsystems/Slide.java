@@ -14,7 +14,7 @@ public class Slide extends Subsystem {
     public Servo servoS;
     public String name = "slide";
     Double openPos = 0.0;
-    Double closePos = 0.5;
+    Double closePos = 1.0;
 
     public Command open() {
         return new ServoToPosition(servoS, // SERVO TO MOVE
@@ -38,5 +38,5 @@ public class Slide extends Subsystem {
     }
 
 
-}
+
 }

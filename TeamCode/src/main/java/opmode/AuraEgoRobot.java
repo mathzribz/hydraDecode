@@ -1,4 +1,6 @@
+
 package opmode;
+
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -66,10 +68,25 @@ public class AuraEgoRobot  extends PedroOpMode {
         imu.resetYaw();
 
         intakeL = hardwareMap.get(CRServo.class, "intakeL");
+        intakeR = hardwareMap.get(CRServo.class, "intakeR");
 
         Kit = hardwareMap.get(DcMotorEx.class, "Kit");
 
         Slide.INSTANCE.close();
+
+        gamepadManager.getGamepad2().getLeftBumper().setPressedCommand(
+                () -> new SequentialGroup(
+                        Slide.INSTANCE.open(),
+                        Pulse.INSTANCE.toLow()
+                )
+        );
+
+        gamepadManager.getGamepad2().getRightBumper().setPressedCommand(
+                () -> new SequentialGroup(
+                        Slide.INSTANCE.close(),
+                        Pulse.INSTANCE.toUp()
+                )
+        );
 
     }
 
@@ -79,6 +96,14 @@ public class AuraEgoRobot  extends PedroOpMode {
        // CommandManager.INSTANCE.scheduleCommand(new DriverControlled(gamepadManager.getGamepad1(), false));
         driverControlled = new MecanumDriverControlled(motors, gamepadManager.getGamepad1());
         driverControlled.invoke();
+
+
+
+    }
+
+    @Override
+    public void onUpdate() {
+        gamepadManager.updateGamepads();
         intake();
         outtake();
 
@@ -86,7 +111,6 @@ public class AuraEgoRobot  extends PedroOpMode {
             imu.resetYaw();
         }
     }
-
 
     public void intake(){
         if (gamepad1.left_trigger > 0.1) {
@@ -105,19 +129,7 @@ public class AuraEgoRobot  extends PedroOpMode {
             intakeR.setPower(0);
         }
 
-        gamepadManager.getGamepad2().getLeftBumper().setPressedCommand(
-                () -> new SequentialGroup(
-                        Slide.INSTANCE.open(),
-                        Pulse.INSTANCE.toLow()
-                )
-        );
 
-        gamepadManager.getGamepad2().getRightBumper().setPressedCommand(
-                () -> new SequentialGroup(
-                        Slide.INSTANCE.close(),
-                        Pulse.INSTANCE.toUp()
-                )
-        );
 
     }
 
