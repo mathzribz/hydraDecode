@@ -14,7 +14,7 @@ public class Pulse extends Subsystem {
     public Servo IntakePulse;
     public String name = "pulse";
     Double openPos = 0.0;
-    Double closePos = 0.5;
+    Double closePos = 0.58;
 
     public Command toLow() {
         return new ServoToPosition(IntakePulse, // SERVO TO MOVE

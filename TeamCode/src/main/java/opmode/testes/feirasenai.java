@@ -1,112 +1,66 @@
 package opmode.testes;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.localization.Pose;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
-import config.pedro.constants.FConstants;
-import config.pedro.constants.LConstants;
 @Config
 @TeleOp
 public class feirasenai extends LinearOpMode {
-    private DcMotor AR, RMF, RMB, LMF, LMB;
-    private Servo servoG;
+
+    private DcMotorEx RMF, RMB, LMF, LMB;
+    private DcMotor viper;
+    private Servo pulse, slide, claw, outtake;
     private CRServo intakeL, intakeR;
-    double speed = 0.8;
 
-    public static double posOpen;
-    public static double posClose;
+    private double speed = 0.75;
 
-    boolean lastShareState = false;
+    public static double posSlideOpen = 0, posSlideClose = 1;
+    public static double posPulseOpen = 0, posPulseClose = 0.58;
+    public static double posOuttakeTransfer = 0, posOuttakeBasket = 0.58,
+            posOuttakeSpecimen = 0.58, posOuttakeChamber = 0.58;
+    public static double posClawOpen = 0, posClawClose = 0.58;
+
+    private boolean clawOpen = false;
+    private boolean lastButtonState = false;
 
     @Override
-    public void runOpMode() throws InterruptedException {
-
+    public void runOpMode() {
+        initHardware();
         waitForStart();
+
         while (opModeIsActive()) {
-            initt();
-            loc();
+            drive();
+            handleIntake();
+            handleOuttake();
 
-
-            /** This method is call once when init is played, it initializes the follower **/
-
-            if (gamepad1.left_trigger > 0.1) {
-                AR.setPower(1);
-
-            }
-
-            else if (gamepad1.dpad_up ) {
-                AR.setPower(-1);
-
-            }
-            else {
-                AR.setPower(0);
-            }
-
-
-
-            if (gamepad1.dpad_up ) {
-                intakeL.setPower(1);
-                intakeR.setPower(-1);
-
-            }
-
-            else if (gamepad1.dpad_down ) {
-                intakeL.setPower(-1);
-                intakeR.setPower(1);
-
-            }
-            else {
-                intakeL.setPower(0);
-                intakeR.setPower(0);
-            }
-
-
-
-
-
-            if (gamepad1.left_bumper) {
-                servoG.setPosition(posClose);
-
-            }
-            if (gamepad1.right_bumper) {
-                servoG.setPosition(posOpen);
-
-            }
-
-
-
-            telemetry.addData("AR", AR.getPower());
-            telemetry.addData("garra", servoG.getPosition());
-            telemetry.addData("speed", speed);
-
-
+            telemetry.addData("Viper Power", viper.getPower());
+            telemetry.addData("Pulse", pulse.getPosition());
+            telemetry.addData("Slide", slide.getPosition());
+            telemetry.addData("Outtake", outtake.getPosition());
+            telemetry.addData("Claw", claw.getPosition());
+            telemetry.addData("Speed", speed);
             telemetry.update();
-
         }
-
-
-
     }
 
-    public void initt() {
-        RMF = hardwareMap.get(DcMotorEx.class, "RMF"); // porta 1 expension
-        RMB = hardwareMap.get(DcMotorEx.class, "RMB"); // porta 2 expension
-        LMF = hardwareMap.get(DcMotorEx.class, "LMF"); // porta 1 control
-        LMB = hardwareMap.get(DcMotorEx.class, "LMB"); // porta 2 control
+    private void initHardware() {
+        RMF = hardwareMap.get(DcMotorEx.class, "RMF");
+        RMB = hardwareMap.get(DcMotorEx.class, "RMB");
+        LMF = hardwareMap.get(DcMotorEx.class, "LMF");
+        LMB = hardwareMap.get(DcMotorEx.class, "LMB");
 
-        AR = hardwareMap.get(DcMotor.class, "Kit"); // porta 0
-        servoG = hardwareMap.get(Servo.class, "servoG"); // porta 0
+        viper = hardwareMap.get(DcMotor.class, "Kit");
+
+        pulse = hardwareMap.get(Servo.class, "pulse");
+        slide = hardwareMap.get(Servo.class, "slide");
+        outtake = hardwareMap.get(Servo.class, "outtake");
+        claw = hardwareMap.get(Servo.class, "claw");
+
         intakeL = hardwareMap.get(CRServo.class, "intakeL");
         intakeR = hardwareMap.get(CRServo.class, "intakeR");
 
@@ -115,32 +69,17 @@ public class feirasenai extends LinearOpMode {
         LMF.setDirection(DcMotor.Direction.REVERSE);
         LMB.setDirection(DcMotor.Direction.REVERSE);
 
-        AR.setDirection(DcMotor.Direction.FORWARD);
+        viper.setDirection(DcMotor.Direction.FORWARD);
     }
 
+    private void drive() {
+        double drive = -gamepad1.left_stick_y;
+        double strafe = gamepad1.left_stick_x * 1.1;
+        double turn = gamepad1.right_stick_x;
 
-    public void loc() {
-
-        // Leitura dos controles do joystick
-        double drive = -gamepad1.left_stick_y; // Movimento para frente/trás
-        double strafe = -gamepad1.left_stick_x; // Movimento lateral (strafe)
-        double turn = gamepad1.right_stick_x; // Rotação
-
-
-        // Fator de compensação para o strafe
-        double strafeCompensation = 1.1; // Ajuste para melhorar a resposta do strafe
-        strafe *= strafeCompensation;
-
-        // Zona morta para evitar pequenos movimentos no joystick
-        double deadzone = 0.05;
-        if (Math.abs(turn) < deadzone) turn = 0;
-        if (Math.abs(strafe) < deadzone) strafe = 0;
-        if (Math.abs(drive) < deadzone) drive = 0;
-
-        // Mudar angulo com base na aliança
-
-
-
+        drive = applyDeadzone(drive);
+        strafe = applyDeadzone(strafe);
+        turn = applyDeadzone(turn);
 
         double denominator = Math.max(Math.abs(drive) + Math.abs(strafe) + Math.abs(turn), 1);
 
@@ -149,17 +88,56 @@ public class feirasenai extends LinearOpMode {
         double powerRMF = (drive - strafe - turn) / denominator;
         double powerRMB = (drive + strafe - turn) / denominator;
 
-        // Alternar velocidade
-        boolean fastMode = false; // Variável global
-        if (gamepad1.share && !lastShareState) { // Detecta apenas a transição do botão
-            fastMode = !fastMode; // Alterna entre rápido e lento
-        }
-        speed = fastMode ? 1.0 : 0.75; // Define a velocidade
-
-        // Aplicação das potências com ajuste de velocidade
         RMF.setPower(powerRMF * speed);
         RMB.setPower(powerRMB * speed);
         LMF.setPower(powerLMF * speed);
         LMB.setPower(powerLMB * speed);
+    }
+
+    private double applyDeadzone(double value) {
+        return Math.abs(value) < 0.05 ? 0 : value;
+    }
+
+    private void handleIntake() {
+        if (gamepad1.left_trigger > 0.4) {
+            slide.setPosition(posSlideClose);
+            pulse.setPosition(posPulseClose);
+        } else {
+            slide.setPosition(posSlideOpen);
+            pulse.setPosition(posPulseOpen);
+        }
+
+        if (gamepad1.right_trigger > 0.1) {
+            intakeL.setPower(-0.8);
+            intakeR.setPower(0.8);
+        } else if (gamepad1.left_bumper) {
+            intakeL.setPower(0.8);
+            intakeR.setPower(-0.8);
+        } else {
+            intakeL.setPower(0);
+            intakeR.setPower(0);
+        }
+    }
+
+    private void handleOuttake() {
+        if (gamepad1.dpad_up) {
+            viper.setPower(1);
+        } else if (gamepad1.dpad_down) {
+            viper.setPower(-1);
+        } else {
+            viper.setPower(0);
+        }
+
+        if (gamepad1.a) outtake.setPosition(posOuttakeTransfer);
+        else if (gamepad1.b) outtake.setPosition(posOuttakeBasket);
+        else if (gamepad1.x) outtake.setPosition(posOuttakeSpecimen);
+        else if (gamepad1.y) outtake.setPosition(posOuttakeChamber);
+
+        boolean buttonPressed = gamepad1.right_bumper;
+        if (buttonPressed && !lastButtonState) {
+            clawOpen = !clawOpen;
+            claw.setPosition(clawOpen ? posClawOpen : posClawClose);
+        }
+        lastButtonState = buttonPressed;
     }
 }

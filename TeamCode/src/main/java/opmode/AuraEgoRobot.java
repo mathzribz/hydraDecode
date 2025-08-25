@@ -1,4 +1,6 @@
+
 package opmode;
+
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -10,6 +12,7 @@ import com.rowanmcalpin.nextftc.core.command.Command;
 import com.rowanmcalpin.nextftc.core.command.CommandManager;
 import com.rowanmcalpin.nextftc.core.command.groups.SequentialGroup;
 import com.rowanmcalpin.nextftc.ftc.driving.MecanumDriverControlled;
+import com.rowanmcalpin.nextftc.ftc.gamepad.GamepadManager;
 import com.rowanmcalpin.nextftc.ftc.hardware.controllables.MotorEx;
 import com.rowanmcalpin.nextftc.pedro.DriverControlled;
 import com.rowanmcalpin.nextftc.pedro.PedroOpMode;
@@ -27,7 +30,6 @@ public class AuraEgoRobot  extends PedroOpMode {
         super(Claw.INSTANCE, Lift.INSTANCE, Slide.INSTANCE, Pulse.INSTANCE, Outtake.INSTANCE);
     }
 
-    boolean a;
     CRServo intakeL, intakeR;
     DcMotorEx Kit;
     public IMU imu;
@@ -66,10 +68,13 @@ public class AuraEgoRobot  extends PedroOpMode {
         imu.resetYaw();
 
         intakeL = hardwareMap.get(CRServo.class, "intakeL");
+        intakeR = hardwareMap.get(CRServo.class, "intakeR");
 
         Kit = hardwareMap.get(DcMotorEx.class, "Kit");
 
         Slide.INSTANCE.close();
+
+
 
     }
 
@@ -79,31 +84,6 @@ public class AuraEgoRobot  extends PedroOpMode {
        // CommandManager.INSTANCE.scheduleCommand(new DriverControlled(gamepadManager.getGamepad1(), false));
         driverControlled = new MecanumDriverControlled(motors, gamepadManager.getGamepad1());
         driverControlled.invoke();
-        intake();
-        outtake();
-
-        if (gamepad1.options){
-            imu.resetYaw();
-        }
-    }
-
-
-    public void intake(){
-        if (gamepad1.left_trigger > 0.1) {
-            intakeL.setPower(0.8);
-            intakeR.setPower(-0.8);
-
-        }
-
-        else if (gamepad1.right_trigger > 0.1) {
-            intakeL.setPower(-0.8);
-            intakeR.setPower(0.8);
-
-        }
-        else {
-            intakeL.setPower(0);
-            intakeR.setPower(0);
-        }
 
         gamepadManager.getGamepad2().getLeftBumper().setPressedCommand(
                 () -> new SequentialGroup(
@@ -119,20 +99,7 @@ public class AuraEgoRobot  extends PedroOpMode {
                 )
         );
 
-    }
 
-    public void outtake(){
-        if (gamepad1.dpad_up ) {
-            Kit.setPower(1);
-
-        }
-
-        else if (gamepad1.dpad_down) {
-            Kit.setPower(-1);
-        }
-        else {
-            Kit.setPower(0);
-        }
 
         //transfer
         gamepadManager.getGamepad1().getA().setPressedCommand(Outtake.INSTANCE::transfer);
@@ -151,6 +118,54 @@ public class AuraEgoRobot  extends PedroOpMode {
         gamepadManager.getGamepad1().getDpadLeft().setPressedCommand(Claw.INSTANCE::close);
 
         gamepadManager.getGamepad1().getDpadRight().setPressedCommand(Claw.INSTANCE::open);
+    }
+
+    @Override
+    public void onUpdate() {
+        super.onUpdate();
+        gamepadManager.updateGamepads();
+        intake();
+        outtake();
+
+        if (gamepad1.options){
+            imu.resetYaw();
+        }
+    }
+
+    public void intake(){
+        if (gamepad1.left_trigger > 0.1) {
+            intakeL.setPower(0.8);
+            intakeR.setPower(-0.8);
+
+        }
+
+        else if (gamepad1.right_trigger > 0.1) {
+            intakeL.setPower(-0.8);
+            intakeR.setPower(0.8);
+
+        }
+        else {
+            intakeL.setPower(0);
+            intakeR.setPower(0);
+        }
+
+
+
+    }
+
+    public void outtake(){
+        if (gamepad1.dpad_up ) {
+            Kit.setPower(1);
+
+        }
+
+        else if (gamepad1.dpad_down) {
+            Kit.setPower(-1);
+        }
+        else {
+            Kit.setPower(0);
+        }
+
 
 
 
