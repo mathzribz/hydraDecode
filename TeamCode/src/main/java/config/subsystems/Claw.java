@@ -12,7 +12,7 @@ public class Claw extends Subsystem {
     public static final Claw INSTANCE = new Claw();
     private Claw() { }
     public Servo servoG;
-    public String name = "servoG";
+    public String name = "claw";
     Double openPos = 0.0;
     Double closePos = 0.5;
 
@@ -36,6 +36,10 @@ public class Claw extends Subsystem {
     public void initialize() {
         servoG = OpModeData.INSTANCE.getHardwareMap().get(Servo.class, name);
     }
+
+
+
+
 
 
 }

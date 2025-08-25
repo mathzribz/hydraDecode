@@ -12,19 +12,33 @@ public class Outtake extends Subsystem {
     public static final Outtake INSTANCE = new Outtake();
     private Outtake() { }
     public Servo outtake;
-    public String name = "servoG";
-    Double openPos = 0.0;
-    Double closePos = 0.5;
+    public String name = "outtake";
+    Double transferPos = 0.0;
+    Double chamberPos = 0.3;
+    Double basketPos = 0.6;
+    Double specPos = 0.8;
 
-    public Command open() {
+    public Command transfer() {
         return new ServoToPosition(outtake, // SERVO TO MOVE
-                openPos, // POSITION TO MOVE TO
+                transferPos, // POSITION TO MOVE TO
                 this); // IMPLEMENTED SUBSYSTEM
     }
 
-    public Command close() {
+    public Command basket() {
         return new ServoToPosition(outtake, // SERVO TO MOVE
-                closePos, // POSITION TO MOVE TO
+                basketPos, // POSITION TO MOVE TO
+                this); // IMPLEMENTED SUBSYSTEM
+    }
+
+    public Command specimen() {
+        return new ServoToPosition(outtake, // SERVO TO MOVE
+                specPos, // POSITION TO MOVE TO
+                this); // IMPLEMENTED SUBSYSTEM
+    }
+
+    public Command chamber() {
+        return new ServoToPosition(outtake, // SERVO TO MOVE
+                chamberPos, // POSITION TO MOVE TO
                 this); // IMPLEMENTED SUBSYSTEM
     }
 
