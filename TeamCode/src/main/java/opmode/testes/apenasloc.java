@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package opmode.testes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.IMU;
