@@ -1,4 +1,4 @@
-package opmode.testes;
+package tests;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -6,12 +6,10 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-
 @Config
 @TeleOp
-public class SHOOTER extends LinearOpMode {
+public class testesMotor extends LinearOpMode {
 
     Servo pulse;
     private DcMotor AR, AL, KITL, KITR;
@@ -24,21 +22,18 @@ public class SHOOTER extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             AR = hardwareMap.get(DcMotor.class, "Kit"); // porta 0
+            AL = hardwareMap.get(DcMotor.class, "Kit2"); // porta 0
 
 
 
-            AR.setDirection(DcMotor.Direction.REVERSE);
+            AR.setDirection(DcMotor.Direction.FORWARD);
+            AL.setDirection(DcMotor.Direction.REVERSE);
 
 
 
-            if(gamepad1.a){
-            AR.setPower(1);
-            }
 
-            if(gamepad1.b){
-                AR.setPower(0);
-            }
-
+            AR.setPower(gamepad1.right_stick_y * 0.2);
+            AL.setPower(gamepad1.right_stick_y * 0.2);
 
 
             if (gamepad1.right_bumper){
