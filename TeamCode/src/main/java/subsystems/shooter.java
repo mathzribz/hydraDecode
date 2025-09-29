@@ -39,6 +39,9 @@ public class shooter implements Subsystem {
     public Command spinDown = new RunToVelocity(controlSystem, 0).requires(motor);
 
 
+
+
+
     @Override
     public void periodic() {
         motor.setPower(controlSystem.calculate(motor.getState()));
