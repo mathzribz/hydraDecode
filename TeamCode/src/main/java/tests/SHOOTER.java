@@ -1,16 +1,23 @@
 package tests;
-
+import com.bylazar.gamepad.Gamepad;
+import com.bylazar.gamepad.GamepadManager;
+import com.bylazar.gamepad.PanelsGamepad;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
 @TeleOp
 public class SHOOTER extends LinearOpMode {
+   Gamepad g1 = PanelsGamepad.INSTANCE.getFirstManager().getCurrentState$Gamepad_release();
+
+
 
     Servo pulse;
     private DcMotor AR, AL, KITL, KITR;
@@ -22,7 +29,9 @@ public class SHOOTER extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-            AR = hardwareMap.get(DcMotor.class, "Kit"); // porta 0
+
+
+            ; // porta 0
 
 
 
