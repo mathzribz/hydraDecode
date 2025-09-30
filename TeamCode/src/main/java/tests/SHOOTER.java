@@ -15,23 +15,23 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 @TeleOp
 public class SHOOTER extends LinearOpMode {
-   Gamepad g1 = PanelsGamepad.INSTANCE.getFirstManager().getCurrentState$Gamepad_release();
-
-
-
     Servo pulse;
     private DcMotor AR, AL, KITL, KITR;
 
-    public static double posPulseOpen = 0, posPulseClose = 0.58;
+
+    private final GamepadManager g1 = PanelsGamepad.INSTANCE.getFirstManager();
+
+
+
     @Override
     public void runOpMode() throws InterruptedException {
-        telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+
 
         waitForStart();
         while (opModeIsActive()) {
+         g1.asCombinedFTCGamepad(gamepad1);
 
 
-            ; // porta 0
 
 
 
@@ -49,16 +49,7 @@ public class SHOOTER extends LinearOpMode {
 
 
 
-            if (gamepad1.right_bumper){
-                pulse.setPosition(posPulseClose);
 
-            }
-
-
-            else if (gamepad1.left_bumper){
-                pulse.setPosition(posPulseOpen);
-
-            }
 
 
             telemetry.addData("AR", AR.getPower());

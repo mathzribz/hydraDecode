@@ -15,7 +15,6 @@ public class testshooter extends NextFTCOpMode {
     public testshooter() {
         addComponents(
                 new SubsystemComponent(shooter.INSTANCE),
-                BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
     }
@@ -23,13 +22,13 @@ public class testshooter extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-
+        Gamepads.gamepad1().y().whenBecomesTrue(shooter.INSTANCE.spinUp); //MotorPower
+        Gamepads.gamepad1().x().whenBecomesTrue(shooter.INSTANCE.spinDown);
     }
 
     @Override
     public void onUpdate() {
         ActiveOpMode.telemetry().update();
-        Gamepads.gamepad1().y().whenBecomesTrue(shooter.INSTANCE.spinUp); //MotorPower
-        Gamepads.gamepad1().x().whenBecomesTrue(shooter.INSTANCE.spinDown);
+
     }
 }
