@@ -26,9 +26,5 @@ public class testshooter extends NextFTCOpMode {
         Gamepads.gamepad1().x().whenBecomesTrue(shooter.INSTANCE.spinDown);
     }
 
-    @Override
-    public void onUpdate() {
-        ActiveOpMode.telemetry().update();
 
-    }
 }
