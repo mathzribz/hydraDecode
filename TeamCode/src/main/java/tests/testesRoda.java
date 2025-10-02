@@ -1,5 +1,5 @@
 
-package opmode;
+package tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp
-public class RobotCentric extends LinearOpMode {
+public class testesRoda extends LinearOpMode {
 
     private DcMotor RMF, RMB, LMF, LMB;
     private double speed = 1;
@@ -26,11 +26,16 @@ public class RobotCentric extends LinearOpMode {
             drive();
 
             if (gamepad1.a) {
-                speed = 0.5;
+                speed = 0.25;
 
             }
 
             if (gamepad1.b) {
+                speed = 0.5;
+
+            }
+
+            if (gamepad1.x) {
                 speed = 0.75;
 
             }
@@ -39,6 +44,30 @@ public class RobotCentric extends LinearOpMode {
                 speed = 1;
 
             }
+
+
+            if (gamepad1.dpad_down) {
+                RMF.setPower(speed);
+
+
+            }
+
+            if (gamepad1.dpad_right) {
+                RMB.setPower(speed);
+
+            }
+
+            if (gamepad1.dpad_left) {
+                LMF.setPower(speed);
+
+            }
+
+            if (gamepad1.dpad_up) {
+                LMB.setPower(speed);
+
+            }
+
+
 
             telemetry.update();
         }
