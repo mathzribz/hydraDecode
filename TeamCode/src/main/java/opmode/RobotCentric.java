@@ -56,7 +56,7 @@ public class RobotCentric extends LinearOpMode {
     private void drive() {
         double drive = gamepad1.left_stick_y;
         double strafe = gamepad1.left_stick_x * 1.1;
-        double turn = gamepad1.right_stick_x;
+        double turn = -gamepad1.right_stick_x;
 
         drive = apllyDeadzone(drive);
         strafe = apllyDeadzone(strafe);

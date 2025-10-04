@@ -25,6 +25,7 @@ public class SHOOTER extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        AR = hardwareMap.get(DcMotor.class, "Kit");
 
 
         waitForStart();

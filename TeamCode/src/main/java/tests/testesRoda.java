@@ -1,6 +1,8 @@
 
 package tests;
 
+import com.bylazar.gamepad.GamepadManager;
+import com.bylazar.gamepad.PanelsGamepad;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp
 public class testesRoda extends LinearOpMode {
+    private final GamepadManager g1 = PanelsGamepad.INSTANCE.getFirstManager();
 
     private DcMotor RMF, RMB, LMF, LMB;
     private double speed = 1;
@@ -23,6 +26,7 @@ public class testesRoda extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
+            g1.asCombinedFTCGamepad(gamepad1);
             drive();
 
             if (gamepad1.a) {
@@ -40,7 +44,7 @@ public class testesRoda extends LinearOpMode {
 
             }
 
-            if (gamepad1.x) {
+            if (gamepad1.y) {
                 speed = 1;
 
             }
