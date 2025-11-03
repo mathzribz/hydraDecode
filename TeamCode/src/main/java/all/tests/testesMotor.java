@@ -1,4 +1,4 @@
-package tests;
+package all.tests;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -32,8 +32,8 @@ public class testesMotor extends LinearOpMode {
 
 
 
-            AR.setPower(gamepad1.right_stick_y * 0.2);
-            AL.setPower(gamepad1.right_stick_y * 0.2);
+            AR.setPower(gamepad1.right_stick_y );
+            AL.setPower(gamepad1.right_stick_y );
 
 
             if (gamepad1.right_bumper){
