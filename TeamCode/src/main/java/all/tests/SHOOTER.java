@@ -1,15 +1,10 @@
-package tests;
-import com.bylazar.gamepad.Gamepad;
+package all.tests;
 import com.bylazar.gamepad.GamepadManager;
 import com.bylazar.gamepad.PanelsGamepad;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
@@ -41,7 +36,7 @@ public class SHOOTER extends LinearOpMode {
 
 
             if(gamepad1.a){
-            AR.setPower(1);
+            AR.setPower(-1);
             }
 
             if(gamepad1.b){

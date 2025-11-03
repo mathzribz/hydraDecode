@@ -1,5 +1,5 @@
 
-package tests;
+package all.tests;
 
 import com.bylazar.gamepad.GamepadManager;
 import com.bylazar.gamepad.PanelsGamepad;
