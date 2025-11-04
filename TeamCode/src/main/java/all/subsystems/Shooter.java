@@ -1,5 +1,6 @@
 package all.subsystems;
 
+import dev.nextftc.control.ControlSystem;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.MotorEx;
@@ -16,6 +17,8 @@ public class Shooter implements Subsystem {
     public Command shooterSpeed_90;
     public Command shooterSpedd_75;
 
+    private ControlSystem controlSystem;
+
     @Override
     public void initialize() {
         shooterMotor = new MotorEx("shooter");
@@ -23,6 +26,8 @@ public class Shooter implements Subsystem {
 
         shooterOn =
                 new SetPower(shooterMotor, shooterSpeed).requires(this);
+
+
 
     }
 

@@ -34,12 +34,8 @@ public class DECODE_TeleOp extends NextFTCOpMode {
 
     }
 
-
-
     @Override
-    public void onUpdate() {
-
-
+    public void onStartButtonPressed() {
         DriverControlledCommand driverControlled = new PedroDriverControlled(
                 Gamepads.gamepad1().leftStickY(),
                 Gamepads.gamepad1().leftStickX(),
@@ -47,13 +43,24 @@ public class DECODE_TeleOp extends NextFTCOpMode {
                 false
         );
         driverControlled.schedule();
-
         Gamepads.gamepad1().leftTrigger().greaterThan(0.1).whenBecomesTrue(Intake.INSTANCE.intakeOn);
         Gamepads.gamepad1().leftBumper().whenBecomesTrue(Intake.INSTANCE.intakeReverse);
 
-        Gamepads.gamepad1().rightTrigger().greaterThan(0.1).whenBecomesTrue(Shooter.INSTANCE.shooterOn);
         Gamepads.gamepad1().rightBumper().whenBecomesTrue(Transfer.INSTANCE.transferOn);
         Gamepads.gamepad1().y().whenBecomesTrue(Transfer.INSTANCE.transferReverse);
+
+
+        Gamepads.gamepad2().rightTrigger().greaterThan(0.1).whenBecomesTrue(Shooter.INSTANCE.shooterOn);
+        Gamepads.gamepad2().leftTrigger().greaterThan(0.1).whenBecomesTrue(Intake.INSTANCE.intakeOn);
+        Gamepads.gamepad2().rightBumper().whenBecomesTrue(Transfer.INSTANCE.transferOn);
+    }
+
+    @Override
+    public void onUpdate() {
+
+
+
+
 
 }
 }

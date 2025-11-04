@@ -11,9 +11,9 @@ import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.controllable.RunToVelocity;
 import dev.nextftc.hardware.impl.MotorEx;
 @Config
-public class FlyWheelTester implements Subsystem {
-    public static final FlyWheelTester INSTANCE = new FlyWheelTester();
-    private FlyWheelTester() {}
+public class transfers implements Subsystem {
+    public static final transfers INSTANCE = new transfers();
+    private transfers() {}
     private MotorEx flyMotor;
     private ControlSystem controlSystem;
     public static PIDCoefficients coefficients;
@@ -31,14 +31,13 @@ public class FlyWheelTester implements Subsystem {
 
     @Override
     public void initialize() {
-        flyMotor = new MotorEx("shooter");
-        flyMotor.reverse();
+        flyMotor = new MotorEx("transfer");
 
         coefficients = new PIDCoefficients(kP, 0.0, kD);
         feedforward = new BasicFeedforwardParameters(kV, kA, 0.0);
 
         controlSystem = ControlSystem.builder()
-                 .velPid(coefficients)
+                .velPid(coefficients)
                 .basicFF(feedforward)
                 .build();
 
@@ -49,7 +48,7 @@ public class FlyWheelTester implements Subsystem {
                 new RunToVelocity(controlSystem, 200).requires(this);
 
         intakeOff =
-                new RunToVelocity(controlSystem, 0).requires(this);
+                new RunToVelocity(controlSystem, 200).requires(this);
 
     }
 

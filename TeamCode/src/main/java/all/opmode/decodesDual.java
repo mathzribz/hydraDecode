@@ -38,7 +38,7 @@ public class decodesDual extends LinearOpMode {
             intake();
             shooter();
             transfer();
-            ll();
+            //ll();
             imu();
 
             telemetry.addData("velocidade shooter", shooterSpeed);
@@ -56,11 +56,11 @@ public class decodesDual extends LinearOpMode {
         Intake = hardwareMap.get(DcMotor.class, "intake");
         Shooter = hardwareMap.get(DcMotor.class, "shooter");
         Transfer = hardwareMap.get(DcMotor.class, "transfer");
-        limelight = hardwareMap.get(Limelight3A.class, "ll");
+//        limelight = hardwareMap.get(Limelight3A.class, "ll");
         imu = hardwareMap.get(IMU.class, "imu");
 
-        limelight.start();
-        limelight.pipelineSwitch(2);
+//        limelight.start();
+//        limelight.pipelineSwitch(2);
 
         RMF.setDirection(DcMotorSimple.Direction.FORWARD);
         RMB.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -153,23 +153,23 @@ public class decodesDual extends LinearOpMode {
 
     }
 
-    public void ll() {
-        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-        limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
-
-        LLResult llResult = limelight.getLatestResult();
-
-        if (llResult != null && llResult.isValid()) {
-
-            Pose3D botpose = llResult.getBotpose();
-
-            telemetry.addData("target X", llResult.getTx());
-            telemetry.addData("target Y", llResult.getTy());
-            telemetry.addData("target Area", llResult.getTa());
-            telemetry.addData(" botpose ", botpose.toString());
-        }
-
-    }
+//    public void ll() {
+//        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+//        limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
+//
+//        LLResult llResult = limelight.getLatestResult();
+//
+//        if (llResult != null && llResult.isValid()) {
+//
+//            Pose3D botpose = llResult.getBotpose();
+//
+//            telemetry.addData("target X", llResult.getTx());
+//            telemetry.addData("target Y", llResult.getTy());
+//            telemetry.addData("target Area", llResult.getTa());
+//            telemetry.addData(" botpose ", botpose.toString());
+//        }
+//
+//    }
 
     public void imu() {
 
