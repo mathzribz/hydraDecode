@@ -7,12 +7,11 @@ import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.controllable.RunToVelocity;
 import dev.nextftc.hardware.impl.MotorEx;
 
-
 public class Shooter implements Subsystem {
     public static final Shooter INSTANCE = new Shooter();
     private Shooter() { }
 
-    private final MotorEx motor = new MotorEx("shooter");
+    private final MotorEx shooterMotor = new MotorEx("shooter");
 
     private final ControlSystem controller = ControlSystem.builder()
             .velPid(0.005, 0, 0)
@@ -23,9 +22,16 @@ public class Shooter implements Subsystem {
     public final Command on = new RunToVelocity(controller, 500.0).requires(this).named("ShooterOn");
 
     @Override
-    public void periodic() {
-        motor.setPower(controller.calculate(motor.getState()));
+    public void initialize() {
+        shooterMotor.reverse();
 
-        ActiveOpMode.telemetry().addData("shooter State", motor.getState());
     }
+
+    @Override
+    public void periodic() {
+        shooterMotor.setPower(controller.calculate(shooterMotor.getState()));
+
+        ActiveOpMode.telemetry().addData("shooter State", shooterMotor.getState());
+}
+
 }
