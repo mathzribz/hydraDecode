@@ -2,125 +2,94 @@ package all.vision;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import all.vision.Drivetrain;
-import all.vision.PIDConstants;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-@TeleOp(name = "Limelight Apriltag Tracker (No Helper)", group = "Vision")
+@TeleOp(name = "Limelight Apriltag PID Tracker", group = "Vision")
 public class limeheading extends LinearOpMode {
 
+    private Limelight3A limelight;
     private IMU imu;
     private Drivetrain drivetrain = new Drivetrain();
 
-    double integralSum = 0;
-    double Kp = PIDConstants.Kp;
-    double Ki = PIDConstants.Ki;
-    double Kd = PIDConstants.Kd;
-    double lastError = 0;
-    ElapsedTime timer = new ElapsedTime();
+    // PID constants
+    private double Kp = PIDConstants.Kp;
+    private double Ki = PIDConstants.Ki;
+    private double Kd = PIDConstants.Kd;
+
+    private double integralSum = 0;
+    private double lastError = 0;
+    private ElapsedTime timer = new ElapsedTime();
 
     @Override
     public void runOpMode() {
+        // Inicializa hardware
         drivetrain.init(hardwareMap);
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        imu = hardwareMap.get(IMU.class, "imu");
 
-        IMU imu = hardwareMap.get(IMU.class, "imu");
-
-        // Define os parâmetros de orientação do Hub no robô
+        // Configuração da orientação do hub
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
-
-        // Inicializa o IMU com os parâmetros definidos
         imu.initialize(parameters);
+
+        // Telemetria combinada com o Dashboard
         FtcDashboard dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
+        limelight.pipelineSwitch(0); // pipeline configurado para AprilTags
+        limelight.start();
+
         waitForStart();
+        timer.reset();
 
         while (opModeIsActive()) {
-            // Lê os dados JSON da Limelight
-            JSONObject data = getLimelightData();
-
-            double tx = 0;
-            double ty = 0;
-            double tv = 0;
-
-            if (data != null) {
-                tx = data.optDouble("tx", 0);
-                ty = data.optDouble("ty", 0);
-                tv = data.optDouble("tv", 0);
-            }
-
-            boolean valid = (tv == 1);
-
+            // Atualiza orientação do robô
             YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-            double currentHeading = orientation.getYaw(AngleUnit.RADIANS);
+            limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
 
-            double targetHeading = 0;
+            // Lê resultado da Limelight
+            LLResult result = limelight.getLatestResult();
 
-            if (valid) {
-                // tx é o desvio angular em graus — converte para radianos
-                targetHeading = Math.toRadians(tx);
+            boolean validTarget = result != null && result.isValid();
+            double tx = 0;
+
+            if (validTarget) {
+                tx = result.getTx(); // desvio lateral em graus
             }
 
-            double power = PIDControl(targetHeading, currentHeading);
-            drivetrain.power(power);
+            // Converte heading atual
+            double currentHeading = orientation.getYaw(AngleUnit.RADIANS);
+            double targetHeading = 0; // queremos centralizar a tag, logo o alvo é 0
+            double correction = PIDControl(Math.toRadians(tx), currentHeading);
 
-            telemetry.addData("Target Found", valid);
-            telemetry.addData("tx", tx);
-            telemetry.addData("ty", ty);
-            telemetry.addData("Current Heading", Math.toDegrees(currentHeading));
-            telemetry.addData("PID Output", power);
+            // Aplica a correção de rotação
+            drivetrain.power(correction);
+
+            // Telemetria
+            telemetry.addData("Target Found", validTarget);
+            telemetry.addData("tx (deg)", tx);
+            telemetry.addData("Current Heading (deg)", Math.toDegrees(currentHeading));
+            telemetry.addData("PID Output", correction);
             telemetry.update();
         }
+
+        drivetrain.power(0);
+        limelight.stop();
     }
 
     /**
-     * Lê os dados JSON da Limelight via HTTP GET (docs oficiais da 3A).
-     * Endpoint: http://limelight.local:5807/json
+     * Controle PID básico para rotação
      */
-    private JSONObject getLimelightData() {
-        try {
-            URL url = new URL("http://limelight.local:5807/json");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(50); // milissegundos
-            connection.setReadTimeout(50);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String inputLine = in.readLine();
-            in.close();
-            connection.disconnect();
-
-            if (inputLine != null && !inputLine.isEmpty()) {
-                JSONObject json = new JSONObject(inputLine);
-                // dados do pipeline atual
-                return json.getJSONObject("Results");
-            }
-        } catch (Exception e) {
-            telemetry.addData("Limelight Error", e.getMessage());
-        }
-        return null;
-    }
-
     private double PIDControl(double reference, double state) {
         double error = angleWrap(reference - state);
         double dt = timer.seconds();
@@ -129,12 +98,24 @@ public class limeheading extends LinearOpMode {
         lastError = error;
         timer.reset();
 
-        return (error * Kp) + (integralSum * Ki) + (derivative * Kd);
+        // Saída final
+        double output = (error * Kp) + (integralSum * Ki) + (derivative * Kd);
+        return clamp(output, -0.5, 0.5); // limite de potência
     }
 
+    /**
+     * Normaliza ângulos para -π a π
+     */
     private double angleWrap(double radians) {
         while (radians > Math.PI) radians -= 2 * Math.PI;
         while (radians < -Math.PI) radians += 2 * Math.PI;
         return radians;
+    }
+
+    /**
+     * Garante que o valor está dentro dos limites
+     */
+    private double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
     }
 }
