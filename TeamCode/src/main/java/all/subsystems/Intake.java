@@ -7,12 +7,11 @@ import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.controllable.RunToVelocity;
 import dev.nextftc.hardware.impl.MotorEx;
 
-
 public class Intake implements Subsystem {
     public static final Intake INSTANCE = new Intake();
     private Intake() { }
 
-    private final MotorEx motor = new MotorEx("intake");
+    private final MotorEx intakeMotor = new MotorEx("intake");
 
     private final ControlSystem controller = ControlSystem.builder()
             .velPid(0.005, 0, 0)
@@ -24,9 +23,16 @@ public class Intake implements Subsystem {
     public final Command reverse = new RunToVelocity(controller, -500.0).requires(this).named("IntakeReverse");
 
     @Override
-    public void periodic() {
-        motor.setPower(controller.calculate(motor.getState()));
+    public void initialize() {
+        intakeMotor.reverse();
 
-        ActiveOpMode.telemetry().addData("intake State", motor.getState());
     }
+
+    @Override
+    public void periodic() {
+        intakeMotor.setPower(controller.calculate(intakeMotor.getState()));
+
+        ActiveOpMode.telemetry().addData("intake State", intakeMotor.getState());
+    }
+
 }
