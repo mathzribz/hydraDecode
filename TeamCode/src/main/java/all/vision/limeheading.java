@@ -3,8 +3,10 @@ package all.vision;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import all.vision.Drivetrain;
@@ -14,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -24,7 +27,7 @@ import java.net.URL;
 @TeleOp(name = "Limelight Apriltag Tracker (No Helper)", group = "Vision")
 public class limeheading extends LinearOpMode {
 
-    private BNO055IMU imu;
+    private IMU imu;
     private Drivetrain drivetrain = new Drivetrain();
 
     double integralSum = 0;
@@ -38,12 +41,15 @@ public class limeheading extends LinearOpMode {
     public void runOpMode() {
         drivetrain.init(hardwareMap);
 
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        imu.initialize(parameters);
+        IMU imu = hardwareMap.get(IMU.class, "imu");
 
+        // Define os parâmetros de orientação do Hub no robô
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.UP));
+
+        // Inicializa o IMU com os parâmetros definidos
+        imu.initialize(parameters);
         FtcDashboard dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
@@ -65,8 +71,8 @@ public class limeheading extends LinearOpMode {
 
             boolean valid = (tv == 1);
 
-            double currentHeading = imu.getAngularOrientation(
-                    AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS).firstAngle;
+            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+            double currentHeading = orientation.getYaw(AngleUnit.RADIANS);
 
             double targetHeading = 0;
 

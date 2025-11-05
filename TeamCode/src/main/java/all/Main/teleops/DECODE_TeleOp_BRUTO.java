@@ -82,8 +82,8 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
 
         // Define os parâmetros de orientação do Hub no robô
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.DOWN,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.UP));
 
         // Inicializa o IMU com os parâmetros definidos
         imu.initialize(parameters);
