@@ -23,8 +23,8 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
     private DcMotor RMF, RMB, LMF, LMB, Intake, Shooter, Transfer;
     private Limelight3A limelight;
     private double driveSpeed = 0.8;
-    public static double shooterSpeed = 0.9;
-    public static double transferSpeed = 0.5;
+    public static double shooterSpeed = 0.65;
+    public static double transferSpeed = 1;
     private static final double DEAD_ZONE = 0.2;
 
 
@@ -32,15 +32,12 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
     public void runOpMode() {
         initHardware();
 
-
         waitForStart();
         while (opModeIsActive()) {
             loc();
             intake();
             shooter();
             transfer();
-
-
 
             telemetry.addData("velocidade shooter", shooterSpeed);
             telemetry.addData("velocidade drive", driveSpeed);
@@ -59,13 +56,11 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
         Transfer = hardwareMap.get(DcMotor.class, "transfer");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
-
-
         RMF.setDirection(DcMotorSimple.Direction.FORWARD);
         RMB.setDirection(DcMotorSimple.Direction.FORWARD);
         LMF.setDirection(DcMotorSimple.Direction.REVERSE);
         LMB.setDirection(DcMotorSimple.Direction.REVERSE);
-        Intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        Intake.setDirection(DcMotorSimple.Direction.REVERSE);
         Transfer.setDirection(DcMotorSimple.Direction.FORWARD);
         Shooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -139,10 +134,6 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
         telemetry.addData("Yaw", imu.getRobotYawPitchRollAngles());
     }
 
-
-
-
-
     public void intake() {
 
         if (gamepad1.left_trigger > 0.1 || gamepad2.left_trigger > 0.1) {
@@ -155,9 +146,23 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
             Intake.setPower(1);
         }
 
+        if (gamepad1.right_trigger > 0.1 )  {
+            Intake.setPower(-1);
+        }
 
+    }
 
+    public void transfer() {
 
+        if (gamepad2.right_bumper || gamepad1.right_bumper || gamepad1.right_trigger > 0.1 )  {
+            Transfer.setPower(transferSpeed);
+        } else {
+            Transfer.setPower(0);
+        }
+
+        if (gamepad2.dpad_down ||  gamepad1.dpad_down) {
+            Transfer.setPower(-transferSpeed);
+        }
 
     }
 
@@ -186,22 +191,6 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
 
     }
 
-    public void transfer() {
-
-        if (gamepad2.right_bumper || gamepad1.right_bumper) {
-            Transfer.setPower(transferSpeed);
-        } else {
-            Transfer.setPower(0);
-        }
-
-        if (gamepad2.dpad_down ||  gamepad1.dpad_down) {
-            Transfer.setPower(-transferSpeed);
-        }
-
-
-
-    }
-
 //    public void ll() {
 //        //YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
 //        limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
@@ -219,7 +208,3 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
 //        }
 
     }
-
-
-
-
