@@ -60,7 +60,7 @@ public class DECODAO extends LinearOpMode {
         RMB.setDirection(DcMotorSimple.Direction.FORWARD);
         LMF.setDirection(DcMotorSimple.Direction.REVERSE);
         LMB.setDirection(DcMotorSimple.Direction.REVERSE);
-        Intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        Intake.setDirection(DcMotorSimple.Direction.FORWARD);
         Transfer.setDirection(DcMotorSimple.Direction.FORWARD);
         Shooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -134,24 +134,22 @@ public class DECODAO extends LinearOpMode {
     public void intake() {
 
         if (gamepad1.left_trigger > 0.1 || gamepad1.right_bumper  ) {
-            Intake.setPower(-1);
+            Intake.setPower(0.5);
         } else {
             Intake.setPower(0);
         }
 
         if (gamepad1.left_bumper) {
-            Intake.setPower(1);
+            Intake.setPower(0.5);
         }
 
-        if (gamepad1.right_bumper )  {
-            Intake.setPower(-1);
-        }
+
 
     }
 
     public void transfer() {
 
-        if (gamepad1.dpad_up  )  {
+        if (gamepad1.dpad_up || gamepad1.right_bumper  )  {
             Transfer.setPower(transferSpeed);
         } else {
             Transfer.setPower(0);

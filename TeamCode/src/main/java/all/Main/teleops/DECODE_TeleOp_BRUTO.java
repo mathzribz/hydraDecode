@@ -137,17 +137,17 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
     public void intake() {
 
         if (gamepad1.left_trigger > 0.1 || gamepad2.left_trigger > 0.1) {
-            Intake.setPower(-1);
+            Intake.setPower(-0.5);
         } else {
             Intake.setPower(0);
         }
 
         if (gamepad1.left_bumper) {
-            Intake.setPower(1);
+            Intake.setPower(0.5);
         }
 
         if (gamepad1.right_trigger > 0.1 )  {
-            Intake.setPower(-1);
+            Intake.setPower(-0.5);
         }
 
     }
