@@ -24,7 +24,7 @@ public class DECODAO extends LinearOpMode {
     private Limelight3A limelight;
     private double driveSpeed = 0.8;
     public static double shooterSpeed = 0.65;
-    public static double transferSpeed = 1;
+    public static double transferSpeed = 0.5;
     private static final double DEAD_ZONE = 0.2;
 
 
@@ -134,13 +134,13 @@ public class DECODAO extends LinearOpMode {
     public void intake() {
 
         if (gamepad1.left_trigger > 0.1 || gamepad1.right_bumper  ) {
-            Intake.setPower(0.5);
+            Intake.setPower(0.6);
         } else {
             Intake.setPower(0);
         }
 
         if (gamepad1.left_bumper) {
-            Intake.setPower(0.5);
+            Intake.setPower(-0.6);
         }
 
 
@@ -155,7 +155,7 @@ public class DECODAO extends LinearOpMode {
             Transfer.setPower(0);
         }
 
-        if (gamepad1.dpad_down ) {
+        if (gamepad1.dpad_down || gamepad1.left_bumper ) {
             Transfer.setPower(-transferSpeed);
         }
 

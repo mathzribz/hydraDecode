@@ -119,75 +119,67 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
         LMF.setPower(frontLeftPower  * driveSpeed);
         LMB.setPower(backLeftPower  * driveSpeed);
 
+        if (gamepad1.dpad_left) {
+            driveSpeed = 0.75;
+        }
         if (gamepad1.x) {
-            driveSpeed = 0.6;
-        }
-        if (gamepad1.a) {
-            driveSpeed = 0.6;
-        }
-
-        if (gamepad1.b) {
-            driveSpeed = 1;
+            driveSpeed = 0.9;
         }
 
 
         telemetry.addData("Yaw", imu.getRobotYawPitchRollAngles());
     }
-
     public void intake() {
 
-        if (gamepad1.left_trigger > 0.1 || gamepad2.left_trigger > 0.1) {
-            Intake.setPower(-0.5);
+        if (gamepad1.left_trigger > 0.1 || gamepad1.right_bumper  ) {
+            Intake.setPower(0.6);
         } else {
             Intake.setPower(0);
         }
 
         if (gamepad1.left_bumper) {
-            Intake.setPower(0.5);
+            Intake.setPower(-0.6);
         }
 
-        if (gamepad1.right_trigger > 0.1 )  {
-            Intake.setPower(-0.5);
-        }
+
 
     }
 
     public void transfer() {
 
-        if (gamepad2.right_bumper || gamepad1.right_bumper || gamepad1.right_trigger > 0.1 )  {
+        if (gamepad1.dpad_up || gamepad1.right_bumper  )  {
             Transfer.setPower(transferSpeed);
         } else {
             Transfer.setPower(0);
         }
 
-        if (gamepad2.dpad_down ||  gamepad1.dpad_down) {
+        if (gamepad1.dpad_down || gamepad1.left_bumper ) {
             Transfer.setPower(-transferSpeed);
         }
 
     }
 
     public void shooter() {
-        if (gamepad2.right_trigger > 0.1) {
+        if (gamepad1.right_trigger > 0.1 || gamepad2.right_trigger  > 0.1 ) {
             Shooter.setPower(shooterSpeed);
         } else {
             Shooter.setPower(0);
         }
 
-        if (gamepad2.a) {
+        if (gamepad1.a || gamepad2.a) {
             shooterSpeed = 0.65;
         }
 
-        if (gamepad2.b) {
-            shooterSpeed = 0.8;
+        if (gamepad1.b || gamepad2.b ){
+            shooterSpeed = 1;
         }
 
         if (gamepad1.y) {
             Shooter.setPower(-shooterSpeed);
             Transfer.setPower(-transferSpeed);
-            Intake.setPower(0.5);
+            Intake.setPower(-0.5);
 
         }
-
 
     }
 

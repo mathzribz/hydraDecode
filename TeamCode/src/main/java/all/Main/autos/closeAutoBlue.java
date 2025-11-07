@@ -23,9 +23,9 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous(name = "AutoExampleNextFTC", group = "NextFTC")
-public class exampleAuto extends NextFTCOpMode {
+public class closeAutoBlue extends NextFTCOpMode {
 
-    public exampleAuto() {
+    public closeAutoBlue() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
                 new SubsystemComponent(Intake.INSTANCE, Shooter.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),

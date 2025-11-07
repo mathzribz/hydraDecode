@@ -29,7 +29,7 @@ public class Transfer implements Subsystem {
   //  public final Command on = new RunToVelocity(controller, transferSpeed).requires(this).named("TransferOn");
     public final Command reverse = new RunToVelocity(controller, -transferSpeed).requires(this).named("TransferReverse");
 
-    public final Command on = new SetPower(transferMotor,-0.8);
+    public final Command on = new SetPower(transferMotor,-0.5);
     public final Command off = new SetPower(transferMotor,0);
 
     @Override
