@@ -33,5 +33,6 @@ dependencies {
     implementation project(':FtcRobotController')
     implementation "com.bylazar:fullpanels:1.0.6"
     implementation 'dev.nextftc.extensions:pedro:1.0.0'
+    implementation 'org.ftclib.ftclib:core:2.1.1'
 
-}
+    }

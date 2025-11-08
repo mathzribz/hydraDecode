@@ -2,6 +2,7 @@
 package all.Main.teleops;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -162,8 +163,13 @@ public class DECODAO extends LinearOpMode {
     }
 
     public void shooter() {
+        SimpleMotorFeedforward feedforward =
+                new SimpleMotorFeedforward(10, 20, 0.5);
+
+       double output = feedforward.calculate(10,20);
+
         if (gamepad1.right_trigger > 0.1) {
-            Shooter.setPower(shooterSpeed);
+            Shooter.setPower(shooterSpeed * output);
         } else {
             Shooter.setPower(0);
         }
