@@ -28,6 +28,10 @@ public class DECODAO extends LinearOpMode {
     public static double transferSpeed = 0.5;
     private static final double DEAD_ZONE = 0.2;
 
+    public static double kS = 10;
+    public static double kV = 20;
+    public static double kA = 0.5;
+
 
     @Override
     public void runOpMode() {
@@ -64,6 +68,7 @@ public class DECODAO extends LinearOpMode {
         Intake.setDirection(DcMotorSimple.Direction.FORWARD);
         Transfer.setDirection(DcMotorSimple.Direction.FORWARD);
         Shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
     }
 
@@ -164,12 +169,12 @@ public class DECODAO extends LinearOpMode {
 
     public void shooter() {
         SimpleMotorFeedforward feedforward =
-                new SimpleMotorFeedforward(10, 20, 0.5);
+                new SimpleMotorFeedforward(kS, kV, kA);
 
-       double output = feedforward.calculate(10,20);
+       double output = feedforward.calculate(kV,kA);
 
         if (gamepad1.right_trigger > 0.1) {
-            Shooter.setPower(shooterSpeed * output);
+            Shooter.setPower( output * shooterSpeed);
         } else {
             Shooter.setPower(0);
         }

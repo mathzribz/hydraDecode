@@ -1,4 +1,3 @@
-
 package all.Main.teleops;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -18,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @Config
 @TeleOp
-public class DECODE_TeleOp_BRUTO extends LinearOpMode {
+public class DECODE_RobotCentric extends LinearOpMode {
 
     private DcMotor RMF, RMB, LMF, LMB, Intake, Shooter, Transfer;
     private Limelight3A limelight;
@@ -85,39 +84,26 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
         if (gamepad1.dpad_right) {
             imu.resetYaw();
         }
+        double drive = gamepad1.left_stick_y;
+        double strafe = -gamepad1.left_stick_x * 1.1;
+        double turn = -gamepad1.right_stick_x;
 
+        drive = applyDeadZone(drive);
+        strafe = applyDeadZone(strafe);
+        turn = applyDeadZone(turn);
 
-        double rawX = gamepad1.left_stick_x;
-        double rawY = -gamepad1.left_stick_y; // Inverte Y pois no joystick o eixo positivo é para baixo
-        double rawTurn = -gamepad1.right_stick_x;
+        double denominator = Math.max(Math.abs(drive) + Math.abs(strafe) + Math.abs(turn), 1);
 
-        // Aplica a zona morta
-        double x = applyDeadZone(rawX);
-        double y = applyDeadZone(rawY);
-        double turn = applyDeadZone(rawTurn);
+        double powerRMF = (drive - strafe - turn) / denominator;
+        double powerRMB = (drive + strafe - turn) / denominator;
+        double powerLMF = (drive + strafe + turn) / denominator;
+        double powerLMB = (drive - strafe + turn) / denominator;
 
-        // Captura o ângulo de rotação do robô
-        double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        RMF.setPower(powerRMF * driveSpeed);
+        RMB.setPower(powerRMB * driveSpeed);
+        LMF.setPower(powerLMF * driveSpeed);
+        LMB.setPower(powerLMB * driveSpeed);
 
-        // Converte os comandos do joystick para coordenadas relativas ao campo
-        double fieldX = x * Math.cos(-heading) - y * Math.sin(-heading);
-        double fieldY = x * Math.sin(-heading) + y * Math.cos(-heading);
-
-        // Compensação do strafe
-        fieldX = fieldX * 1.1; // testar
-
-        double denominator = Math.max(Math.abs(fieldY) + Math.abs(fieldX) + Math.abs(turn), 1);
-
-        double frontLeftPower = (fieldY + fieldX + turn) / denominator;
-        double backLeftPower = (fieldY - fieldX + turn) / denominator;
-        double frontRightPower = (fieldY - fieldX - turn) / denominator;
-        double backRightPower = (fieldY + fieldX - turn) / denominator;
-
-        // Aplicar potências
-        RMF.setPower(frontRightPower * driveSpeed);
-        RMB.setPower(backRightPower * driveSpeed) ;
-        LMF.setPower(frontLeftPower  * driveSpeed);
-        LMB.setPower(backLeftPower  * driveSpeed);
 
         if (gamepad1.dpad_left) {
             driveSpeed = 0.75;
@@ -199,4 +185,4 @@ public class DECODE_TeleOp_BRUTO extends LinearOpMode {
 //            telemetry.addData(" botpose ", botpose.toString());
 //        }
 
-    }
+}

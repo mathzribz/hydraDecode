@@ -22,7 +22,7 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "AutoExampleNextFTC", group = "NextFTC")
+@Autonomous
 public class closeAutoRed extends NextFTCOpMode {
 
     public closeAutoRed() {
