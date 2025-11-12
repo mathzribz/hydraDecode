@@ -18,9 +18,9 @@ public class Shooter implements Subsystem {
     public static double shooterSpeed = 500.0;
     public static double kP = 0.1;
     public static double kD = 0.0;
-    public static double kV = 0.1;
-    public static double kA = 0.5;
-    public static double kS = 0.1;
+    public static double kV = 0.0;
+    public static double kA = 0.0;
+    public static double kS = 0.0;
 
     private final ControlSystem controller = ControlSystem.builder()
             .velPid(kP, 0, kD)
