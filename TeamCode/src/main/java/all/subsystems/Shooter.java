@@ -14,7 +14,7 @@ public class Shooter implements Subsystem {
     public static final Shooter INSTANCE = new Shooter();
     private Shooter() { }
 
-    private final MotorEx shooterMotor = new MotorEx("shooter");
+    private final MotorEx shooterMotor = new MotorEx("AR");
     public static double shooterSpeed = 500.0;
     public static double kP = 0.1;
     public static double kD = 0.0;
