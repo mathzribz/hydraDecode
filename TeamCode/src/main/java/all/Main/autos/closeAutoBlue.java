@@ -34,8 +34,8 @@ public class closeAutoBlue extends NextFTCOpMode {
         );
     }
 
-    private Path scorePreload, turn1;
-    private PathChain  intake1,Score2;
+    private Path scorePreload;
+    private PathChain  intake1,Score2, turn1;
 
     @Override
     public void onInit() {
@@ -57,8 +57,10 @@ public class closeAutoBlue extends NextFTCOpMode {
 
 
 
-        turn1 = new Path(new BezierCurve(scorePose1, turnPose1));
-        turn1.setLinearHeadingInterpolation(scorePose1.getHeading(), turnPose1.getHeading());
+        turn1 = follower().pathBuilder()
+                .addPath(new BezierLine(scorePose1, turnPose1))
+                .setLinearHeadingInterpolation(scorePose1.getHeading(), turnPose1.getHeading())
+                .build();
 
 
 

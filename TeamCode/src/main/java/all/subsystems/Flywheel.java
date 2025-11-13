@@ -28,7 +28,7 @@ public class Flywheel implements Subsystem {
 
     @Override
     public void initialize() {
-        motor.brakeMode();
+
     }
 
     @Override

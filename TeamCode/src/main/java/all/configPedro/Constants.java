@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
+
             .mass(12.55)
             .forwardZeroPowerAcceleration(-47)
             .lateralZeroPowerAcceleration(-75)
@@ -32,6 +33,7 @@ public class Constants {
             ;
 
     public static MecanumConstants driveConstants = new MecanumConstants()
+
             .maxPower(0.8)
             .rightFrontMotorName("RMF")
             .rightRearMotorName("RMB")
@@ -47,8 +49,9 @@ public class Constants {
             ;
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(5.984252)
-            .strafePodX(4.055118)
+
+            .forwardPodY(5.98)
+            .strafePodX(4.055)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
