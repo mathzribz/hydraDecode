@@ -1,11 +1,12 @@
 package all.tests;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import dev.nextftc.hardware.impl.CRServoEx;
 
-@TeleOp
+@Disabled
 public class TransferTester extends OpMode {
 
     private CRServoEx servo1;

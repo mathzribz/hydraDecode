@@ -1,3 +1,4 @@
+
 package all.tests;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -6,6 +7,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 @Config
 @TeleOp
@@ -21,13 +23,13 @@ public class testesMotor extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-            AR = hardwareMap.get(DcMotor.class, "Kit"); // porta 0
-            AL = hardwareMap.get(DcMotor.class, "Kit2"); // porta 0
+            AR = hardwareMap.get(DcMotor.class, "transfer"); // porta 0
+            AL = hardwareMap.get(DcMotor.class, "shooterR"); // porta 0
 
 
 
             AR.setDirection(DcMotor.Direction.FORWARD);
-            AL.setDirection(DcMotor.Direction.REVERSE);
+            AL.setDirection(DcMotor.Direction.FORWARD);
 
 
 
