@@ -2,20 +2,16 @@ package all.Main.teleops;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import all.configPedro.Constants;
 import all.subsystems.Flywheel;
 import all.subsystems.Intake;
-import all.subsystems.Shooter;
 import all.subsystems.Transfer;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
-import dev.nextftc.extensions.pedro.PedroComponent;
-import dev.nextftc.extensions.pedro.PedroDriverControlled;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
-import dev.nextftc.hardware.driving.DriverControlledCommand;
+
 import com.bylazar.configurables.annotations.Configurable;
 
 @Configurable

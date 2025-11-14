@@ -9,14 +9,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import all.configPedro.Constants;
 import all.subsystems.Flywheel;
 import all.subsystems.Intake;
-import all.subsystems.Shooter;
 import all.subsystems.Transfer;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
-import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.extensions.pedro.PedroComponent;

@@ -1,6 +1,5 @@
 package all.Main.autos;
 
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
@@ -10,7 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import all.configPedro.Constants;
 import all.subsystems.Flywheel;
 import all.subsystems.Intake;
-import all.subsystems.Shooter;
 import all.subsystems.Transfer;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 

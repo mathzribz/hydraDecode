@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import all.configPedro.Constants;
 import all.subsystems.Flywheel;
 import all.subsystems.Intake;
-import all.subsystems.Shooter;
 import all.subsystems.Transfer;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 

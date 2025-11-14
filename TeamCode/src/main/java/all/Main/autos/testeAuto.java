@@ -1,21 +1,18 @@
 package all.Main.autos;
 
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import all.configPedro.Constants;
 import all.subsystems.Flywheel;
 import all.subsystems.Intake;
-import all.subsystems.Shooter;
 import all.subsystems.Transfer;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.ftc.NextFTCOpMode;
@@ -25,11 +22,12 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
 public class testeAuto extends NextFTCOpMode {
+    DistanceSensor dd;
 
     public testeAuto() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
-                new SubsystemComponent(Intake.INSTANCE, Shooter.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
+                new SubsystemComponent(Intake.INSTANCE,  Transfer.INSTANCE, Flywheel.INSTANCE),
                 BulkReadComponent.INSTANCE
         );
     }
@@ -127,6 +125,7 @@ public class testeAuto extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
+        dd = hardwareMap.get(DistanceSensor.class, "dd");
         autonomousRoutine().schedule();
     }
 
