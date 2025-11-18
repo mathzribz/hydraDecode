@@ -21,7 +21,7 @@ public class DECODE_TeleOp extends NextFTCOpMode {
     public DECODE_TeleOp() {
         addComponents(
 
-                new SubsystemComponent(Intake.INSTANCE,Transfer.INSTANCE,Shooter.INSTANCE, Flywheel.INSTANCE),
+                new SubsystemComponent(Intake.INSTANCE,Transfer.INSTANCE, Flywheel.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );
@@ -38,8 +38,8 @@ public class DECODE_TeleOp extends NextFTCOpMode {
 
 
         //Shooter gamepad2
-        Gamepads.gamepad2().rightTrigger().greaterThan(0.1).whenBecomesTrue(Flywheel.INSTANCE.on);
-        Gamepads.gamepad1().rightTrigger().lessThan(0.1).whenBecomesTrue(Flywheel.INSTANCE.off);
+//        Gamepads.gamepad2().rightTrigger().greaterThan(0.1).whenBecomesTrue(Flywheel.INSTANCE.on);
+//        Gamepads.gamepad1().rightTrigger().lessThan(0.1).whenBecomesTrue(Flywheel.INSTANCE.off);
 
         ActiveOpMode.telemetry().update();
 }

@@ -27,7 +27,7 @@ public class closeAutoRed extends NextFTCOpMode {
     public closeAutoRed() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
-                new SubsystemComponent(Intake.INSTANCE, Shooter.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
+                new SubsystemComponent(Intake.INSTANCE,  Transfer.INSTANCE, Flywheel.INSTANCE),
                 BulkReadComponent.INSTANCE
         );
     }
@@ -74,13 +74,13 @@ public class closeAutoRed extends NextFTCOpMode {
     private Command autonomousRoutine() {
         return new SequentialGroup(
 
-                Flywheel.INSTANCE.on,
+               // Flywheel.INSTANCE.on,
                 new FollowPath(scorePreload, true),
                 new Delay(1),
                 Transfer.INSTANCE.on,
                 Intake.INSTANCE.on,
                 new Delay(4),
-                Flywheel.INSTANCE.off,
+             //   Flywheel.INSTANCE.off,
                 Transfer.INSTANCE.off,
                 Intake.INSTANCE.off,
                 new FollowPath(turn1, true),

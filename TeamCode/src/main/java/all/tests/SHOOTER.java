@@ -15,6 +15,8 @@ public class SHOOTER extends LinearOpMode {
     private DcMotor AR, AL, KITL, KITR;
 
 
+
+
     private final GamepadManager g1 = PanelsGamepad.INSTANCE.getFirstManager();
 
 

@@ -26,7 +26,7 @@ public class farAuto extends NextFTCOpMode {
     public farAuto() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
-                new SubsystemComponent(Intake.INSTANCE, Shooter.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
+                new SubsystemComponent(Intake.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
                 BulkReadComponent.INSTANCE
         );
     }
@@ -73,12 +73,12 @@ public class farAuto extends NextFTCOpMode {
     private Command autonomousRoutine() {
         return new SequentialGroup(
 
-                Flywheel.INSTANCE.onfar,
+              //  Flywheel.INSTANCE.onfar,
                 new Delay(3),
                 Transfer.INSTANCE.on,
                 Intake.INSTANCE.on,
                 new Delay(5),
-                Flywheel.INSTANCE.off,
+             //   Flywheel.INSTANCE.off,
                 Transfer.INSTANCE.off,
                 Intake.INSTANCE.off
 

@@ -27,7 +27,7 @@ public class closeAutoBlue extends NextFTCOpMode {
     public closeAutoBlue() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
-                new SubsystemComponent(Intake.INSTANCE, Shooter.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
+                new SubsystemComponent(Intake.INSTANCE,Transfer.INSTANCE, Flywheel.INSTANCE),
                 BulkReadComponent.INSTANCE
         );
     }
@@ -81,14 +81,14 @@ public class closeAutoBlue extends NextFTCOpMode {
     private Command autonomousRoutine() {
         return new SequentialGroup(
 
-                Flywheel.INSTANCE.on,
+               // Flywheel.INSTANCE.on,
                new FollowPath(scorePreload, true),
                 new Delay(3),
                 Transfer.INSTANCE.on,
                 new Delay(0.1),
                 Intake.INSTANCE.on,
                 new Delay(4),
-                Flywheel.INSTANCE.off,
+             //   Flywheel.INSTANCE.off,
                 Transfer.INSTANCE.off,
 
                 Intake.INSTANCE.onin,
@@ -101,13 +101,13 @@ public class closeAutoBlue extends NextFTCOpMode {
                 Intake.INSTANCE.off,
                 new Delay(1),
 
-                Flywheel.INSTANCE.on,
+             //   Flywheel.INSTANCE.on,
                 new FollowPath(Score2, true),
                 new Delay(3),
                 Transfer.INSTANCE.on,
                 Intake.INSTANCE.on,
                 new Delay(4),
-                Flywheel.INSTANCE.off,
+              //  Flywheel.INSTANCE.off,
                 Transfer.INSTANCE.off,
                 Intake.INSTANCE.off
 
