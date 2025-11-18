@@ -21,7 +21,7 @@ public class DECODE_TeleOp extends NextFTCOpMode {
     public DECODE_TeleOp() {
         addComponents(
 
-                new SubsystemComponent(Intake.INSTANCE,Transfer.INSTANCE,Shooter.INSTANCE, Flywheel.INSTANCE),
+                new SubsystemComponent(Intake.INSTANCE,Transfer.INSTANCE, Flywheel.INSTANCE),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE
         );

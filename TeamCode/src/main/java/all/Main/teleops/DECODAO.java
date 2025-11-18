@@ -11,9 +11,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
@@ -21,12 +23,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 @TeleOp
 public class DECODAO extends LinearOpMode {
 
-    private DcMotor RMF, RMB, LMF, LMB, Intake, Shooter, Transfer;
+    private DcMotor RMF, RMB, LMF, LMB, Intake, ShooterR ,ShooterL, Transfer;
     private Limelight3A limelight;
     private double driveSpeed = 0.8;
     public static double shooterSpeed = 0.65;
     public static double transferSpeed = 0.5;
     private static final double DEAD_ZONE = 0.2;
+    private DistanceSensor dd;
+    private String ch = "vazio";
 
     public static double kS = 10;
     public static double kV = 20;
@@ -57,9 +61,11 @@ public class DECODAO extends LinearOpMode {
         LMF = hardwareMap.get(DcMotor.class, "LMF");
         LMB = hardwareMap.get(DcMotor.class, "LMB");
         Intake = hardwareMap.get(DcMotor.class, "intake");
-        Shooter = hardwareMap.get(DcMotor.class, "shooter");
+        ShooterR = hardwareMap.get(DcMotor.class, "shooter");
+        ShooterL = hardwareMap.get(DcMotor.class, "shooter");
         Transfer = hardwareMap.get(DcMotor.class, "transfer");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        dd = hardwareMap.get(DistanceSensor.class, "dd");
 
         RMF.setDirection(DcMotorSimple.Direction.FORWARD);
         RMB.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -67,7 +73,8 @@ public class DECODAO extends LinearOpMode {
         LMB.setDirection(DcMotorSimple.Direction.REVERSE);
         Intake.setDirection(DcMotorSimple.Direction.FORWARD);
         Transfer.setDirection(DcMotorSimple.Direction.FORWARD);
-        Shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+        ShooterR.setDirection(DcMotorSimple.Direction.REVERSE);
+        ShooterL.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
     }
@@ -154,15 +161,34 @@ public class DECODAO extends LinearOpMode {
     }
 
     public void transfer() {
+        double distance = dd.getDistance(DistanceUnit.CM);
 
-        if (gamepad1.dpad_up || gamepad1.right_bumper  )  {
-            Transfer.setPower(transferSpeed);
-        } else {
+        float lt = gamepad1.left_trigger;
+        boolean rb = gamepad1.right_bumper;
+        double threshold = 0.1;
+
+        boolean prevRightBumper = false;
+
+
+
+
+        if (distance <= 10) {
+            ch = "cheio";
             Transfer.setPower(0);
-        }
+        } else {
 
-        if (gamepad1.dpad_down || gamepad1.left_bumper ) {
-            Transfer.setPower(-transferSpeed);
+            if (rb && !prevRightBumper) {
+                ch = "vazio";
+                Transfer.setPower(0.5);
+            }
+
+            else if (lt > threshold && ch.equals("vazio")) {
+                Transfer.setPower(0.5);
+            }
+
+            else {
+                Transfer.setPower(0);
+            }
         }
 
     }
@@ -174,9 +200,11 @@ public class DECODAO extends LinearOpMode {
        double output = feedforward.calculate(kV,kA);
 
         if (gamepad1.right_trigger > 0.1) {
-            Shooter.setPower( output * shooterSpeed);
+            ShooterR.setPower( output * shooterSpeed);
+            ShooterL.setPower( output * shooterSpeed);
         } else {
-            Shooter.setPower(0);
+            ShooterR.setPower(0);
+            ShooterL.setPower(0);
         }
 
         if (gamepad1.a) {
@@ -188,7 +216,7 @@ public class DECODAO extends LinearOpMode {
         }
 
         if (gamepad1.y) {
-            Shooter.setPower(-shooterSpeed);
+            ShooterR.setPower(-shooterSpeed);
             Transfer.setPower(-transferSpeed);
             Intake.setPower(0.5);
 

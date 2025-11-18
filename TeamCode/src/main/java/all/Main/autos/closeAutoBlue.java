@@ -27,7 +27,7 @@ public class closeAutoBlue extends NextFTCOpMode {
     public closeAutoBlue() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
-                new SubsystemComponent(Intake.INSTANCE, Shooter.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
+                new SubsystemComponent(Intake.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
                 BulkReadComponent.INSTANCE
         );
     }
