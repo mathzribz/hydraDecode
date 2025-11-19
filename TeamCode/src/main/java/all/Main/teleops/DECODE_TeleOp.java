@@ -1,5 +1,6 @@
 package all.Main.teleops;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import all.subsystems.Flywheel;
@@ -15,7 +16,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 import com.bylazar.configurables.annotations.Configurable;
 
 @Configurable
-@TeleOp
+@Disabled
 public class DECODE_TeleOp extends NextFTCOpMode {
 
     public DECODE_TeleOp() {

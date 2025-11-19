@@ -13,7 +13,7 @@ import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@TeleOp
+@Disabled
 @Config
 @Configurable
 public class NextOpMode extends NextFTCOpMode {
