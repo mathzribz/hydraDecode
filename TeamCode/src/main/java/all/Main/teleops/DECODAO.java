@@ -72,6 +72,7 @@ public class DECODAO extends LinearOpMode {
         Transfer = hardwareMap.get(DcMotor.class, "transfer");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         dd = hardwareMap.get(DistanceSensor.class, "dd");
+        vs = hardwareMap.voltageSensor.iterator().next();
 
         RMF.setDirection(DcMotorSimple.Direction.FORWARD);
         RMB.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -178,7 +179,7 @@ public class DECODAO extends LinearOpMode {
 
 
 
-        if (distance <= 10) {
+        if (distance <= 1) {
             ch = "cheio";
             Transfer.setPower(0);
         } else {
