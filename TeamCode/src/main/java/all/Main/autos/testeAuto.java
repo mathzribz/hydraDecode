@@ -22,7 +22,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
 public class testeAuto extends NextFTCOpMode {
-    DistanceSensor dd;
+
 
     public testeAuto() {
         addComponents(
@@ -51,8 +51,8 @@ public class testeAuto extends NextFTCOpMode {
 
     private final Pose startPose = new Pose(26, 130, Math.toRadians(140));
     private final Pose scorePose = new Pose(50, 108, Math.toRadians(140));
-    private final Pose repoPose1 = new Pose(50, 86 , Math.toRadians(180));
-    private final Pose intakePose1 = new Pose(15, 86, Math.toRadians(180));
+    private final Pose repoPose1 = new Pose(50, 86.5 , Math.toRadians(180));
+    private final Pose intakePose1 = new Pose(20, 86.5, Math.toRadians(180));
     private final Pose repoPose2 = new Pose(15, 60, Math.toRadians(180));
     private final Pose intakePose2 = new Pose(15, 60, Math.toRadians(180));
     private final Pose repoPose3 = new Pose(15, 36, Math.toRadians(180));
@@ -125,7 +125,7 @@ public class testeAuto extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        dd = hardwareMap.get(DistanceSensor.class, "dd");
+
         autonomousRoutine().schedule();
     }
 

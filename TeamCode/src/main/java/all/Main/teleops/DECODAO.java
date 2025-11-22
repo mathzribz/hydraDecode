@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -49,6 +50,16 @@ public class DECODAO extends LinearOpMode {
             new SimpleMotorFeedforward(kS, kV, kA);
 
     PIDController pid = new PIDController(kP, kI, kD);
+
+
+        ElapsedTime rbTimer = new ElapsedTime();
+    boolean rbAtivo = false;
+    boolean rbRodando = false;
+
+    double tempoRodar = 0.5;
+    double tempoParar = 0.3;
+
+    boolean transferEnabled = true;
 
     @Override
     public void runOpMode() {
@@ -152,8 +163,6 @@ public class DECODAO extends LinearOpMode {
         telemetry.addData("Yaw", heading);
     }
 
-    private boolean transferEnabled = true;
-
     public void intake() {
 
         // Intake normal
@@ -169,31 +178,70 @@ public class DECODAO extends LinearOpMode {
     public void transfer() {
 
         double distance = dd.getDistance(DistanceUnit.CM);
-        boolean ballDetected = (distance > 6 && distance < 7);
+        boolean ballDetected = (distance < 9 );
 
-        // Se detectou bola → trava o transfer controlado pelo trigger
+        // Se detectou bola -> trava apenas o trigger
         if (ballDetected) {
             transferEnabled = false;
         }
 
+        // ================================
+        // 1) RIGHT BUMPER -> inicia ciclo temporizado e libera o trigger
+        // ================================
+        if (gamepad1.right_bumper && !rbAtivo) {
+            rbAtivo = true;
+            rbRodando = true;
+            rbTimer.reset();
 
-        // 1) RB → libera e roda ao mesmo tempo
-        if (gamepad1.right_bumper) {
+            // importante: RB também reabilita o LT para poder usar depois
             transferEnabled = true;
-            Transfer.setPower(1);
-            return;
         }
 
-        // 2) LT → roda o transfer apenas se estiver liberado e sem bola
+        // Se o ciclo do RB estiver ativo, executa o ciclo (RB tem prioridade)
+        if (rbAtivo) {
+
+            if (rbRodando) {
+                Transfer.setPower(0.5);
+
+                if (rbTimer.seconds() >= tempoRodar) {
+                    rbRodando = false;
+
+                }
+
+            } else { // período parado
+                Transfer.setPower(0);
+
+                if (rbTimer.seconds() >= tempoParar) {
+                    rbRodando = true;
+
+                }
+            }
+
+            // Se quiser que o ciclo pare quando soltar o RB:
+            if (!gamepad1.right_bumper) {
+                // Desativa o ciclo quando o jogador soltar o botão
+                rbAtivo = false;
+                rbRodando = false;
+                Transfer.setPower(0);
+            }
+
+            telemetry.addData("rbCycle", "active");
+
+            return;   // RB tem prioridade sobre o LT
+        }
+
+
         if (gamepad1.left_trigger > 0.1 && transferEnabled && !ballDetected) {
             Transfer.setPower(0.5);
-        }
-        else {
+        } else {
             Transfer.setPower(0);
         }
 
         telemetry.addData("distance", distance);
+        telemetry.addData("rbCycle", "inactive");
+        telemetry.addData("transferEnabled", transferEnabled);
     }
+
 
 
 
@@ -215,7 +263,10 @@ public class DECODAO extends LinearOpMode {
         double ff = feedforward.calculate(5,5);
 
 
-        double pidOut = pid.calculate(ShooterR.getCurrentPosition(), ShooterL.getCurrentPosition() ) ;
+
+
+        double targetVelocity = shooterSpeed ;
+        double pidOut = pid.calculate(currentVelocity, targetVelocity);
 
 
 

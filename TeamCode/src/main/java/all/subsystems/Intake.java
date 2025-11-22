@@ -33,7 +33,7 @@ public class  Intake implements Subsystem {
     public final Command off = new SetPower(intakeMotor,0);
     @Override
     public void initialize() {
-        dd = hardwareMap.get(DistanceSensor.class, "dd");
+//        dd = hardwareMap.get(DistanceSensor.class, "dd");
 
     }
 
@@ -43,20 +43,20 @@ public class  Intake implements Subsystem {
         intakeMotor.setPower(intakeMotor.getPower());
 
 
-        double distance = dd.getDistance(DistanceUnit.CM);
-        boolean ballDetected = (distance > 7 && distance < 8);
-
-        // Se detectou bola → trava o transfer controlado pelo trigger
-        if (ballDetected) {
-            transferEnabled = false;
-        }
-
-        if (!transferEnabled){
-            intakespeed = 0;
-        }
-        else{
-            intakespeed = 0.8;
-        }
+//        double distance = dd.getDistance(DistanceUnit.CM);
+//        boolean ballDetected = (distance > 7 && distance < 8);
+//
+//        // Se detectou bola → trava o transfer controlado pelo trigger
+//        if (ballDetected) {
+//            transferEnabled = false;
+//        }
+//
+//        if (!transferEnabled){
+//            intakespeed = 0;
+//        }
+//        else{
+//            intakespeed = 0.8;
+//        }
 
 
         ActiveOpMode.telemetry().addData("intake State", intakeMotor.getState());
