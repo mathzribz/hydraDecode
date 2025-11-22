@@ -51,8 +51,8 @@ public class testeAuto extends NextFTCOpMode {
 
     private final Pose startPose = new Pose(26, 130, Math.toRadians(140));
     private final Pose scorePose = new Pose(50, 108, Math.toRadians(140));
-    private final Pose repoPose1 = new Pose(50, 84 , Math.toRadians(180));
-    private final Pose intakePose1 = new Pose(15, 84, Math.toRadians(180));
+    private final Pose repoPose1 = new Pose(50, 86 , Math.toRadians(180));
+    private final Pose intakePose1 = new Pose(15, 86, Math.toRadians(180));
     private final Pose repoPose2 = new Pose(15, 60, Math.toRadians(180));
     private final Pose intakePose2 = new Pose(15, 60, Math.toRadians(180));
     private final Pose repoPose3 = new Pose(15, 36, Math.toRadians(180));

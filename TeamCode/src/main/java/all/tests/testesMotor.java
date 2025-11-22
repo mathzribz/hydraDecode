@@ -29,7 +29,7 @@ public class testesMotor extends LinearOpMode {
 
 
             AR.setDirection(DcMotor.Direction.FORWARD);
-            AL.setDirection(DcMotor.Direction.FORWARD);
+            AL.setDirection(DcMotor.Direction.REVERSE);
 
 
 

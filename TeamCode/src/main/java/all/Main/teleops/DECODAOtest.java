@@ -1,4 +1,3 @@
-
 package all.Main.teleops;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -21,7 +20,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 @TeleOp
-public class DECODAO extends LinearOpMode {
+public class DECODAOtest extends LinearOpMode {
 
     private DcMotor RMF, RMB, LMF, LMB;
     private DcMotor Intake, Transfer;
@@ -33,22 +32,21 @@ public class DECODAO extends LinearOpMode {
     private VoltageSensor vs;
 
     private double driveSpeed = 0.8;
-    public static double shooterSpeed = 10;
+    public static double shooterSpeed = 12.0;
 
     private static final double DEAD_ZONE = 0.2;
 
     // PIDF DE DASHBOARD
     public static double kP = 0.8;
+    public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kI = 5;
-    public static double kV = 10.0;
-    public static double kA = 10.0;
-    public static double kS = 10.0;
 
-    SimpleMotorFeedforward feedforward =
-            new SimpleMotorFeedforward(kS, kV, kA);
+    public static double kS = 0.1;
+    public static double kV = 0.0022;
+    public static double kA = 0.0;
 
-    PIDController pid = new PIDController(kP, kI, kD);
+    private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(kS, kV, kA);
+    private PIDController pid = new PIDController(kP, kI, kD);
 
     @Override
     public void runOpMode() {
@@ -62,8 +60,6 @@ public class DECODAO extends LinearOpMode {
             transfer();
             shooter();
 
-
-            telemetry.addData("Shooter Speed", shooterSpeed);
             telemetry.update();
         }
     }
@@ -93,7 +89,7 @@ public class DECODAO extends LinearOpMode {
         LMF.setDirection(DcMotorSimple.Direction.REVERSE);
         LMB.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        Intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        Intake.setDirection(DcMotorSimple.Direction.FORWARD);
 
         ShooterR.setDirection(DcMotorSimple.Direction.REVERSE);
         ShooterL.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -157,10 +153,10 @@ public class DECODAO extends LinearOpMode {
     public void intake() {
 
         // Intake normal
-        if (gamepad1.left_trigger > 0.1 || gamepad1.right_bumper) {
-            Intake.setPower(0.8);
+        if (gamepad1.left_trigger > 0.1) {
+            Intake.setPower(0.6);
         } else if (gamepad1.left_bumper) {
-            Intake.setPower(-0.8);
+            Intake.setPower(-0.6);
         } else {
             Intake.setPower(0);
         }
@@ -169,7 +165,7 @@ public class DECODAO extends LinearOpMode {
     public void transfer() {
 
         double distance = dd.getDistance(DistanceUnit.CM);
-        boolean ballDetected = (distance > 6 && distance < 7);
+        boolean ballDetected = (distance <= 1.0);
 
         // Se detectou bola → trava o transfer controlado pelo trigger
         if (ballDetected) {
@@ -186,17 +182,17 @@ public class DECODAO extends LinearOpMode {
 
         // 2) LT → roda o transfer apenas se estiver liberado e sem bola
         if (gamepad1.left_trigger > 0.1 && transferEnabled && !ballDetected) {
-            Transfer.setPower(0.5);
+            Transfer.setPower(0.7);
         }
         else {
             Transfer.setPower(0);
         }
-
-        telemetry.addData("distance", distance);
     }
 
 
-
+    public double clamp(double v, double min, double max) {
+        return Math.max(min, Math.min(v, max));
+    }
 
     public void shooter() {
 
@@ -205,36 +201,37 @@ public class DECODAO extends LinearOpMode {
         feedforward = new SimpleMotorFeedforward(kS, kV, kA);
 
         // Velocidade alvo → shooterSpeed * 100 é só exemplo
-
+        double targetVelocity = shooterSpeed;
 
         // Velocidade atual dos encoders (ticks/s)
         double currentVelocity =
                 (ShooterR.getVelocity() + ShooterL.getVelocity()) / 2.0;
 
+        // PID
+        double pidOut = pid.calculate(currentVelocity, targetVelocity);
+
         // Feedforward
-        double ff = feedforward.calculate(5,5);
-
-
-        double pidOut = pid.calculate(ShooterR.getCurrentPosition(), ShooterL.getCurrentPosition() ) ;
+        double ff = feedforward.calculate(targetVelocity);
 
 
 
-        double output = pidOut + ff;
+        double output = clamp(pidOut + ff, 0, 1);
 
         if (gamepad1.right_trigger > 0.1) {
-            ShooterR.setVelocity(output * shooterSpeed);
-            ShooterL.setVelocity(output * shooterSpeed);
+            ShooterR.setPower(output);
+            ShooterL.setPower(output);
         } else {
             ShooterR.setPower(0);
             ShooterL.setPower(0);
         }
 
         // MUDAR RPM
-
+        if (gamepad1.a) shooterSpeed = 14;
+        if (gamepad1.b) shooterSpeed = 10;
 
 
         if (gamepad1.y) {
-            ShooterR.setPower(0.6);
+            ShooterR.setPower(-0.6);
             ShooterL.setPower(-0.6);
             Transfer.setPower(-0.5);
             Intake.setPower(0.3);
@@ -242,30 +239,10 @@ public class DECODAO extends LinearOpMode {
 
         // COMPENSAR BATERIA
         double voltage = vs.getVoltage();
+        if (voltage > 12.5) shooterSpeed -= 10;
 
-        if (voltage > 13) {
-            if (gamepad1.a) shooterSpeed = 6;
-            if (gamepad1.b) shooterSpeed = 9;
-
-        }
-
-        if (voltage > 12 && voltage < 13) {
-            if (gamepad1.a) shooterSpeed = 8;
-            if (gamepad1.b) shooterSpeed = 10;
-
-        }
-
-        if (voltage < 11.5) {
-            if (gamepad1.a) shooterSpeed = 12;
-            if (gamepad1.b) shooterSpeed = 14;
-
-        }
-
-
-        telemetry.addData("VR ", ShooterR.getVelocity());
-        telemetry.addData("VL ", ShooterL.getVelocity());
-        telemetry.addData("voltage", voltage);
-
+        telemetry.addData("Velocity", currentVelocity);
+        telemetry.addData("Target", targetVelocity);
     }
 
     // public void ll() {
