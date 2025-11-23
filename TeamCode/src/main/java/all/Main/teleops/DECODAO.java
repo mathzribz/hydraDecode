@@ -1,4 +1,3 @@
-
 package all.Main.teleops;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -19,6 +18,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @Config
 @TeleOp
@@ -27,15 +28,14 @@ public class DECODAO extends LinearOpMode {
     private DcMotor RMF, RMB, LMF, LMB;
     private DcMotor Intake, Transfer;
     private DcMotorEx ShooterR, ShooterL;
-
+    private DistanceSensor distanceSensor;
     private Limelight3A limelight;
     private IMU imu;
-    private DistanceSensor dd;
     private VoltageSensor vs;
 
+    // VALORES
     private double driveSpeed = 0.8;
     public static double shooterSpeed = 10;
-
     private static final double DEAD_ZONE = 0.2;
 
     // PIDF DE DASHBOARD
@@ -49,16 +49,15 @@ public class DECODAO extends LinearOpMode {
     SimpleMotorFeedforward feedforward =
             new SimpleMotorFeedforward(kS, kV, kA);
 
-    PIDController pid = new PIDController(kP, kI, kD);
+    PIDController pid =
+            new PIDController(kP, kI, kD);
 
-
-        ElapsedTime rbTimer = new ElapsedTime();
+    // VALORES TRANSFER SYSTEM
+    ElapsedTime rbTimer = new ElapsedTime();
     boolean rbAtivo = false;
     boolean rbRodando = false;
-
     double tempoRodar = 0.5;
     double tempoParar = 0.3;
-
     boolean transferEnabled = true;
 
     @Override
@@ -73,10 +72,11 @@ public class DECODAO extends LinearOpMode {
             transfer();
             shooter();
 
-
             telemetry.addData("Shooter Speed", shooterSpeed);
+            telemetry.addData("Drive Speed", driveSpeed);
             telemetry.update();
         }
+
     }
 
     private void initHardware() {
@@ -94,9 +94,10 @@ public class DECODAO extends LinearOpMode {
 
         Transfer = hardwareMap.get(DcMotor.class, "transfer");
 
-        dd = hardwareMap.get(DistanceSensor.class, "dd");
-        vs = hardwareMap.voltageSensor.iterator().next();
+        // SENSORES
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        vs = hardwareMap.voltageSensor.iterator().next();
 
         // DIRECTIONS
         RMF.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -117,6 +118,8 @@ public class DECODAO extends LinearOpMode {
                         RevHubOrientationOnRobot.UsbFacingDirection.UP
                 )
         );
+
+        //INIT IMU
         imu.initialize(params);
 
         // RESET YAW
@@ -131,41 +134,44 @@ public class DECODAO extends LinearOpMode {
     // FIELD CENTRIC
     public void loc() {
 
-        if (gamepad1.dpad_right) imu.resetYaw();
-
-        double x = applyDeadZone(gamepad1.left_stick_x);
-        double y = -applyDeadZone(gamepad1.left_stick_y);
-        double turn = -applyDeadZone(gamepad1.right_stick_x);
-
+        // GET HEADING
         double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        double fieldX = x * Math.cos(-heading) - y * Math.sin(-heading);
-        double fieldY = x * Math.sin(-heading) + y * Math.cos(-heading);
+        // RESET PLAYER DIRECTION
+        if (gamepad1.dpad_right) imu.resetYaw();
 
-        fieldX *= 1.1; // compensate strafe
+        // JOYSTICKS
+        double strafe = applyDeadZone(gamepad1.left_stick_x);
+        double drive = -applyDeadZone(gamepad1.left_stick_y);
+        double turn = -applyDeadZone(gamepad1.right_stick_x);
 
-        double denom = Math.max(Math.abs(fieldY) + Math.abs(fieldX) + Math.abs(turn), 1);
+        // MECANO ANGLES
+        double fieldX = strafe * Math.cos(-heading) - drive * Math.sin(-heading);
+        double fieldY = strafe * Math.sin(-heading) + drive * Math.cos(-heading);
 
-        double fl = (fieldY + fieldX + turn) / denom;
-        double bl = (fieldY - fieldX + turn) / denom;
-        double fr = (fieldY - fieldX - turn) / denom;
-        double br = (fieldY + fieldX - turn) / denom;
+        // STRAFE ERROR
+        fieldX *= 1.1;
 
-        LMF.setPower(fl * driveSpeed);
-        LMB.setPower(bl * driveSpeed);
-        RMF.setPower(fr * driveSpeed);
-        RMB.setPower(br * driveSpeed);
+        // DENOMINATOR
+        double denominator = Math.max(Math.abs(fieldY) + Math.abs(fieldX) + Math.abs(turn), 1);
 
-        // DRIVE SPEED TOGGLE
-        if (gamepad1.dpad_left) driveSpeed = 0.75;
-        if (gamepad1.x) driveSpeed = 0.9;
+        // POWERS
+        double LMFpower = (fieldY + fieldX + turn) / denominator;
+        double LMBpower = (fieldY - fieldX + turn) / denominator;
+        double RMFpower = (fieldY - fieldX - turn) / denominator;
+        double RMBpower = (fieldY + fieldX - turn) / denominator;
+
+        LMF.setPower(LMFpower * driveSpeed);
+        LMB.setPower(LMBpower * driveSpeed);
+        RMF.setPower(RMFpower * driveSpeed);
+        RMB.setPower(RMBpower * driveSpeed);
 
         telemetry.addData("Yaw", heading);
     }
 
     public void intake() {
 
-        // Intake normal
+        // INTAKE GAMEPAD
         if (gamepad1.left_trigger > 0.1 || gamepad1.right_bumper) {
             Intake.setPower(0.8);
         } else if (gamepad1.left_bumper) {
@@ -173,27 +179,41 @@ public class DECODAO extends LinearOpMode {
         } else {
             Intake.setPower(0);
         }
+
     }
 
     public void transfer() {
 
-        double distance = dd.getDistance(DistanceUnit.CM);
+        // VARIAVEL DISTANCE OF SENSOR
+        double distance = distanceSensor.getDistance(DistanceUnit.CM);
+
+        // VARIALVEL BALL DETECTED
         boolean ballDetected = (distance < 9 );
+
+        // INTAKE
 
         // Se detectou bola -> trava apenas o trigger
         if (ballDetected) {
             transferEnabled = false;
         }
 
-        // ================================
-        // 1) RIGHT BUMPER -> inicia ciclo temporizado e libera o trigger
-        // ================================
+        if (gamepad1.left_trigger > 0.1 && transferEnabled && !ballDetected) {
+            Transfer.setPower(0.5);
+        } else {
+            Transfer.setPower(0);
+        }
+
+        //TRANSFER
+
+        // RB inicia ciclo temporizado e libera o trigger
         if (gamepad1.right_bumper && !rbAtivo) {
             rbAtivo = true;
             rbRodando = true;
+
+            // RESET RB TIMER
             rbTimer.reset();
 
-            // importante: RB também reabilita o LT para poder usar depois
+            // RB também reabilita o LT para poder usar depois
             transferEnabled = true;
         }
 
@@ -215,63 +235,52 @@ public class DECODAO extends LinearOpMode {
                     rbRodando = true;
 
                 }
+
             }
 
             // Se quiser que o ciclo pare quando soltar o RB:
             if (!gamepad1.right_bumper) {
-                // Desativa o ciclo quando o jogador soltar o botão
                 rbAtivo = false;
                 rbRodando = false;
                 Transfer.setPower(0);
+
             }
 
-            telemetry.addData("rbCycle", "active");
-
+            telemetry.addData("rbCycle", "active"); // CYCLE ACTIVE
             return;   // RB tem prioridade sobre o LT
-        }
 
-
-        if (gamepad1.left_trigger > 0.1 && transferEnabled && !ballDetected) {
-            Transfer.setPower(0.5);
-        } else {
-            Transfer.setPower(0);
         }
 
         telemetry.addData("distance", distance);
-        telemetry.addData("rbCycle", "inactive");
         telemetry.addData("transferEnabled", transferEnabled);
+        telemetry.addData("rbCycle", "inactive"); // CYCLE INACTIVE
     }
-
-
-
-
 
     public void shooter() {
 
-        // Atualiza PID e Feedforward do dashboard
+        // VARIAVEL VOLTAGEM
+        double voltage = vs.getVoltage();
+
+        // CURRENT VELOCITY
+        double currentVelocity = (ShooterR.getVelocity() + ShooterL.getVelocity()) / 2.0;
+
+        // TARGET VELOCITY
+        double targetVelocity = shooterSpeed;
+
+        // ATUALIZA PID E FF DASHBOARD
         pid.setPID(kP, kI, kD);
         feedforward = new SimpleMotorFeedforward(kS, kV, kA);
 
-        // Velocidade alvo → shooterSpeed * 100 é só exemplo
-
-
-        // Velocidade atual dos encoders (ticks/s)
-        double currentVelocity =
-                (ShooterR.getVelocity() + ShooterL.getVelocity()) / 2.0;
-
-        // Feedforward
+        // FF
         double ff = feedforward.calculate(5,5);
 
-
-
-
-        double targetVelocity = shooterSpeed ;
+        // PID OUT
         double pidOut = pid.calculate(currentVelocity, targetVelocity);
 
-
-
+        // OUTPUT
         double output = pidOut + ff;
 
+        // SHOOTER GAMEPAD
         if (gamepad1.right_trigger > 0.1) {
             ShooterR.setVelocity(output * shooterSpeed);
             ShooterL.setVelocity(output * shooterSpeed);
@@ -280,38 +289,28 @@ public class DECODAO extends LinearOpMode {
             ShooterL.setPower(0);
         }
 
-        // MUDAR RPM
-
-
-
         if (gamepad1.y) {
             ShooterR.setPower(0.6);
             ShooterL.setPower(-0.6);
-            Transfer.setPower(-0.5);
+            Transfer.setPower(-0.6);
             Intake.setPower(0.3);
         }
 
-        // COMPENSAR BATERIA
-        double voltage = vs.getVoltage();
-
+        // TROCAR VELOCITY
         if (voltage > 13) {
             if (gamepad1.a) shooterSpeed = 6;
             if (gamepad1.b) shooterSpeed = 9;
-
         }
 
         if (voltage > 12 && voltage < 13) {
             if (gamepad1.a) shooterSpeed = 8;
             if (gamepad1.b) shooterSpeed = 10;
-
         }
 
         if (voltage < 11.5) {
             if (gamepad1.a) shooterSpeed = 12;
             if (gamepad1.b) shooterSpeed = 14;
-
         }
-
 
         telemetry.addData("VR ", ShooterR.getVelocity());
         telemetry.addData("VL ", ShooterL.getVelocity());
@@ -319,19 +318,25 @@ public class DECODAO extends LinearOpMode {
 
     }
 
-    // public void ll() {
-    //
-    // YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-    // limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
-    //
-    // LLResult llResult = limelight.getLatestResult();
-    // if (llResult != null && llResult.isValid()) {
-    //
-    // Pose3D botpose = llResult.getBotpose();
-    // /
-    // telemetry.addData("target X", llResult.getTx());
-    //  telemetry.addData("target Y", llResult.getTy());
-    // telemetry.addData("target Area", llResult.getTa());
-    // telemetry.addData(" botpose ", botpose.toString());
-    // }
+//     public void ll() {
+//
+//         // VARIAVEL ORIENTATION
+//         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+//
+//         // LL ORIENTATION
+//         limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
+//
+//         // LL ON
+//         LLResult llResult = limelight.getLatestResult();
+//         if (llResult != null && llResult.isValid()) {
+//
+//             Pose3D botpose = llResult.getBotpose();
+//             telemetry.addData("target X", llResult.getTx());
+//             telemetry.addData("target Y", llResult.getTy());
+//             telemetry.addData("target Area", llResult.getTa());
+//             telemetry.addData(" botpose ", botpose.toString());
+//         }
+//
+//     }
+
 }
