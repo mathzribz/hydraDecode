@@ -12,7 +12,10 @@ import all.subsystems.Intake;
 import all.subsystems.Transfer;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.conditionals.IfElseCommand;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.ftc.NextFTCOpMode;
@@ -22,6 +25,8 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
 public class testeAuto extends NextFTCOpMode {
+    private DistanceSensor dd;
+
 
 
     public testeAuto() {
@@ -47,6 +52,10 @@ public class testeAuto extends NextFTCOpMode {
     public void onInit() {
         buildPaths();
         follower().setStartingPose(startPose);
+
+        dd = hardwareMap.get(DistanceSensor.class, "dd");
+
+
     }
 
     private final Pose startPose = new Pose(26, 130, Math.toRadians(140));
@@ -123,6 +132,7 @@ public class testeAuto extends NextFTCOpMode {
 
     }
 
+
     @Override
     public void onStartButtonPressed() {
 
@@ -130,13 +140,26 @@ public class testeAuto extends NextFTCOpMode {
     }
 
     private Command autonomousRoutine() {
+        // VARIAVEL DISTANCE OF SENSOR
+        double distance = dd.getDistance(DistanceUnit.CM);
+
+        // VARIALVEL BALL DETECTED
+        boolean ballDetected = (distance < 9 );
+
         return new SequentialGroup(
                 new FollowPath(score1, true),
                 new FollowPath(repo1, true),
-                new FollowPath(intake1, true)
+                new FollowPath(intake1, true),
+                new IfElseCommand(
+                        () -> ballDetected ,
+                         Transfer.INSTANCE.off,
+                        Transfer.INSTANCE.onin
+                )
+
 
 
 
         );
     }
+
 }
