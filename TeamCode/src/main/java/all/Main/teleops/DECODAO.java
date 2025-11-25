@@ -35,29 +35,34 @@ public class DECODAO extends LinearOpMode {
 
     // VALORES
     private double driveSpeed = 0.8;
-    public static double shooterSpeed = 10;
+
     private static final double DEAD_ZONE = 0.2;
 
-    // PIDF DE DASHBOARD
-    public static double kP = 0.8;
-    public static double kD = 0.0;
-    public static double kI = 5;
-    public static double kV = 10.0;
-    public static double kA = 10.0;
-    public static double kS = 10.0;
+    public static double kP = 0.02;
+    public static double kI = 0.0;
+    public static double kD = 0.00005;
 
-    SimpleMotorFeedforward feedforward =
-            new SimpleMotorFeedforward(kS, kV, kA);
+    // Feedforward constants
+    public static double kS = 0.1;
+    public static double kV = 0.00125;
+    public static double kA = 0.00008;
 
-    PIDController pid =
-            new PIDController(kP, kI, kD);
+    public static double TICKS_PER_REV = 28;
+    public static double targetRPM = 3000;
+    public static double targetTPS ;
+    public static double shSpeed = 0.5 ;
+
+
+
+    private final PIDController pid = new PIDController(kP, kI, kD);
+    private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(kS, kV, kA);
 
     // VALORES TRANSFER SYSTEM
     ElapsedTime rbTimer = new ElapsedTime();
     boolean rbAtivo = false;
     boolean rbRodando = false;
-    double tempoRodar = 0.5;
-    double tempoParar = 0.3;
+    double tempoRodar = 0.05;
+    double tempoParar = 0.5;
     boolean transferEnabled = true;
 
     @Override
@@ -72,7 +77,6 @@ public class DECODAO extends LinearOpMode {
             transfer();
             shooter();
 
-            telemetry.addData("Shooter Speed", shooterSpeed);
             telemetry.addData("Drive Speed", driveSpeed);
             telemetry.update();
         }
@@ -106,9 +110,13 @@ public class DECODAO extends LinearOpMode {
         LMB.setDirection(DcMotorSimple.Direction.REVERSE);
 
         Intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        Transfer.setDirection(DcMotorSimple.Direction.FORWARD);
 
         ShooterR.setDirection(DcMotorSimple.Direction.REVERSE);
         ShooterL.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        ShooterR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        ShooterL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // IMU
         imu = hardwareMap.get(IMU.class, "imu");
@@ -221,10 +229,12 @@ public class DECODAO extends LinearOpMode {
         if (rbAtivo) {
 
             if (rbRodando) {
-                Transfer.setPower(0.5);
+                Transfer.setPower(1);
 
                 if (rbTimer.seconds() >= tempoRodar) {
                     rbRodando = false;
+
+                    rbTimer.reset();
 
                 }
 
@@ -233,6 +243,7 @@ public class DECODAO extends LinearOpMode {
 
                 if (rbTimer.seconds() >= tempoParar) {
                     rbRodando = true;
+                    rbTimer.reset();
 
                 }
 
@@ -258,35 +269,41 @@ public class DECODAO extends LinearOpMode {
 
     public void shooter() {
 
-        // VARIAVEL VOLTAGEM
+
+        double vr = ShooterR.getVelocity();
+        double vl = ShooterL.getVelocity();
+        double vAvg = (vr + vl) / 2.0;
+
+        targetTPS = (targetRPM / 60.0) * TICKS_PER_REV;
+
+
+        if (gamepad1.a) {
+            targetRPM = 2000;
+        }
+        if (gamepad1.b) {
+            targetRPM = 1000;
+
+        } if (gamepad1.x) {
+            targetRPM = 500;
+        }
+        double pidPower = pid.calculate(vAvg, targetTPS);
+        double ffPower = ff.calculate(targetTPS);
+
+        // ajustar feedforward com compensação de voltagem
         double voltage = vs.getVoltage();
+        double compensatedFF = ffPower * (12.0 / Math.max(10.0, voltage));
 
-        // CURRENT VELOCITY
-        double currentVelocity = (ShooterR.getVelocity() + ShooterL.getVelocity()) / 2.0;
+        double finalPower = pidPower + compensatedFF;
 
-        // TARGET VELOCITY
-        double targetVelocity = shooterSpeed;
+        finalPower = Math.max(-1.0, Math.min(1.0, finalPower));
 
-        // ATUALIZA PID E FF DASHBOARD
-        pid.setPID(kP, kI, kD);
-        feedforward = new SimpleMotorFeedforward(kS, kV, kA);
-
-        // FF
-        double ff = feedforward.calculate(5,5);
-
-        // PID OUT
-        double pidOut = pid.calculate(currentVelocity, targetVelocity);
-
-        // OUTPUT
-        double output = pidOut + ff;
-
-        // SHOOTER GAMEPAD
-        if (gamepad1.right_trigger > 0.1) {
-            ShooterR.setVelocity(output * shooterSpeed);
-            ShooterL.setVelocity(output * shooterSpeed);
+        if (gamepad1.right_trigger > 0.1 || gamepad2.right_trigger > 0.1) {
+            ShooterR.setPower(shSpeed);
+            ShooterL.setPower(shSpeed);
         } else {
             ShooterR.setPower(0);
             ShooterL.setPower(0);
+            pid.reset();
         }
 
         if (gamepad1.y) {
@@ -296,25 +313,18 @@ public class DECODAO extends LinearOpMode {
             Intake.setPower(0.3);
         }
 
-        // TROCAR VELOCITY
-        if (voltage > 13) {
-            if (gamepad1.a) shooterSpeed = 6;
-            if (gamepad1.b) shooterSpeed = 9;
-        }
 
-        if (voltage > 12 && voltage < 13) {
-            if (gamepad1.a) shooterSpeed = 8;
-            if (gamepad1.b) shooterSpeed = 10;
-        }
 
-        if (voltage < 11.5) {
-            if (gamepad1.a) shooterSpeed = 12;
-            if (gamepad1.b) shooterSpeed = 14;
-        }
 
-        telemetry.addData("VR ", ShooterR.getVelocity());
-        telemetry.addData("VL ", ShooterL.getVelocity());
-        telemetry.addData("voltage", voltage);
+        telemetry.addData("RPM avg", vAvg);
+        telemetry.addData("targetRPM", targetRPM);
+        telemetry.addData("PID", pidPower);
+        telemetry.addData("FF", ffPower);
+        telemetry.addData("FF compensado", compensatedFF);
+        telemetry.addData("Voltagem", voltage);
+        telemetry.addData("FinalPower", finalPower);
+        telemetry.addData("RPM R", vr);
+        telemetry.addData("RPM L", vl);
 
     }
 

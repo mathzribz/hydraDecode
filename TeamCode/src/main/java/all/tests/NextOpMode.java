@@ -28,8 +28,8 @@ public class NextOpMode extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        Gamepads.gamepad1().a().whenBecomesTrue(Flywheel.INSTANCE.lowR);
-        Gamepads.gamepad1().a().whenBecomesTrue(Flywheel.INSTANCE.lowL);
+//        Gamepads.gamepad1().a().whenBecomesTrue(Flywheel.INSTANCE.lowR);
+//        Gamepads.gamepad1().a().whenBecomesTrue(Flywheel.INSTANCE.lowL);
 
 
 

@@ -28,8 +28,8 @@ public class  Intake implements Subsystem {
 
 
 
-    public final Command on = new SetPower(intakeMotor,1);
-    public final Command onin = new SetPower(intakeMotor,intakespeed);
+    public final Command on = new SetPower(intakeMotor,0.3);
+    public final Command onin = new SetPower(intakeMotor,-intakespeed);
     public final Command off = new SetPower(intakeMotor,0);
     @Override
     public void initialize() {
@@ -38,6 +38,7 @@ public class  Intake implements Subsystem {
 
     @Override
     public void periodic() {
+
 
         intakeMotor.setPower(intakeMotor.getPower());
 

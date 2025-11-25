@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -20,19 +21,21 @@ public class testesshootpidf extends LinearOpMode {
     private VoltageSensor battery;
 
     // PID constants
-    public static double kP = 0.0040;
+    public static double kP = 0.01;
     public static double kI = 0.0;
-    public static double kD = 0.00010;
+    public static double kD = 0.00005;
 
     // Feedforward constants
-    public static double kS = 0.15;
+    public static double kS = 0.1;
     public static double kV = 0.00125;
     public static double kA = 0.00008;
 
+    public static double TICKS_PER_REV = 28;
     public static double targetRPM = 3000;
+    public static double targetTPS ;
 
-    private PIDController pid = new PIDController(kP, kI, kD);
-    private SimpleMotorFeedforward ff = new SimpleMotorFeedforward(kS, kV, kA);
+    private final PIDController pid = new PIDController(kP, kI, kD);
+    private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(kS, kV, kA);
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -44,7 +47,7 @@ public class testesshootpidf extends LinearOpMode {
         AR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         AL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        AR.setDirection(DcMotor.Direction.FORWARD);
+        AR.setDirection(DcMotor.Direction.REVERSE);
         AL.setDirection(DcMotor.Direction.REVERSE);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -58,28 +61,7 @@ public class testesshootpidf extends LinearOpMode {
             double vl = AL.getVelocity();
             double vAvg = (vr + vl) / 2.0;
 
-            double pidPower = pid.calculate(vAvg, targetRPM);
-
-
-            double ffPower = ff.calculate(targetRPM);
-
-            // ajustar feedforward com compensação de voltagem
-            double voltage = battery.getVoltage();
-            double compensatedFF = ffPower * (12.0 / Math.max(10.0, voltage));
-
-            double finalPower = pidPower + compensatedFF;
-
-
-            if (gamepad1.right_trigger > 0.1) {
-                AR.setPower(finalPower);
-                AL.setPower(finalPower);
-            } else {
-                AR.setPower(0);
-                AL.setPower(0);
-                pid.reset();
-            }
-
-
+            targetTPS = (targetRPM / 60.0) * TICKS_PER_REV;
 
             if (gamepad1.a) {
                 targetRPM = 2000;
@@ -89,6 +71,25 @@ public class testesshootpidf extends LinearOpMode {
 
             } if (gamepad1.x) {
                 targetRPM = 500;
+            }
+            double pidPower = pid.calculate(vAvg, targetTPS);
+            double ffPower = ff.calculate(targetTPS);
+
+            // ajustar feedforward com compensação de voltagem
+            double voltage = battery.getVoltage();
+            double compensatedFF = ffPower * (12.0 / Math.max(10.0, voltage));
+
+            double finalPower = pidPower + compensatedFF;
+
+            finalPower = Math.max(-1.0, Math.min(1.0, finalPower));
+
+            if (gamepad1.right_trigger > 0.1) {
+                AR.setPower(finalPower);
+                AL.setPower(finalPower);
+            } else {
+                AR.setPower(0);
+                AL.setPower(0);
+                pid.reset();
             }
 
 

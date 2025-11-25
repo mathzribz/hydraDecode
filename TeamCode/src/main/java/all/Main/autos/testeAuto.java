@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.conditionals.IfElseCommand;
+import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.ftc.NextFTCOpMode;
@@ -53,17 +54,17 @@ public class testeAuto extends NextFTCOpMode {
         buildPaths();
         follower().setStartingPose(startPose);
 
-        dd = hardwareMap.get(DistanceSensor.class, "dd");
+
 
 
     }
 
-    private final Pose startPose = new Pose(26, 130, Math.toRadians(140));
-    private final Pose scorePose = new Pose(50, 108, Math.toRadians(140));
-    private final Pose repoPose1 = new Pose(50, 86.5 , Math.toRadians(180));
-    private final Pose intakePose1 = new Pose(20, 86.5, Math.toRadians(180));
-    private final Pose repoPose2 = new Pose(15, 60, Math.toRadians(180));
-    private final Pose intakePose2 = new Pose(15, 60, Math.toRadians(180));
+    private final Pose startPose = new Pose(22, 123, Math.toRadians(130));
+    private final Pose scorePose = new Pose(48, 96, Math.toRadians(130));
+    private final Pose repoPose1 = new Pose(55, 83 , Math.toRadians(181));
+    private final Pose intakePose1 = new Pose(19, 83.5, Math.toRadians(181));
+    private final Pose repoPose2 = new Pose(55, 63.5, Math.toRadians(180));
+    private final Pose intakePose2 = new Pose(19, 63.5, Math.toRadians(180));
     private final Pose repoPose3 = new Pose(15, 36, Math.toRadians(180));
     private final Pose intakePose3 = new Pose(15, 36, Math.toRadians(180));
 
@@ -141,25 +142,63 @@ public class testeAuto extends NextFTCOpMode {
 
     private Command autonomousRoutine() {
         // VARIAVEL DISTANCE OF SENSOR
-        double distance = dd.getDistance(DistanceUnit.CM);
+
 
         // VARIALVEL BALL DETECTED
-        boolean ballDetected = (distance < 9 );
+
 
         return new SequentialGroup(
+                Flywheel.INSTANCE.on,
+                Flywheel.INSTANCE.onin,
+
                 new FollowPath(score1, true),
+                new Delay(0.5),
+                Transfer.INSTANCE.on,
+                new Delay(0.35),
+                Intake.INSTANCE.onin,
+                new Delay(2.8),
+                Transfer.INSTANCE.off,
+
+                Flywheel.INSTANCE.off,
+                Flywheel.INSTANCE.off2,
+
                 new FollowPath(repo1, true),
-                new FollowPath(intake1, true),
-                new IfElseCommand(
-                        () -> ballDetected ,
-                         Transfer.INSTANCE.off,
-                        Transfer.INSTANCE.onin
-                )
+                Transfer.INSTANCE.onin,
+                new FollowPath(intake1, true,0.7),
+                new Delay(0.25),
+                Transfer.INSTANCE.off,
+                new Delay(0.8),
+                Intake.INSTANCE.off,
+
+                Flywheel.INSTANCE.on,
+                Flywheel.INSTANCE.onin,
+
+                new FollowPath(score2, true),
+                new Delay(1),
+                Transfer.INSTANCE.on,
+                new Delay(0.35),
+                Intake.INSTANCE.onin,
+                new Delay(3),
+
+                Flywheel.INSTANCE.off,
+                Flywheel.INSTANCE.off2,
+                Transfer.INSTANCE.off,
+
+                new FollowPath(repo2, true),
+                Transfer.INSTANCE.onin,
+                new FollowPath(intake2, true,0.7),
+                new Delay(0.25),
+                Transfer.INSTANCE.off,
+                new Delay(0.8),
+                Intake.INSTANCE.off
 
 
 
 
-        );
+
+
+
+                );
     }
 
 }
