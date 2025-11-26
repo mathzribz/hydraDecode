@@ -20,7 +20,7 @@ public class  Flywheel implements Subsystem {
 
 
     private boolean transferEnabled = true;
-    private double FlywheelSpeed = 0.75;
+    private double FlywheelSpeed = 0.5;
     public static final Flywheel INSTANCE = new Flywheel();
     private Flywheel() { }
 

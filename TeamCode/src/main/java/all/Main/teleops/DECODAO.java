@@ -118,8 +118,8 @@ public class DECODAO extends LinearOpMode {
         ShooterR.setDirection(DcMotorSimple.Direction.REVERSE);
         ShooterL.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        ShooterR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        ShooterL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        ShooterR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        ShooterL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // IMU
         imu = hardwareMap.get(IMU.class, "imu");
@@ -197,7 +197,7 @@ public class DECODAO extends LinearOpMode {
     public void transfer() {
 
         double distance = distanceSensor.getDistance(DistanceUnit.CM);
-        boolean ballDetected = (distance < 11);
+        boolean ballDetected = (distance < 9);
 
         // Se detectou bola, bloqueia LT
         if (ballDetected) {
@@ -213,7 +213,6 @@ public class DECODAO extends LinearOpMode {
         }
 
         if (rbAtivo) {
-
             // Fase rodando
             if (rbRodando) {
                 Transfer.setPower(1);
@@ -222,7 +221,6 @@ public class DECODAO extends LinearOpMode {
                     rbRodando = false;
                     rbTimer.reset();
                 }
-
                 // Fase parado
             } else {
                 Transfer.setPower(0);
@@ -249,7 +247,7 @@ public class DECODAO extends LinearOpMode {
         } else {
             Transfer.setPower(0);
         }
-
+        telemetry.addData("distance", distance);
         telemetry.addData("rbCycle", rbAtivo ? "active" : "inactive");
     }
     public void shooter() {
@@ -263,14 +261,14 @@ public class DECODAO extends LinearOpMode {
         targetTPS = (targetRPM / 60.0) * TICKS_PER_REV;
 
 
-        if (gamepad1.a) {
-            targetRPM = 1300;
+        if (gamepad1.x || gamepad2.x) {
+            shSpeed = 0.55;
         }
-        if (gamepad1.b) {
-            targetRPM = 2000;
+        if (gamepad1.a || gamepad2.a) {
+            shSpeed = 0.6;
 
-        } if (gamepad1.x) {
-            targetRPM = 3500;
+        } if (gamepad1.b || gamepad2.b) {
+            shSpeed = 0.7;
         }
         double pidPower = pidf.calculate(vAvg, targetTPS);
 
@@ -284,8 +282,8 @@ public class DECODAO extends LinearOpMode {
         finalPower = Math.max(-1.0, Math.min(1.0, finalPower));
 
         if (gamepad1.right_trigger > 0.1 || gamepad2.right_trigger > 0.1) {
-            ShooterR.setPower(finalPower);
-            ShooterL.setPower(finalPower);
+            ShooterR.setPower(shSpeed);
+            ShooterL.setPower(shSpeed);
         } else {
             ShooterR.setPower(0);
             ShooterL.setPower(0);
