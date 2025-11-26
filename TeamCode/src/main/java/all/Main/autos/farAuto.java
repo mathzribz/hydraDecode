@@ -15,6 +15,7 @@ import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
+import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -40,8 +41,8 @@ public class farAuto extends NextFTCOpMode {
         follower().setStartingPose(startPose);
     }
 
-    private final Pose startPose = new Pose(16, 111, Math.toRadians(90));
-    private final Pose scorePose1 = new Pose(55, 95, Math.toRadians(130));
+    private final Pose startPose = new Pose(57, 8, Math.toRadians(90));
+    private final Pose scorePose1 = new Pose(62, 17, Math.toRadians(120));
     private final Pose turnPose1 = new Pose(53, 82, Math.toRadians(180));
     private final Pose intakePose1 = new Pose(15, 82, Math.toRadians(180));
     private final Pose scorePose2 = new Pose(55, 95, Math.toRadians(130));
@@ -73,16 +74,19 @@ public class farAuto extends NextFTCOpMode {
     private Command autonomousRoutine() {
         return new SequentialGroup(
 
-              //  Flywheel.INSTANCE.onfar,
-                new Delay(3),
+                Flywheel.INSTANCE.onfar,
+                Flywheel.INSTANCE.oninfar,
+
+                new FollowPath(scorePreload, true),
+                new Delay(0.5),
                 Transfer.INSTANCE.on,
-                Intake.INSTANCE.on,
-                new Delay(5),
-             //   Flywheel.INSTANCE.off,
+                new Delay(0.35),
+                Intake.INSTANCE.onin,
+                new Delay(2.8),
                 Transfer.INSTANCE.off,
-                Intake.INSTANCE.off
 
-
+                Flywheel.INSTANCE.off,
+                Flywheel.INSTANCE.off2
 
 //
 //                new FollowPath(turn1, true),

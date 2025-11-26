@@ -1,7 +1,10 @@
 package all.Main.teleops;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -38,35 +41,35 @@ public class DECODAO extends LinearOpMode {
 
     private static final double DEAD_ZONE = 0.2;
 
-    public static double kP = 0.02;
+    public static double kP = 0.0006;
     public static double kI = 0.0;
-    public static double kD = 0.00005;
-
-    // Feedforward constants
-    public static double kS = 0.1;
-    public static double kV = 0.00125;
-    public static double kA = 0.00008;
+    public static double kD = 0.00001;
+    public static double kF = 0.0014;
 
     public static double TICKS_PER_REV = 28;
-    public static double targetRPM = 3000;
+    public static double targetRPM = 1300;
+    public static double targetAlvo = 1300;
     public static double targetTPS ;
     public static double shSpeed = 0.5 ;
 
 
 
-    private final PIDController pid = new PIDController(kP, kI, kD);
-    private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(kS, kV, kA);
+    private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
+    ;
+   // private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(kS, kV, kA);
 
     // VALORES TRANSFER SYSTEM
     ElapsedTime rbTimer = new ElapsedTime();
     boolean rbAtivo = false;
     boolean rbRodando = false;
-    double tempoRodar = 0.05;
+    double tempoRodar = 0.05; ///0.05
     double tempoParar = 0.5;
     boolean transferEnabled = true;
 
     @Override
     public void runOpMode() {
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
         initHardware();
 
         waitForStart();
@@ -179,131 +182,114 @@ public class DECODAO extends LinearOpMode {
 
     public void intake() {
 
-        // INTAKE GAMEPAD
-        if (gamepad1.left_trigger > 0.1 || gamepad1.right_bumper) {
-            Intake.setPower(0.8);
-        } else if (gamepad1.left_bumper) {
-            Intake.setPower(-0.8);
-        } else {
-            Intake.setPower(0);
-        }
+            // INTAKE GAMEPAD
+            if (gamepad1.left_trigger > 0.1 || gamepad1.right_bumper) {
+                Intake.setPower(0.8);
+            } else if (gamepad1.left_bumper) {
+                Intake.setPower(-0.8);
+            } else {
+                Intake.setPower(0);
+            }
+
 
     }
 
     public void transfer() {
 
-        // VARIAVEL DISTANCE OF SENSOR
         double distance = distanceSensor.getDistance(DistanceUnit.CM);
+        boolean ballDetected = (distance < 11);
 
-        // VARIALVEL BALL DETECTED
-        boolean ballDetected = (distance < 9 );
-
-        // INTAKE
-
-        // Se detectou bola -> trava apenas o trigger
+        // Se detectou bola, bloqueia LT
         if (ballDetected) {
             transferEnabled = false;
         }
 
+        // --- CICLO DO RB TEM PRIORIDADE ---
+        if (gamepad1.right_bumper && !rbAtivo) {
+            rbAtivo = true;
+            rbRodando = true;
+            rbTimer.reset();
+            transferEnabled = true; // Libera LT depois
+        }
+
+        if (rbAtivo) {
+
+            // Fase rodando
+            if (rbRodando) {
+                Transfer.setPower(1);
+
+                if (rbTimer.seconds() >= tempoRodar) {
+                    rbRodando = false;
+                    rbTimer.reset();
+                }
+
+                // Fase parado
+            } else {
+                Transfer.setPower(0);
+
+                if (rbTimer.seconds() >= tempoParar) {
+                    rbRodando = true;
+                    rbTimer.reset();
+                }
+            }
+
+            // Se soltar RB, cancela ciclo
+            if (!gamepad1.right_bumper) {
+                rbAtivo = false;
+                rbRodando = false;
+                Transfer.setPower(0);
+            }
+
+            return; // RB domina
+        }
+
+        // --- CONTROLE COM LT ---
         if (gamepad1.left_trigger > 0.1 && transferEnabled && !ballDetected) {
             Transfer.setPower(0.5);
         } else {
             Transfer.setPower(0);
         }
 
-        //TRANSFER
-
-        // RB inicia ciclo temporizado e libera o trigger
-        if (gamepad1.right_bumper && !rbAtivo) {
-            rbAtivo = true;
-            rbRodando = true;
-
-            // RESET RB TIMER
-            rbTimer.reset();
-
-            // RB também reabilita o LT para poder usar depois
-            transferEnabled = true;
-        }
-
-        // Se o ciclo do RB estiver ativo, executa o ciclo (RB tem prioridade)
-        if (rbAtivo) {
-
-            if (rbRodando) {
-                Transfer.setPower(1);
-
-                if (rbTimer.seconds() >= tempoRodar) {
-                    rbRodando = false;
-
-                    rbTimer.reset();
-
-                }
-
-            } else { // período parado
-                Transfer.setPower(0);
-
-                if (rbTimer.seconds() >= tempoParar) {
-                    rbRodando = true;
-                    rbTimer.reset();
-
-                }
-
-            }
-
-            // Se quiser que o ciclo pare quando soltar o RB:
-            if (!gamepad1.right_bumper) {
-                rbAtivo = false;
-                rbRodando = false;
-                Transfer.setPower(0);
-
-            }
-
-            telemetry.addData("rbCycle", "active"); // CYCLE ACTIVE
-            return;   // RB tem prioridade sobre o LT
-
-        }
-
-        telemetry.addData("distance", distance);
-        telemetry.addData("transferEnabled", transferEnabled);
-        telemetry.addData("rbCycle", "inactive"); // CYCLE INACTIVE
+        telemetry.addData("rbCycle", rbAtivo ? "active" : "inactive");
     }
-
     public void shooter() {
+      PIDFController pidf = new PIDFController(kP, kI, kD, kF);
 
 
         double vr = ShooterR.getVelocity();
         double vl = ShooterL.getVelocity();
-        double vAvg = (vr + vl) / 2.0;
+        double vAvg = vl;
 
         targetTPS = (targetRPM / 60.0) * TICKS_PER_REV;
 
 
         if (gamepad1.a) {
-            targetRPM = 2000;
+            targetRPM = 1300;
         }
         if (gamepad1.b) {
-            targetRPM = 1000;
+            targetRPM = 2000;
 
         } if (gamepad1.x) {
-            targetRPM = 500;
+            targetRPM = 3500;
         }
-        double pidPower = pid.calculate(vAvg, targetTPS);
-        double ffPower = ff.calculate(targetTPS);
+        double pidPower = pidf.calculate(vAvg, targetTPS);
+
 
         // ajustar feedforward com compensação de voltagem
         double voltage = vs.getVoltage();
-        double compensatedFF = ffPower * (12.0 / Math.max(10.0, voltage));
+       // double compensatedFF = ffPower * (12.0 / Math.max(10.0, voltage));
 
-        double finalPower = pidPower + compensatedFF;
+        double finalPower = pidPower;
 
         finalPower = Math.max(-1.0, Math.min(1.0, finalPower));
 
         if (gamepad1.right_trigger > 0.1 || gamepad2.right_trigger > 0.1) {
-            ShooterR.setPower(shSpeed);
-            ShooterL.setPower(shSpeed);
+            ShooterR.setPower(finalPower);
+            ShooterL.setPower(finalPower);
         } else {
             ShooterR.setPower(0);
             ShooterL.setPower(0);
-            pid.reset();
+            pidf.reset();
         }
 
         if (gamepad1.y) {
@@ -319,8 +305,7 @@ public class DECODAO extends LinearOpMode {
         telemetry.addData("RPM avg", vAvg);
         telemetry.addData("targetRPM", targetRPM);
         telemetry.addData("PID", pidPower);
-        telemetry.addData("FF", ffPower);
-        telemetry.addData("FF compensado", compensatedFF);
+
         telemetry.addData("Voltagem", voltage);
         telemetry.addData("FinalPower", finalPower);
         telemetry.addData("RPM R", vr);

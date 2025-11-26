@@ -20,7 +20,7 @@ public class  Flywheel implements Subsystem {
 
 
     private boolean transferEnabled = true;
-    private double FlywheelSpeed = 0.88;
+    private double FlywheelSpeed = 0.75;
     public static final Flywheel INSTANCE = new Flywheel();
     private Flywheel() { }
 
@@ -31,6 +31,9 @@ public class  Flywheel implements Subsystem {
 
     public final Command on = new SetPower(Flywheel,FlywheelSpeed);
     public final Command onin = new SetPower(Flywheel2,FlywheelSpeed);
+
+    public final Command onfar = new SetPower(Flywheel,1);
+    public final Command oninfar = new SetPower(Flywheel2,1);
     public final Command off = new SetPower(Flywheel,0);
     public final Command off2 = new SetPower(Flywheel2,0);
 //    public final Command off = new SetPower(intakeMotor,0);
