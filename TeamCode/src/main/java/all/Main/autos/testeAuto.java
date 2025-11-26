@@ -200,7 +200,7 @@ public class testeAuto extends NextFTCOpMode {
                 new Delay(0.7),
                 Intake.INSTANCE.off,
                 new FollowPath(repogg,true),
-                new Delay(0.3),
+                new Delay(0.2),
 
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
@@ -210,7 +210,13 @@ public class testeAuto extends NextFTCOpMode {
                 Transfer.INSTANCE.on,
                 new Delay(0.35),
                 Intake.INSTANCE.onin,
-                new Delay(3)
+                new Delay(3),
+
+                Flywheel.INSTANCE.off,
+                Flywheel.INSTANCE.off2,
+                Intake.INSTANCE.off,
+                Transfer.INSTANCE.off
+
 
 
 

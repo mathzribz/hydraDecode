@@ -28,13 +28,12 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 public class testeAuto2 extends NextFTCOpMode {
     private DistanceSensor distanceSensor;
     double distance;
-    boolean ballDetected = (distance < 9 );
-
+    boolean ballDetected = false;
 
     public testeAuto2() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
-                new SubsystemComponent(Intake.INSTANCE,  Transfer.INSTANCE, Flywheel.INSTANCE),
+                new SubsystemComponent(Intake.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
                 BulkReadComponent.INSTANCE
         );
     }
@@ -56,9 +55,6 @@ public class testeAuto2 extends NextFTCOpMode {
         follower().setStartingPose(startPose);
 
         distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
-
-
-
     }
 
     private final Pose startPose = new Pose(57, 134, Math.toRadians(180));
@@ -70,10 +66,6 @@ public class testeAuto2 extends NextFTCOpMode {
     private final Pose repoPose3 = new Pose(15, 36, Math.toRadians(180));
     private final Pose intakePose3 = new Pose(15, 36, Math.toRadians(180));
 
-
-
-
-
     private void buildPaths() {
 
         score1 = follower().pathBuilder()
@@ -81,12 +73,10 @@ public class testeAuto2 extends NextFTCOpMode {
                 .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
                 .build();
 
-//------------------------------------------------------------------------------------------------------------------
         repo1 = follower().pathBuilder()
                 .addPath(new BezierLine(scorePose, repoPose1))
                 .setLinearHeadingInterpolation(scorePose.getHeading(), repoPose1.getHeading())
                 .build();
-
 
         intake1 = follower().pathBuilder()
                 .addPath(new BezierLine(repoPose1, intakePose1))
@@ -97,8 +87,6 @@ public class testeAuto2 extends NextFTCOpMode {
                 .addPath(new BezierLine(intakePose1, scorePose))
                 .setLinearHeadingInterpolation(intakePose1.getHeading(), scorePose.getHeading())
                 .build();
-
-//------------------------------------------------------------------------------------------------------------------
 
         repo2 = follower().pathBuilder()
                 .addPath(new BezierLine(scorePose, repoPose2))
@@ -111,11 +99,9 @@ public class testeAuto2 extends NextFTCOpMode {
                 .build();
 
         score3 = follower().pathBuilder()
-                .addPath(new BezierLine(intakePose1, scorePose))
-                .setLinearHeadingInterpolation(intakePose1.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(intakePose2, scorePose))
+                .setLinearHeadingInterpolation(intakePose2.getHeading(), scorePose.getHeading())
                 .build();
-
-//------------------------------------------------------------------------------------------------------------------
 
         repo3 = follower().pathBuilder()
                 .addPath(new BezierLine(scorePose, repoPose3))
@@ -131,27 +117,18 @@ public class testeAuto2 extends NextFTCOpMode {
                 .addPath(new BezierLine(intakePose3, scorePose))
                 .setLinearHeadingInterpolation(intakePose3.getHeading(), scorePose.getHeading())
                 .build();
-
-
     }
-
 
     @Override
     public void onStartButtonPressed() {
-       distance = distanceSensor.getDistance(DistanceUnit.CM);
 
+        distance = distanceSensor.getDistance(DistanceUnit.CM);
+        ballDetected = (distance < 9);  // agora funciona corretamente
 
         autonomousRoutine().schedule();
     }
 
     private Command autonomousRoutine() {
-        // VARIAVEL DISTANCE OF SENSOR
-
-
-
-
-        // VARIALVEL BALL DETECTED
-
 
         return new SequentialGroup(
                 Flywheel.INSTANCE.on,
@@ -164,29 +141,22 @@ public class testeAuto2 extends NextFTCOpMode {
                 Intake.INSTANCE.onin,
                 new Delay(2.8),
                 Transfer.INSTANCE.off,
-
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
 
                 new FollowPath(repo1, true),
                 Intake.INSTANCE.onin,
-                Transfer.INSTANCE.on,
                 new FollowPath(intake1, true,0.7),
+
+                // checa se já captou bola
                 new IfElseCommand(
-                () -> ballDetected,
-                        Transfer.INSTANCE.off
+                        () -> ballDetected,
+                        Transfer.INSTANCE.off,
+                        Transfer.INSTANCE.on
                 ),
+
                 new Delay(1.0),
                 Intake.INSTANCE.off
-
-
-
-
-
-
-
-
-
         );
     }
 

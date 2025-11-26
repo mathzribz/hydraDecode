@@ -56,13 +56,13 @@ public class DECODAO extends LinearOpMode {
 
     private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
     ;
-   // private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(kS, kV, kA);
+    // private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(kS, kV, kA);
 
     // VALORES TRANSFER SYSTEM
     ElapsedTime rbTimer = new ElapsedTime();
     boolean rbAtivo = false;
     boolean rbRodando = false;
-    double tempoRodar = 0.05; ///0.05
+    double tempoRodar = 0.1; ///0.05
     double tempoParar = 0.5;
     boolean transferEnabled = true;
 
@@ -118,8 +118,8 @@ public class DECODAO extends LinearOpMode {
         ShooterR.setDirection(DcMotorSimple.Direction.REVERSE);
         ShooterL.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        ShooterR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        ShooterL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        ShooterR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        ShooterL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // IMU
         imu = hardwareMap.get(IMU.class, "imu");
@@ -182,14 +182,14 @@ public class DECODAO extends LinearOpMode {
 
     public void intake() {
 
-            // INTAKE GAMEPAD
-            if (gamepad1.left_trigger > 0.1 || gamepad1.right_bumper) {
-                Intake.setPower(0.8);
-            } else if (gamepad1.left_bumper) {
-                Intake.setPower(-0.8);
-            } else {
-                Intake.setPower(0);
-            }
+        // INTAKE GAMEPAD
+        if (gamepad1.left_trigger > 0.1 || gamepad1.right_bumper) {
+            Intake.setPower(0.8);
+        } else if (gamepad1.left_bumper) {
+            Intake.setPower(-0.8);
+        } else {
+            Intake.setPower(0);
+        }
 
 
     }
@@ -197,7 +197,7 @@ public class DECODAO extends LinearOpMode {
     public void transfer() {
 
         double distance = distanceSensor.getDistance(DistanceUnit.CM);
-        boolean ballDetected = (distance < 11);
+        boolean ballDetected = (distance < 9);
 
         // Se detectou bola, bloqueia LT
         if (ballDetected) {
@@ -213,7 +213,6 @@ public class DECODAO extends LinearOpMode {
         }
 
         if (rbAtivo) {
-
             // Fase rodando
             if (rbRodando) {
                 Transfer.setPower(1);
@@ -222,7 +221,6 @@ public class DECODAO extends LinearOpMode {
                     rbRodando = false;
                     rbTimer.reset();
                 }
-
                 // Fase parado
             } else {
                 Transfer.setPower(0);
@@ -249,11 +247,11 @@ public class DECODAO extends LinearOpMode {
         } else {
             Transfer.setPower(0);
         }
-
+        telemetry.addData("distance", distance);
         telemetry.addData("rbCycle", rbAtivo ? "active" : "inactive");
     }
     public void shooter() {
-      PIDFController pidf = new PIDFController(kP, kI, kD, kF);
+        PIDFController pidf = new PIDFController(kP, kI, kD, kF);
 
 
         double vr = ShooterR.getVelocity();
@@ -263,21 +261,21 @@ public class DECODAO extends LinearOpMode {
         targetTPS = (targetRPM / 60.0) * TICKS_PER_REV;
 
 
-        if (gamepad1.a) {
-            targetRPM = 1300;
+        if (gamepad1.x || gamepad2.x) {
+            shSpeed = 0.55;
         }
-        if (gamepad1.b) {
-            targetRPM = 2000;
+        if (gamepad1.a || gamepad2.a) {
+            shSpeed = 0.6;
 
-        } if (gamepad1.x) {
-            targetRPM = 3500;
+        } if (gamepad1.b || gamepad2.b) {
+            shSpeed = 0.7;
         }
         double pidPower = pidf.calculate(vAvg, targetTPS);
 
 
         // ajustar feedforward com compensação de voltagem
         double voltage = vs.getVoltage();
-       // double compensatedFF = ffPower * (12.0 / Math.max(10.0, voltage));
+        // double compensatedFF = ffPower * (12.0 / Math.max(10.0, voltage));
 
         double finalPower = pidPower;
 
