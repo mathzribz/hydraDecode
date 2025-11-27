@@ -63,9 +63,9 @@ public class testeAuto extends NextFTCOpMode {
     private final Pose startPose = new Pose(56, 133, Math.toRadians(180));
     private final Pose scorePose = new Pose(44.5, 98.5, Math.toRadians(136));
     private final Pose repoPose1 = new Pose(59, 82 , Math.toRadians(182));
-    private final Pose intakePose1 = new Pose(19.5, 82, Math.toRadians(182));
+    private final Pose intakePose1 = new Pose(19, 82, Math.toRadians(182));
     private final Pose repoPose2 = new Pose(57, 58, Math.toRadians(180));
-    private final Pose intakePose2 = new Pose(17.75, 58, Math.toRadians(180));
+    private final Pose intakePose2 = new Pose(17, 58, Math.toRadians(180));
     private final Pose repoG = new Pose(23,58 , Math.toRadians(180));
     private final Pose repoPose3 = new Pose(15, 36, Math.toRadians(180));
     private final Pose intakePose3 = new Pose(15, 36, Math.toRadians(180));
@@ -160,55 +160,61 @@ public class testeAuto extends NextFTCOpMode {
                 Flywheel.INSTANCE.onin,
 
                 new FollowPath(score1, true),
-                new Delay(0.5),
+                new Delay(0.6),
                 Transfer.INSTANCE.on,
-                new Delay(0.35),
+                new Delay(0.4),
                 Intake.INSTANCE.onin,
-                new Delay(2.8),
+                new Delay(2),
                 Transfer.INSTANCE.off,
 
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
 
+                // INTAKE 1
                 new FollowPath(repo1, true),
                 Transfer.INSTANCE.onin,
-                new FollowPath(intake1, true,0.6),
-                new Delay(0.15),
+                new FollowPath(intake1, true,0.65),
+                new Delay(0.05),
                 Transfer.INSTANCE.off,
-                new Delay(0.8),
+                new Delay(0.9),
                 Intake.INSTANCE.off,
 
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
 
                 new FollowPath(score2, true),
-                new Delay(1),
+                new Delay(0.6),
                 Transfer.INSTANCE.on,
-                new Delay(0.3),
+                new Delay(0.4),
                 Intake.INSTANCE.onin,
-                new Delay(2.8),
+                new Delay(2),
 
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
                 Transfer.INSTANCE.off,
 
+
+                // INTAKE 2
                 new FollowPath(repo2, true),
                 Transfer.INSTANCE.onin,
-                new FollowPath(intake2, true,0.6),
-                new Delay(0.1),
+                new FollowPath(intake2, true,0.55),
+                new Delay(0.01),
                 Transfer.INSTANCE.off,
                 new Delay(0.7),
                 Intake.INSTANCE.off,
+
                 new FollowPath(repogg,true),
-                new Delay(0.2),
 
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
 
+
+
+
                 new FollowPath(score3, true),
-                new Delay(1),
+                new Delay(0.6),
                 Transfer.INSTANCE.on,
-                new Delay(0.35),
+                new Delay(0.4),
                 Intake.INSTANCE.onin,
                 new Delay(3),
 
