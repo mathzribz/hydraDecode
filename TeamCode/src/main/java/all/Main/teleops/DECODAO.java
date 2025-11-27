@@ -282,8 +282,8 @@ public class DECODAO extends LinearOpMode {
         finalPower = Math.max(-1.0, Math.min(1.0, finalPower));
 
         if (gamepad1.right_trigger > 0.1 || gamepad2.right_trigger > 0.1) {
-            ShooterR.setPower(finalPower);
-            ShooterL.setPower(finalPower);
+            ShooterR.setPower(shSpeed);
+            ShooterL.setPower(shSpeed);
         } else {
             ShooterR.setPower(0);
             ShooterL.setPower(0);
