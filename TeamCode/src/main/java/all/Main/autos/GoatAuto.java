@@ -26,12 +26,12 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
-public class testeAuto extends NextFTCOpMode {
+public class GoatAuto extends NextFTCOpMode {
     private DistanceSensor dd;
 
 
 
-    public testeAuto() {
+    public GoatAuto() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
                 new SubsystemComponent(Intake.INSTANCE,  Transfer.INSTANCE, Flywheel.INSTANCE),
@@ -68,8 +68,9 @@ public class testeAuto extends NextFTCOpMode {
     private final Pose repoPose2 = new Pose(57, 58, Math.toRadians(180));
     private final Pose intakePose2 = new Pose(17, 58, Math.toRadians(180));
     private final Pose repoG = new Pose(23,58 , Math.toRadians(180));
-    private final Pose repoPose3 = new Pose(15, 36, Math.toRadians(180));
-    private final Pose intakePose3 = new Pose(15, 36, Math.toRadians(180));
+    private final Pose repoPose3 = new Pose(57, 36.5, Math.toRadians(180));
+
+    private final Pose intakePose3 = new Pose(17, 36, Math.toRadians(180));
 
 
 
@@ -221,6 +222,30 @@ public class testeAuto extends NextFTCOpMode {
 
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
+
+
+                new FollowPath(repo3, true,0.95),
+                Transfer.INSTANCE.onin,
+                new FollowPath(intake3, true,0.55),
+                new Delay(0.01),
+                Transfer.INSTANCE.off,
+                new Delay(0.7),
+                Intake.INSTANCE.off,
+
+
+
+                Flywheel.INSTANCE.on,
+                Flywheel.INSTANCE.onin,
+
+                new FollowPath(score3, true),
+                new Delay(0.6),
+                Transfer.INSTANCE.on,
+                new Delay(0.4),
+                Intake.INSTANCE.onin,
+                new Delay(3),
+
+                Flywheel.INSTANCE.off,
+                Flywheel.INSTANCE.off2,
                 Intake.INSTANCE.off,
                 Transfer.INSTANCE.off
 
@@ -231,7 +256,7 @@ public class testeAuto extends NextFTCOpMode {
 
 
 
-                );
+        );
     }
 
 }

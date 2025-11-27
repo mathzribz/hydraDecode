@@ -68,9 +68,8 @@ public class limeheading extends LinearOpMode {
             }
 
             // Converte heading atual
-            double currentHeading = orientation.getYaw(AngleUnit.RADIANS);
-            double targetHeading = 0; // queremos centralizar a tag, logo o alvo é 0
-            double correction = PIDControl(Math.toRadians(tx), currentHeading);
+            double correction = PIDControl(0, Math.toRadians(tx));
+
 
             // Aplica a correção de rotação
             drivetrain.power(correction);
@@ -78,7 +77,7 @@ public class limeheading extends LinearOpMode {
             // Telemetria
             telemetry.addData("Target Found", validTarget);
             telemetry.addData("tx (deg)", tx);
-            telemetry.addData("Current Heading (deg)", Math.toDegrees(currentHeading));
+
             telemetry.addData("PID Output", correction);
             telemetry.update();
         }
@@ -92,15 +91,17 @@ public class limeheading extends LinearOpMode {
      */
     private double PIDControl(double reference, double state) {
         double error = angleWrap(reference - state);
-        double dt = timer.seconds();
+
+        double dt = Math.max(timer.seconds(), 0.001);
+
         integralSum += error * dt;
         double derivative = (error - lastError) / dt;
+
         lastError = error;
         timer.reset();
 
-        // Saída final
         double output = (error * Kp) + (integralSum * Ki) + (derivative * Kd);
-        return clamp(output, -0.5, 0.5); // limite de potência
+        return clamp(output, -0.5, 0.5);
     }
 
     /**

@@ -33,7 +33,7 @@ public class farAuto extends NextFTCOpMode {
     }
 
     private Path scorePreload, turn1;
-    private PathChain  intake1;
+    private PathChain  intake1, score2;
 
     @Override
     public void onInit() {
@@ -42,10 +42,10 @@ public class farAuto extends NextFTCOpMode {
     }
 
     private final Pose startPose = new Pose(57, 8, Math.toRadians(90));
-    private final Pose scorePose1 = new Pose(62, 17, Math.toRadians(120));
-    private final Pose turnPose1 = new Pose(53, 82, Math.toRadians(180));
-    private final Pose intakePose1 = new Pose(15, 82, Math.toRadians(180));
-    private final Pose scorePose2 = new Pose(55, 95, Math.toRadians(130));
+    private final Pose scorePose1 = new Pose(61.5, 17.5, Math.toRadians(178));
+    private final Pose turnPose1 = new Pose(68, 36.5, Math.toRadians(185));
+    private final Pose intakePose1 = new Pose(18, 35.5, Math.toRadians(185));
+    private final Pose scorePose2 = new Pose(62.5, 17.5, Math.toRadians(110));
 
 
     private void buildPaths() {
@@ -64,6 +64,10 @@ public class farAuto extends NextFTCOpMode {
                 .addPath(new BezierLine(turnPose1, intakePose1))
                 .setLinearHeadingInterpolation(turnPose1.getHeading(), intakePose1.getHeading())
                 .build();
+        score2 = follower().pathBuilder()
+                .addPath(new BezierLine(intakePose1, scorePose2))
+                .setLinearHeadingInterpolation(intakePose1.getHeading(), scorePose2.getHeading())
+                .build();
     }
 
     @Override
@@ -78,11 +82,33 @@ public class farAuto extends NextFTCOpMode {
                 Flywheel.INSTANCE.oninfar,
 
                 new FollowPath(scorePreload, true),
-                new Delay(0.5),
+                new Delay(1.3),
+                Transfer.INSTANCE.on,
+                new Delay(0.4),
+                Intake.INSTANCE.onin,
+                new Delay(2.2),
+                Transfer.INSTANCE.off,
+
+                Flywheel.INSTANCE.off,
+                Flywheel.INSTANCE.off2,
+
+                new FollowPath(turn1, true),
+                Transfer.INSTANCE.onin,
+                new FollowPath(intake1, true,0.55),
+                new Delay(0.05),
+                Transfer.INSTANCE.off,
+                new Delay(0.9),
+                Intake.INSTANCE.off,
+
+                Flywheel.INSTANCE.onfar,
+                Flywheel.INSTANCE.oninfar,
+
+                new FollowPath(score2, true),
+                new Delay(1),
                 Transfer.INSTANCE.on,
                 new Delay(0.35),
                 Intake.INSTANCE.onin,
-                new Delay(2.8),
+                new Delay(2),
                 Transfer.INSTANCE.off,
 
                 Flywheel.INSTANCE.off,
