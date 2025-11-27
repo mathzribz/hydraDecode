@@ -24,15 +24,15 @@ import all.Main.teleops.DECODAO;
 import all.subsystems.PIDFflywheel;
 
 @Config
-public class  Flywheel implements Subsystem {
+public class  FlywheelPID implements Subsystem {
 
     private VoltageSensor vs;
 
 
     private boolean transferEnabled = true;
     private double FlywheelSpeed = 0.585;
-    public static final Flywheel INSTANCE = new Flywheel();
-    private Flywheel() { }
+    public static final FlywheelPID INSTANCE = new FlywheelPID();
+    private FlywheelPID() { }
 
     private final MotorEx Flywheel = new MotorEx("shooterL");
     private final MotorEx Flywheel2 = new MotorEx("shooterR");
@@ -44,7 +44,7 @@ public class  Flywheel implements Subsystem {
     public final Command oninfar = new SetPower(Flywheel2,0.78);
     public final Command off = new SetPower(Flywheel,0);
     public final Command off2 = new SetPower(Flywheel2,0);
-//    public final Command off = new SetPower(intakeMotor,0);
+    //    public final Command off = new SetPower(intakeMotor,0);
     @Override
     public void initialize() {
 

@@ -20,7 +20,6 @@ public class limeheading extends LinearOpMode {
     private IMU imu;
     private Drivetrain drivetrain = new Drivetrain();
 
-    // PID constants
     private double Kp = PIDConstants.Kp;
     private double Ki = PIDConstants.Ki;
     private double Kd = PIDConstants.Kd;
@@ -31,53 +30,43 @@ public class limeheading extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        // Inicializa hardware
         drivetrain.init(hardwareMap);
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         imu = hardwareMap.get(IMU.class, "imu");
 
-        // Configuração da orientação do hub
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
         imu.initialize(parameters);
 
-        // Telemetria combinada com o Dashboard
         FtcDashboard dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
-        limelight.pipelineSwitch(0); // pipeline configurado para AprilTags
+        limelight.pipelineSwitch(0);
         limelight.start();
 
         waitForStart();
         timer.reset();
 
         while (opModeIsActive()) {
-            // Atualiza orientação do robô
             YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
             limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
 
-            // Lê resultado da Limelight
             LLResult result = limelight.getLatestResult();
 
             boolean validTarget = result != null && result.isValid();
             double tx = 0;
 
             if (validTarget) {
-                tx = result.getTx(); // desvio lateral em graus
+                tx = result.getTx();
             }
 
-            // Converte heading atual
-            double correction = PIDControl(0, Math.toRadians(tx));
+            double correction = PIDControl(0,(tx));
 
-
-            // Aplica a correção de rotação
             drivetrain.power(correction);
 
-            // Telemetria
             telemetry.addData("Target Found", validTarget);
             telemetry.addData("tx (deg)", tx);
-
             telemetry.addData("PID Output", correction);
             telemetry.update();
         }
@@ -86,36 +75,24 @@ public class limeheading extends LinearOpMode {
         limelight.stop();
     }
 
-    /**
-     * Controle PID básico para rotação
-     */
     private double PIDControl(double reference, double state) {
         double error = angleWrap(reference - state);
-
         double dt = Math.max(timer.seconds(), 0.001);
-
         integralSum += error * dt;
         double derivative = (error - lastError) / dt;
-
         lastError = error;
         timer.reset();
-
         double output = (error * Kp) + (integralSum * Ki) + (derivative * Kd);
         return clamp(output, -0.5, 0.5);
     }
 
-    /**
-     * Normaliza ângulos para -π a π
-     */
-    private double angleWrap(double radians) {
-        while (radians > Math.PI) radians -= 2 * Math.PI;
-        while (radians < -Math.PI) radians += 2 * Math.PI;
-        return radians;
+    private double angleWrap(double deg) {
+        while (deg > 180) deg -= 360;
+        while (deg < -180) deg += 360;
+        return deg;
     }
 
-    /**
-     * Garante que o valor está dentro dos limites
-     */
+
     private double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(max, value));
     }

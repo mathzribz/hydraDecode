@@ -202,7 +202,7 @@ public class GoatAuto extends NextFTCOpMode {
                 new FollowPath(intake2, true,0.55),
                 new Delay(0.01),
                 Transfer.INSTANCE.off,
-                new Delay(0.7),
+                new Delay(0.9),
                 Intake.INSTANCE.off,
 
                 new FollowPath(repogg,true),
