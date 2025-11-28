@@ -1,3 +1,4 @@
+
 package all.Main.teleops;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -48,12 +49,22 @@ public class DECODAO extends LinearOpMode {
 
     public static double TICKS_PER_REV = 28;
     public static double targetRPM = 1300;
-    public static double targetAlvo = 1300;
+    public static double targetAlvo = 1250;
     public static double targetTPS ;
     public static double shSpeed = 0.5 ;
 
     public static double finalPower;
 
+
+    // =============== LIMELIGHT TRACKER VARIÁVEIS ===============
+    public static double LL_Kp = 0.05;
+    public static double LL_Ki = 0.0;
+    public static double LL_Kd = 0.0001;
+
+    private double llIntegral = 0;
+    private double llLastError = 0;
+    private ElapsedTime llTimer = new ElapsedTime();
+    private Limelight3A limelightLL;
 
 
     private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
@@ -120,8 +131,7 @@ public class DECODAO extends LinearOpMode {
         ShooterR.setDirection(DcMotorSimple.Direction.REVERSE);
         ShooterL.setDirection(DcMotorSimple.Direction.REVERSE);
 
-//        ShooterR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        ShooterL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         // IMU
         imu = hardwareMap.get(IMU.class, "imu");
@@ -137,6 +147,12 @@ public class DECODAO extends LinearOpMode {
 
         // RESET YAW
         imu.resetYaw();
+
+
+
+        limelightLL = hardwareMap.get(Limelight3A.class, "limelight");
+        limelightLL.pipelineSwitch(0);
+        limelightLL.start();
     }
 
     // DEADZONE
@@ -156,7 +172,30 @@ public class DECODAO extends LinearOpMode {
         // JOYSTICKS
         double strafe = applyDeadZone(gamepad1.left_stick_x);
         double drive = -applyDeadZone(gamepad1.left_stick_y);
-        double turn = -applyDeadZone(gamepad1.right_stick_x);
+        double turnInput = -applyDeadZone(gamepad1.right_stick_x);
+        double turn = turnInput;
+
+        // ================== LIMELIGHT AIM ASSIST ==================
+        if (gamepad1.right_trigger > 0.15) {   // segurou RT → tracking ativado
+            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+            limelightLL.updateRobotOrientation(
+                    orientation.getYaw(AngleUnit.DEGREES)
+            );
+
+            LLResult res = limelightLL.getLatestResult();
+
+            if (res != null && res.isValid()) {
+                double tx = res.getTx();
+                 turn = LL_PID(tx, 0);   // substitui turn pelo PID de correção
+                telemetry.addData("LL Tracking", "ATIVO");
+                telemetry.addData("tx", tx);
+            } else {
+                telemetry.addData("LL Tracking", "SEM TAG");
+            }
+        } else {
+            llIntegral = 0;  // reset quando soltar
+            llLastError = 0;
+        }
 
         // MECANO ANGLES
         double fieldX = strafe * Math.cos(-heading) - drive * Math.sin(-heading);
@@ -178,6 +217,8 @@ public class DECODAO extends LinearOpMode {
         LMB.setPower(LMBpower * driveSpeed);
         RMF.setPower(RMFpower * driveSpeed);
         RMB.setPower(RMBpower * driveSpeed);
+
+
 
         telemetry.addData("Yaw", heading);
     }
@@ -278,7 +319,7 @@ public class DECODAO extends LinearOpMode {
             targetRPM = 1000;
         }
         if (gamepad1.a || gamepad2.a) {
-            targetRPM = 1300;
+            targetRPM = 1250;
 
         } if (gamepad1.b || gamepad2.b) {
             targetRPM = 3300;
@@ -324,25 +365,22 @@ public class DECODAO extends LinearOpMode {
 
     }
 
-//     public void ll() {
-//
-//         // VARIAVEL ORIENTATION
-//         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-//
-//         // LL ORIENTATION
-//         limelight.updateRobotOrientation(orientation.getYaw(AngleUnit.DEGREES));
-//
-//         // LL ON
-//         LLResult llResult = limelight.getLatestResult();
-//         if (llResult != null && llResult.isValid()) {
-//
-//             Pose3D botpose = llResult.getBotpose();
-//             telemetry.addData("target X", llResult.getTx());
-//             telemetry.addData("target Y", llResult.getTy());
-//             telemetry.addData("target Area", llResult.getTa());
-//             telemetry.addData(" botpose ", botpose.toString());
-//         }
-//
-//     }
+    private double LL_PID(double target, double state) {
+        double error = target - state;
+        double dt = Math.max(llTimer.seconds(), 0.001);
+
+        llIntegral += error * dt;
+        double derivative = (error - llLastError) / dt;
+
+        llLastError = error;
+        llTimer.reset();
+
+        double output = (LL_Kp * error) + (LL_Ki * llIntegral) + (LL_Kd * derivative);
+        return clamp(output, -0.5, 0.5);
+    }
+
+    private double clamp(double v, double min, double max) {
+        return Math.max(min, Math.min(max, v));
+    }
 
 }

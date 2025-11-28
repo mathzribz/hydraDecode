@@ -1,6 +1,8 @@
+
 package all.vision;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -14,15 +16,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @TeleOp(name = "Limelight Apriltag PID Tracker", group = "Vision")
+@Config
 public class limeheading extends LinearOpMode {
 
     private Limelight3A limelight;
     private IMU imu;
     private Drivetrain drivetrain = new Drivetrain();
 
-    private double Kp = PIDConstants.Kp;
-    private double Ki = PIDConstants.Ki;
-    private double Kd = PIDConstants.Kd;
+    public static double Kp = 0.05;  // Proportional gain
+    public static double Ki = 0.0;   // Integral gain ( KEEP THIS 0 )
+    public static double Kd = 0.0001  ;   // Derivative gain
 
     private double integralSum = 0;
     private double lastError = 0;
