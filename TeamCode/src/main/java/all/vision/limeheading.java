@@ -61,7 +61,7 @@ public class limeheading extends LinearOpMode {
                 tx = result.getTx();
             }
 
-            double correction = PIDControl(0, Math.toRadians(tx));
+            double correction = PIDControl(0,(tx));
 
             drivetrain.power(correction);
 
@@ -86,11 +86,12 @@ public class limeheading extends LinearOpMode {
         return clamp(output, -0.5, 0.5);
     }
 
-    private double angleWrap(double radians) {
-        while (radians > Math.PI) radians -= 2 * Math.PI;
-        while (radians < -Math.PI) radians += 2 * Math.PI;
-        return radians;
+    private double angleWrap(double deg) {
+        while (deg > 180) deg -= 360;
+        while (deg < -180) deg += 360;
+        return deg;
     }
+
 
     private double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(max, value));

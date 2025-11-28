@@ -36,6 +36,7 @@ public class testeAuto extends NextFTCOpMode {
                 new PedroComponent(Constants::createFollower),
                 new SubsystemComponent(Intake.INSTANCE,  Transfer.INSTANCE, Flywheel.INSTANCE),
                 BulkReadComponent.INSTANCE
+
         );
     }
 
@@ -139,6 +140,7 @@ public class testeAuto extends NextFTCOpMode {
                 .setLinearHeadingInterpolation(intakePose3.getHeading(), scorePose.getHeading())
                 .build();
 
+     
 
     }
 
@@ -150,6 +152,7 @@ public class testeAuto extends NextFTCOpMode {
     }
 
     private Command autonomousRoutine() {
+
         // VARIAVEL DISTANCE OF SENSOR
 
 
