@@ -32,8 +32,8 @@ public class BlueGoatFar extends NextFTCOpMode {
         );
     }
 
-    private Path scorePreload, turn1;
-    private PathChain  intake1;
+    private Path scorePreload , turn1;
+    private PathChain intake1,scorePreload2;
 
     @Override
     public void onInit() {
@@ -42,10 +42,10 @@ public class BlueGoatFar extends NextFTCOpMode {
     }
 
     private final Pose startPose = new Pose(57, 8, Math.toRadians(90));
-    private final Pose scorePose1 = new Pose(61.5, 17.5, Math.toRadians(178));
+    private final Pose scorePose1 = new Pose(60.5, 18.5, Math.toRadians(166));
     private final Pose turnPose1 = new Pose(68, 35.5, Math.toRadians(185));
-    private final Pose intakePose1 = new Pose(17, 35.5, Math.toRadians(185));
-
+    private final Pose intakePose1 = new Pose(18, 35.5, Math.toRadians(185));
+    private final Pose scorePose2 = new Pose(60.5, 18.5, Math.toRadians(117));
     private void buildPaths() {
 
 //------------------------------------------------------------------------------------------------------------------
@@ -60,6 +60,12 @@ public class BlueGoatFar extends NextFTCOpMode {
                 .addPath(new BezierLine(turnPose1, intakePose1))
                 .setLinearHeadingInterpolation(turnPose1.getHeading(), intakePose1.getHeading())
                 .build();
+
+        scorePreload2 = follower().pathBuilder()
+                .addPath(new BezierLine(intakePose1, scorePose2))
+                .setLinearHeadingInterpolation(intakePose1.getHeading(), scorePose2.getHeading())
+                .build();
+
     }
 
     @Override
@@ -75,40 +81,48 @@ public class BlueGoatFar extends NextFTCOpMode {
                 Flywheel.INSTANCE.oninfar,
 
                 new FollowPath(scorePreload, true),
-                new Delay(1.3),
+                new Delay(1.4),
                 Transfer.INSTANCE.on,
-                new Delay(0.8),
+                new Delay(0.1),
+                Transfer.INSTANCE.off,
+                new Delay(0.55),
+                Transfer.INSTANCE.on,
+                new Delay(0.33),
                 Intake.INSTANCE.onin,
-                new Delay(2.2),
+                new Delay(2),
                 Transfer.INSTANCE.off,
 
+                // INTAKE 1
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
 
-                // INTAKE 1
                 new FollowPath(turn1, true),
                 Transfer.INSTANCE.onin,
-                new FollowPath(intake1, true,0.55),
-                new Delay(0.05),
+                new FollowPath(intake1, true,0.65),
+                new Delay(0.09),
                 Transfer.INSTANCE.off,
-                new Delay(0.9),
+                new Delay(1.15),
                 Intake.INSTANCE.off,
 
                 // SCORE 2
                 Flywheel.INSTANCE.onfar,
                 Flywheel.INSTANCE.oninfar,
 
-                new FollowPath(scorePreload, true),
-                new Delay(1),
+                new FollowPath(scorePreload2, true),
+                new Delay(1.2),
                 Transfer.INSTANCE.on,
-                new Delay(0.8),
+                new Delay(0.1),
+                Transfer.INSTANCE.off,
+                new Delay(0.4),
+                Transfer.INSTANCE.on,
+                new Delay(0.24),
                 Intake.INSTANCE.onin,
-                new Delay(2.2),
+                new Delay(2),
                 Transfer.INSTANCE.off,
 
                 Flywheel.INSTANCE.off,
-                Flywheel.INSTANCE.off2
-
+                Flywheel.INSTANCE.off2,
+                Intake.INSTANCE.off
         );
 
     }

@@ -41,8 +41,8 @@ public class BlueMidFar extends NextFTCOpMode {
     }
 
     private final Pose startPose = new Pose(57, 8, Math.toRadians(90));
-    private final Pose scorePose1 = new Pose(61.5, 17.5, Math.toRadians(178));
-    private final Pose turnPose1 = new Pose(68, 35.5, Math.toRadians(185));
+    private final Pose scorePose1 = new Pose(60.5, 18.5, Math.toRadians(166));
+    private final Pose turnPose1 = new Pose(80, 30.5, Math.toRadians(-90));
 
     private void buildPaths() {
 
@@ -68,13 +68,19 @@ public class BlueMidFar extends NextFTCOpMode {
                 Flywheel.INSTANCE.oninfar,
 
                 new FollowPath(scorePreload, true),
-                new Delay(1.3),
+                new Delay(1.4),
                 Transfer.INSTANCE.on,
-                new Delay(0.8),
+                new Delay(0.1),
+                Transfer.INSTANCE.off,
+                new Delay(0.55),
+                Transfer.INSTANCE.on,
+                new Delay(0.33),
                 Intake.INSTANCE.onin,
-                new Delay(2.2),
+                new Delay(2),
                 Transfer.INSTANCE.off,
 
+                new FollowPath(turn1, true),
+                Intake.INSTANCE.off,
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2
 

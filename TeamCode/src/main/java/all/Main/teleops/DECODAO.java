@@ -57,7 +57,7 @@ public class DECODAO extends LinearOpMode {
 
 
     // =============== LIMELIGHT TRACKER VARIÁVEIS ===============
-    public static double LL_Kp = 0.05;
+    public static double LL_Kp = 0.065;
     public static double LL_Ki = 0.0;
     public static double LL_Kd = 0.0001;
 
@@ -78,6 +78,8 @@ public class DECODAO extends LinearOpMode {
     double tempoRodar = 0.2; ///0.05
     double tempoParar = 0.5;
     boolean transferEnabled = true;
+
+    boolean shooterSolo = false;
 
     @Override
     public void runOpMode() {
@@ -228,7 +230,7 @@ public class DECODAO extends LinearOpMode {
         // INTAKE GAMEPAD
         if (gamepad1.left_trigger > 0.1) {
             Intake.setPower(1);
-        } else if (gamepad1.dpad_down) {
+        } else if (gamepad1.dpad_left) {
             Intake.setPower(-0.8);
         } else {
             Intake.setPower(0);
@@ -248,34 +250,41 @@ public class DECODAO extends LinearOpMode {
 
         double distance = distanceSensor.getDistance(DistanceUnit.CM);
         boolean ballDetected = (distance < 12);
+        boolean ltPressed = gamepad1.left_trigger > 0.1;
+        boolean rbPressed = gamepad1.right_bumper;
 
-        // Se detectou bola, bloqueia LT
-        if (ballDetected) {
-            transferEnabled = false;
-        }
+        // ---------------------------------------------------------
+        // 1) TRAVAMENTO DO LT
+        //    O Transfer trava SE:
+        //       - LT está sendo pressionado
+        //       - E uma bola já foi detectada
+        //    → RB só destrava ENQUANTO for segurado
+        // ---------------------------------------------------------
+        boolean ltTravado = ltPressed && ballDetected;
+        boolean transferPodeRodarLT = ltPressed && !ltTravado;
 
-        // --- CICLO DO RB TEM PRIORIDADE ---
-        if (gamepad1.right_bumper && !rbAtivo) {
+        // ---------------------------------------------------------
+        // 2) CICLO DO RB (PRIORITÁRIO)
+        // ---------------------------------------------------------
+        if (rbPressed && !rbAtivo) {
             rbAtivo = true;
             rbRodando = true;
             rbTimer.reset();
-            transferEnabled = true; // Libera LT depois
         }
 
         if (rbAtivo) {
+
             // Fase rodando
             if (rbRodando) {
                 Transfer.setPower(0.8);
                 Intake.setPower(0.7);
 
-                ;
-
                 if (rbTimer.seconds() >= tempoRodar) {
                     rbRodando = false;
                     rbTimer.reset();
                 }
-                // Fase parado
-            } else {
+
+            } else { // fase parado
                 Transfer.setPower(0);
                 Intake.setPower(0);
 
@@ -285,25 +294,31 @@ public class DECODAO extends LinearOpMode {
                 }
             }
 
-            // Se soltar RB, cancela ciclo
-            if (!gamepad1.right_bumper) {
+            // Soltou RB → encerra ciclo na hora
+            if (!rbPressed) {
                 rbAtivo = false;
                 rbRodando = false;
                 Transfer.setPower(0);
             }
 
-            return; // RB domina
+            return; // RB domina totalmente
         }
 
-        // --- CONTROLE COM LT ---
-        if (gamepad1.left_trigger > 0.1 && transferEnabled && !ballDetected) {
+        // ---------------------------------------------------------
+        // 3) LT CONTROLANDO TRANSFER (somente se não estiver travado)
+        // ---------------------------------------------------------
+        if (transferPodeRodarLT) {
             Transfer.setPower(0.5);
         } else {
             Transfer.setPower(0);
         }
+
         telemetry.addData("distance", distance);
-        telemetry.addData("rbCycle", rbAtivo ? "active" : "inactive");
+        telemetry.addData("ltTravado", ltTravado);
+        telemetry.addData("transferPodeRodarLT", transferPodeRodarLT);
+        telemetry.addData("rbAtivo", rbAtivo);
     }
+
     public void shooter() {
         PIDFController pidf = new PIDFController(kP, kI, kD, kF);
 
@@ -316,13 +331,13 @@ public class DECODAO extends LinearOpMode {
 
 
         if (gamepad1.x || gamepad2.x) {
-            targetRPM = 1000;
+            targetRPM = 1100;
         }
         if (gamepad1.a || gamepad2.a) {
             targetRPM = 1250;
 
         } if (gamepad1.b || gamepad2.b) {
-            targetRPM = 3300;
+            targetRPM = 2200;
         }
         double pidPower = pidf.calculate(vAvg, targetTPS);
 
@@ -335,7 +350,7 @@ public class DECODAO extends LinearOpMode {
 
         finalPower = Math.max(-1.0, Math.min(1.0, finalPower));
 
-        if (gamepad1.right_trigger > 0.1 || gamepad2.right_trigger > 0.1) {
+        if ( gamepad2.right_trigger > 0.1) {
             ShooterR.setPower(finalPower);
             ShooterL.setPower(finalPower);
         } else {
@@ -349,6 +364,27 @@ public class DECODAO extends LinearOpMode {
             ShooterL.setPower(-0.6);
             Transfer.setPower(-0.6);
             Intake.setPower(0.3);
+        }
+
+
+        if (gamepad1.dpad_down){
+            shooterSolo = false;
+
+        }
+        if (gamepad1.dpad_up){
+            shooterSolo = true;
+
+        }
+
+        if(shooterSolo){
+            if ( gamepad2.right_trigger > 0.1 || gamepad1.right_trigger > 0.1 ) {
+                ShooterR.setPower(finalPower);
+                ShooterL.setPower(finalPower);
+            } else {
+                ShooterR.setPower(0);
+                ShooterL.setPower(0);
+                pidf.reset();
+            }
         }
 
 

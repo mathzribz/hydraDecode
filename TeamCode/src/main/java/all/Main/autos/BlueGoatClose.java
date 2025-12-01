@@ -51,18 +51,18 @@ public class BlueGoatClose extends NextFTCOpMode {
         follower().setStartingPose(startPose);
     }
 
-    private final Pose startPose = new Pose(56, 135, Math.toRadians(180));
-    private final Pose scorePose = new Pose(44.5, 98.5, Math.toRadians(136));
-    private final Pose repoPose1 = new Pose(59, 82 , Math.toRadians(182));
-    private final Pose intakePose1 = new Pose(19, 82, Math.toRadians(182));
-    private final Pose repoPose2 = new Pose(57, 58, Math.toRadians(180));
-    private final Pose intakePose2 = new Pose(17, 58, Math.toRadians(180));
-    private final Pose repoG = new Pose(23,58 , Math.toRadians(180));
-    private final Pose repoPose3 = new Pose(57, 35.5, Math.toRadians(180));
+    private final Pose startPose = new Pose(17, 115, Math.toRadians(90));
+    private final Pose scorePose = new Pose(44.5, 98.5, Math.toRadians(133));
+    private final Pose repoPose1 = new Pose(59, 87.5 , Math.toRadians(182));
+    private final Pose intakePose1 = new Pose(19, 87.5, Math.toRadians(182));
+    private final Pose repoPose2 = new Pose(57, 61.75, Math.toRadians(180));
+    private final Pose intakePose2 = new Pose(18.5, 61.75, Math.toRadians(180));
+    private final Pose repoG = new Pose(23,61 , Math.toRadians(180));
+    private final Pose repoPose3 = new Pose(57, 38.5, Math.toRadians(180));
 
-    private final Pose intakePose3 = new Pose(17, 35.5, Math.toRadians(180));
-    private final Pose gatepose  = new Pose(37, 65, Math.toRadians(0));
-    private final Pose parkpose  = new Pose(19, 65, Math.toRadians(0));
+    private final Pose intakePose3 = new Pose(17, 38.5, Math.toRadians(180));
+    private final Pose gatepose  = new Pose(37, 68.5, Math.toRadians(0));
+    private final Pose parkpose  = new Pose(19, 68.5, Math.toRadians(0));
 
     private void buildPaths() {
 
@@ -158,12 +158,12 @@ public class BlueGoatClose extends NextFTCOpMode {
                 Flywheel.INSTANCE.off2,
 
                 // INTAKE 1
-                new FollowPath(repo1, true,0.95),
+                new FollowPath(repo1, false,0.95),
                 Transfer.INSTANCE.onin,
                 new FollowPath(intake1, true,0.65),
-                new Delay(0.05),
+                new Delay(0.07),
                 Transfer.INSTANCE.off,
-                new Delay(0.9),
+                new Delay(1.3),
                 Intake.INSTANCE.onkeep,
 
                 // SCORE 2
@@ -171,7 +171,6 @@ public class BlueGoatClose extends NextFTCOpMode {
                 Flywheel.INSTANCE.onin,
     
                 new FollowPath(score2, true),
-                Intake.INSTANCE.off,
                 new Delay(0.6),
                 Transfer.INSTANCE.on,
                 new Delay(0.4),
@@ -183,12 +182,12 @@ public class BlueGoatClose extends NextFTCOpMode {
                 Transfer.INSTANCE.off,
 
                 // INTAKE 2
-                new FollowPath(repo2, true,0.95),
+                new FollowPath(repo2, false,0.95),
                 Transfer.INSTANCE.onin,
                 new FollowPath(intake2, true,0.5),
                 new Delay(0.01),
                 Transfer.INSTANCE.off,
-                new Delay(0.9),
+                new Delay(0.7),
 
                 new FollowPath(repogg,true),
 
@@ -197,7 +196,6 @@ public class BlueGoatClose extends NextFTCOpMode {
                 Flywheel.INSTANCE.onin,
 
                 new FollowPath(score3, true),
-                Intake.INSTANCE.off,
                 new Delay(0.6),
                 Transfer.INSTANCE.on,
                 new Delay(0.4),
@@ -208,16 +206,16 @@ public class BlueGoatClose extends NextFTCOpMode {
                 Flywheel.INSTANCE.off2,
 
                 // INTAKE 3 + GATE
-                new FollowPath(repo3, true,0.95),
+                new FollowPath(repo3, false,0.95),
                 Transfer.INSTANCE.onin,
                 new FollowPath(intake3, true,0.48),
                 new Delay(0.01),
                 Transfer.INSTANCE.off,
-                new Delay(0.9),
+                new Delay(0.7),
                 Intake.INSTANCE.onkeep,
 
-                new FollowPath(finalPose, true),
-                new FollowPath(gate, true)
+                new FollowPath(finalPose, false,0.98),
+                new FollowPath(gate, true,0.98)
 
         );
 
