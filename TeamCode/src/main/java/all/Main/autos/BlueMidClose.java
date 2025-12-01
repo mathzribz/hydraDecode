@@ -13,10 +13,7 @@ import all.subsystems.Intake;
 import all.subsystems.Transfer;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.conditionals.IfElseCommand;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.extensions.pedro.FollowPath;
@@ -26,12 +23,9 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
-public class testeAuto extends NextFTCOpMode {
-    private DistanceSensor dd;
+public class BlueMidClose extends NextFTCOpMode {
 
-
-
-    public testeAuto() {
+    public BlueMidClose() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
                 new SubsystemComponent(Intake.INSTANCE,  Transfer.INSTANCE, Flywheel.INSTANCE),
@@ -48,18 +42,12 @@ public class testeAuto extends NextFTCOpMode {
     public PathChain intake2;
     public PathChain score3;
     public PathChain repogg;
-    public PathChain repo3;
-    public PathChain intake3;
-    public PathChain score4;
 
     @Override
     public void onInit() {
+
         buildPaths();
         follower().setStartingPose(startPose);
-
-
-
-
     }
 
     private final Pose startPose = new Pose(56, 133, Math.toRadians(180));
@@ -69,12 +57,6 @@ public class testeAuto extends NextFTCOpMode {
     private final Pose repoPose2 = new Pose(57, 58, Math.toRadians(180));
     private final Pose intakePose2 = new Pose(17, 58, Math.toRadians(180));
     private final Pose repoG = new Pose(23,58 , Math.toRadians(180));
-    private final Pose repoPose3 = new Pose(15, 36, Math.toRadians(180));
-    private final Pose intakePose3 = new Pose(15, 36, Math.toRadians(180));
-
-
-
-
 
     private void buildPaths() {
 
@@ -122,28 +104,7 @@ public class testeAuto extends NextFTCOpMode {
                 .setLinearHeadingInterpolation(repoG.getHeading(), scorePose.getHeading())
                 .build();
 
-
-//------------------------------------------------------------------------------------------------------------------
-
-        repo3 = follower().pathBuilder()
-                .addPath(new BezierLine(scorePose, repoPose3))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), repoPose3.getHeading())
-                .build();
-
-        intake3 = follower().pathBuilder()
-                .addPath(new BezierLine(repoPose3, intakePose3))
-                .setLinearHeadingInterpolation(repoPose3.getHeading(), intakePose3.getHeading())
-                .build();
-
-        score4 = follower().pathBuilder()
-                .addPath(new BezierLine(intakePose3, scorePose))
-                .setLinearHeadingInterpolation(intakePose3.getHeading(), scorePose.getHeading())
-                .build();
-
-     
-
     }
-
 
     @Override
     public void onStartButtonPressed() {
@@ -152,14 +113,9 @@ public class testeAuto extends NextFTCOpMode {
     }
 
     private Command autonomousRoutine() {
-
-        // VARIAVEL DISTANCE OF SENSOR
-
-
-        // VARIALVEL BALL DETECTED
-
-
         return new SequentialGroup(
+
+                // SCORE 1
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
 
@@ -183,6 +139,7 @@ public class testeAuto extends NextFTCOpMode {
                 new Delay(0.9),
                 Intake.INSTANCE.off,
 
+                // SCORE 2
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
 
@@ -197,7 +154,6 @@ public class testeAuto extends NextFTCOpMode {
                 Flywheel.INSTANCE.off2,
                 Transfer.INSTANCE.off,
 
-
                 // INTAKE 2
                 new FollowPath(repo2, true,0.95),
                 Transfer.INSTANCE.onin,
@@ -209,11 +165,9 @@ public class testeAuto extends NextFTCOpMode {
 
                 new FollowPath(repogg,true),
 
+                // SCORE 3
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
-
-
-
 
                 new FollowPath(score3, true),
                 new Delay(0.6),
@@ -226,15 +180,8 @@ public class testeAuto extends NextFTCOpMode {
                 Flywheel.INSTANCE.off2,
                 Intake.INSTANCE.off,
                 Transfer.INSTANCE.off
-
-
-
-
-
-
-
-
                 );
+
     }
 
 }

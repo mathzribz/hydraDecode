@@ -22,9 +22,9 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
-public class farAuto extends NextFTCOpMode {
+public class BlueGoatFar extends NextFTCOpMode {
 
-    public farAuto() {
+    public BlueGoatFar() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
                 new SubsystemComponent(Intake.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
@@ -33,7 +33,7 @@ public class farAuto extends NextFTCOpMode {
     }
 
     private Path scorePreload, turn1;
-    private PathChain  intake1, score2;
+    private PathChain  intake1;
 
     @Override
     public void onInit() {
@@ -43,30 +43,22 @@ public class farAuto extends NextFTCOpMode {
 
     private final Pose startPose = new Pose(57, 8, Math.toRadians(90));
     private final Pose scorePose1 = new Pose(61.5, 17.5, Math.toRadians(178));
-    private final Pose turnPose1 = new Pose(68, 36.5, Math.toRadians(185));
-    private final Pose intakePose1 = new Pose(18, 35.5, Math.toRadians(185));
-    private final Pose scorePose2 = new Pose(62.5, 17.5, Math.toRadians(110));
-
+    private final Pose turnPose1 = new Pose(68, 35.5, Math.toRadians(185));
+    private final Pose intakePose1 = new Pose(17, 35.5, Math.toRadians(185));
 
     private void buildPaths() {
 
+//------------------------------------------------------------------------------------------------------------------
         scorePreload = new Path(new BezierLine(startPose, scorePose1));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose1.getHeading());
-
-
 
         turn1 = new Path(new BezierLine(scorePose1, turnPose1));
         turn1.setLinearHeadingInterpolation(scorePose1.getHeading(), turnPose1.getHeading());
 
-
-
+//------------------------------------------------------------------------------------------------------------------
         intake1 = follower().pathBuilder()
                 .addPath(new BezierLine(turnPose1, intakePose1))
                 .setLinearHeadingInterpolation(turnPose1.getHeading(), intakePose1.getHeading())
-                .build();
-        score2 = follower().pathBuilder()
-                .addPath(new BezierLine(intakePose1, scorePose2))
-                .setLinearHeadingInterpolation(intakePose1.getHeading(), scorePose2.getHeading())
                 .build();
     }
 
@@ -78,13 +70,14 @@ public class farAuto extends NextFTCOpMode {
     private Command autonomousRoutine() {
         return new SequentialGroup(
 
+                // SCORE 1
                 Flywheel.INSTANCE.onfar,
                 Flywheel.INSTANCE.oninfar,
 
                 new FollowPath(scorePreload, true),
                 new Delay(1.3),
                 Transfer.INSTANCE.on,
-                new Delay(0.4),
+                new Delay(0.8),
                 Intake.INSTANCE.onin,
                 new Delay(2.2),
                 Transfer.INSTANCE.off,
@@ -92,6 +85,7 @@ public class farAuto extends NextFTCOpMode {
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
 
+                // INTAKE 1
                 new FollowPath(turn1, true),
                 Transfer.INSTANCE.onin,
                 new FollowPath(intake1, true,0.55),
@@ -100,28 +94,23 @@ public class farAuto extends NextFTCOpMode {
                 new Delay(0.9),
                 Intake.INSTANCE.off,
 
+                // SCORE 2
                 Flywheel.INSTANCE.onfar,
                 Flywheel.INSTANCE.oninfar,
 
-                new FollowPath(score2, true),
+                new FollowPath(scorePreload, true),
                 new Delay(1),
                 Transfer.INSTANCE.on,
-                new Delay(0.35),
+                new Delay(0.8),
                 Intake.INSTANCE.onin,
-                new Delay(2),
+                new Delay(2.2),
                 Transfer.INSTANCE.off,
 
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2
 
-//
-//                new FollowPath(turn1, true),
-//
-//                new Delay(1),
-//
-//                new FollowPath(intake1, true)
-
-
         );
+
     }
+
 }

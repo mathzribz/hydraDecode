@@ -1,35 +1,20 @@
 
 package all.subsystems;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
-import static all.Main.teleops.DECODAO.targetRPM;
-import static all.subsystems.PIDFflywheel.power;
-
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
+
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
-import dev.nextftc.control.ControlSystem;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
-import dev.nextftc.hardware.controllable.RunToVelocity;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.powerable.SetPower;
-
-import all.Main.teleops.DECODAO;
-import all.subsystems.PIDFflywheel;
 
 @Config
 public class  Flywheel implements Subsystem {
 
     private VoltageSensor vs;
-
-
-    private boolean transferEnabled = true;
     private double FlywheelSpeed = 0.585;
     public static final Flywheel INSTANCE = new Flywheel();
     private Flywheel() { }
@@ -44,31 +29,22 @@ public class  Flywheel implements Subsystem {
     public final Command oninfar = new SetPower(Flywheel2,0.78);
     public final Command off = new SetPower(Flywheel,0);
     public final Command off2 = new SetPower(Flywheel2,0);
-//    public final Command off = new SetPower(intakeMotor,0);
+
     @Override
     public void initialize() {
-
-
 
         Flywheel.reverse();
         Flywheel2.reverse();
 
     }
 
-
     @Override
     public void periodic() {
-
 
         Flywheel.setPower(Flywheel.getPower());
         Flywheel2.setPower(Flywheel2.getPower());
 
-
-
-
-
         ActiveOpMode.telemetry().addData("Flywheel State", Flywheel.getState());
-
     }
 
 }

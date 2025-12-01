@@ -1,4 +1,3 @@
-
 package all.Main.autos;
 
 import com.pedropathing.geometry.BezierLine;
@@ -13,10 +12,7 @@ import all.subsystems.Intake;
 import all.subsystems.Transfer;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.conditionals.IfElseCommand;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.extensions.pedro.FollowPath;
@@ -26,15 +22,11 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
-public class GoatAuto extends NextFTCOpMode {
-    private DistanceSensor dd;
-
-
-
-    public GoatAuto() {
+public class RedGoatClose extends NextFTCOpMode {
+    public RedGoatClose() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
-                new SubsystemComponent(Intake.INSTANCE,  Transfer.INSTANCE, Flywheel.INSTANCE),
+                new SubsystemComponent(Intake.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
                 BulkReadComponent.INSTANCE
         );
     }
@@ -46,37 +38,30 @@ public class GoatAuto extends NextFTCOpMode {
     public PathChain repo2;
     public PathChain intake2;
     public PathChain score3;
-    public PathChain repogg;
     public PathChain repo3;
     public PathChain intake3;
-    public PathChain score4;
+    public PathChain finalPose;
+    public PathChain repogg;
     public PathChain gate;
 
     @Override
     public void onInit() {
+
         buildPaths();
         follower().setStartingPose(startPose);
-
-
-
-
     }
 
-    private final Pose startPose = new Pose(56, 135, Math.toRadians(180));
-    private final Pose scorePose = new Pose(44.5, 98.5, Math.toRadians(136));
-    private final Pose repoPose1 = new Pose(59, 82 , Math.toRadians(182));
-    private final Pose intakePose1 = new Pose(19, 82, Math.toRadians(182));
-    private final Pose repoPose2 = new Pose(57, 58, Math.toRadians(180));
-    private final Pose intakePose2 = new Pose(17, 58, Math.toRadians(180));
-    private final Pose repoG = new Pose(23,58 , Math.toRadians(180));
-    private final Pose repoPose3 = new Pose(57, 35.5, Math.toRadians(180));
-
-    private final Pose intakePose3 = new Pose(17, 35.5, Math.toRadians(180));
-    private final Pose gatepose  = new Pose(37, 65, Math.toRadians(0));
-    private final Pose parkpose  = new Pose(19, 65, Math.toRadians(0));
-
-
-
+    private final Pose startPose = new Pose(87, 135, Math.toRadians(0));
+    private final Pose scorePose = new Pose(95, 97, Math.toRadians(44));
+    private final Pose repoPose1 = new Pose(84, 83.5, Math.toRadians(0));
+    private final Pose intakePose1 = new Pose(129, 83.5, Math.toRadians(0));
+    private final Pose repoPose2 = new Pose(85, 59.5, Math.toRadians(0));
+    private final Pose intakePose2 = new Pose(129, 59.5, Math.toRadians(0));
+    private final Pose repoG = new Pose(119,58 , Math.toRadians(0));
+    private final Pose repoPose3 = new Pose(85, 35.5, Math.toRadians(0));
+    private final Pose intakePose3 = new Pose(125, 35, Math.toRadians(0));
+    private final Pose gatepose  = new Pose(105, 65, Math.toRadians(180));
+    private final Pose parkpose  = new Pose(127, 65, Math.toRadians(180));
 
 
     private void buildPaths() {
@@ -91,7 +76,6 @@ public class GoatAuto extends NextFTCOpMode {
                 .addPath(new BezierLine(scorePose, repoPose1))
                 .setLinearHeadingInterpolation(scorePose.getHeading(), repoPose1.getHeading())
                 .build();
-
 
         intake1 = follower().pathBuilder()
                 .addPath(new BezierLine(repoPose1, intakePose1))
@@ -125,7 +109,6 @@ public class GoatAuto extends NextFTCOpMode {
                 .setLinearHeadingInterpolation(repoG.getHeading(), scorePose.getHeading())
                 .build();
 
-
 //------------------------------------------------------------------------------------------------------------------
 
         repo3 = follower().pathBuilder()
@@ -143,35 +126,27 @@ public class GoatAuto extends NextFTCOpMode {
                 .setLinearHeadingInterpolation(intakePose3.getHeading(), gatepose.getHeading())
                 .build();
 
-        score4 = follower().pathBuilder()
+        finalPose = follower().pathBuilder()
                 .addPath(new BezierLine(gatepose, parkpose))
                 .setLinearHeadingInterpolation(gatepose.getHeading(), parkpose.getHeading())
                 .build();
 
-
-
     }
-
-
-    @Override
+        @Override
     public void onStartButtonPressed() {
 
         autonomousRoutine().schedule();
     }
 
     private Command autonomousRoutine() {
-        // VARIAVEL DISTANCE OF SENSOR
-
-
-        // VARIALVEL BALL DETECTED
-
-
         return new SequentialGroup(
+
+                // SCORE 1
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
 
                 new FollowPath(score1, true),
-                new Delay(0.6),
+                new Delay(0.65),
                 Transfer.INSTANCE.on,
                 new Delay(0.4),
                 Intake.INSTANCE.onin,
@@ -190,7 +165,7 @@ public class GoatAuto extends NextFTCOpMode {
                 new Delay(0.9),
                 Intake.INSTANCE.onkeep,
 
-
+                // SCORE 2
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
 
@@ -206,7 +181,6 @@ public class GoatAuto extends NextFTCOpMode {
                 Flywheel.INSTANCE.off2,
                 Transfer.INSTANCE.off,
 
-
                 // INTAKE 2
                 new FollowPath(repo2, true,0.95),
                 Transfer.INSTANCE.onin,
@@ -218,11 +192,9 @@ public class GoatAuto extends NextFTCOpMode {
 
                 new FollowPath(repogg,true),
 
+                // SCORE 3
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
-
-
-
 
                 new FollowPath(score3, true),
                 Intake.INSTANCE.off,
@@ -235,7 +207,7 @@ public class GoatAuto extends NextFTCOpMode {
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
 
-
+                // INTAKE 3 + GATE
                 new FollowPath(repo3, true,0.95),
                 Transfer.INSTANCE.onin,
                 new FollowPath(intake3, true,0.48),
@@ -244,23 +216,10 @@ public class GoatAuto extends NextFTCOpMode {
                 new Delay(0.9),
                 Intake.INSTANCE.onkeep,
 
-
-                new FollowPath(score4, true),
+                new FollowPath(finalPose, true),
                 new FollowPath(gate, true)
-
-
-
-
-
-
-
-
-
-
-
-
-
         );
+
     }
 
 }
