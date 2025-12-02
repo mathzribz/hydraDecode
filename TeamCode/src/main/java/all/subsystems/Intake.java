@@ -20,7 +20,7 @@ public class  Intake implements Subsystem {
 
     public final Command on = new SetPower(intakeMotor,0.3);
     public final Command onin = new SetPower(intakeMotor,-intakespeed);
-    public final Command onkeep = new SetPower(intakeMotor,-0.4);
+    public final Command onkeep = new SetPower(intakeMotor,-0.45);
     public final Command off = new SetPower(intakeMotor,0);
     @Override
     public void initialize() {

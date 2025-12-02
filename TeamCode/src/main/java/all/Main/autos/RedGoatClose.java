@@ -1,3 +1,4 @@
+
 package all.Main.autos;
 
 import com.pedropathing.geometry.BezierLine;
@@ -51,7 +52,7 @@ public class RedGoatClose extends NextFTCOpMode {
         follower().setStartingPose(startPose);
     }
 
-    private final Pose startPose = new Pose(87, 135, Math.toRadians(0));
+    private final Pose startPose = new Pose(128, 115, Math.toRadians(90));
     private final Pose scorePose = new Pose(95, 97, Math.toRadians(44));
     private final Pose repoPose1 = new Pose(84, 83.5, Math.toRadians(0));
     private final Pose intakePose1 = new Pose(129, 83.5, Math.toRadians(0));
@@ -190,7 +191,7 @@ public class RedGoatClose extends NextFTCOpMode {
                 new Delay(0.9),
 
 
-                new FollowPath(repogg,true),
+
 
                 // SCORE 3
                 Flywheel.INSTANCE.on,

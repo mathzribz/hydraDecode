@@ -1,3 +1,4 @@
+
 package all.Main.autos;
 
 import com.pedropathing.geometry.BezierLine;
@@ -38,7 +39,11 @@ public class RedMidClose extends NextFTCOpMode {
     public PathChain repo2;
     public PathChain intake2;
     public PathChain score3;
+    public PathChain repo3;
+    public PathChain intake3;
+    public PathChain finalPose;
     public PathChain repogg;
+    public PathChain gate;
 
     @Override
     public void onInit() {
@@ -47,13 +52,18 @@ public class RedMidClose extends NextFTCOpMode {
         follower().setStartingPose(startPose);
     }
 
-    private final Pose startPose = new Pose(87, 135, Math.toRadians(0));
+    private final Pose startPose = new Pose(128, 115, Math.toRadians(90));
     private final Pose scorePose = new Pose(95, 97, Math.toRadians(44));
-    private final Pose repoPose1 = new Pose(84, 83.5, Math.toRadians(0));
-    private final Pose intakePose1 = new Pose(129, 83.5, Math.toRadians(0));
+    private final Pose repoPose1 = new Pose(84, 83.7, Math.toRadians(0));
+    private final Pose intakePose1 = new Pose(129, 83.7, Math.toRadians(0));
     private final Pose repoPose2 = new Pose(85, 59.5, Math.toRadians(0));
     private final Pose intakePose2 = new Pose(129, 59.5, Math.toRadians(0));
     private final Pose repoG = new Pose(119,58 , Math.toRadians(0));
+    private final Pose repoPose3 = new Pose(85, 45.5, Math.toRadians(0));
+    private final Pose intakePose3 = new Pose(125, 35, Math.toRadians(0));
+    private final Pose gatepose  = new Pose(105, 65, Math.toRadians(180));
+    private final Pose parkpose  = new Pose(127, 65, Math.toRadians(180));
+
 
     private void buildPaths() {
 
@@ -100,6 +110,28 @@ public class RedMidClose extends NextFTCOpMode {
                 .setLinearHeadingInterpolation(repoG.getHeading(), scorePose.getHeading())
                 .build();
 
+//------------------------------------------------------------------------------------------------------------------
+
+        repo3 = follower().pathBuilder()
+                .addPath(new BezierLine(scorePose, repoPose3))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), repoPose3.getHeading())
+                .build();
+
+        intake3 = follower().pathBuilder()
+                .addPath(new BezierLine(repoPose3, intakePose3))
+                .setLinearHeadingInterpolation(repoPose3.getHeading(), intakePose3.getHeading())
+                .build();
+
+        gate = follower().pathBuilder()
+                .addPath(new BezierLine(intakePose3, gatepose))
+                .setLinearHeadingInterpolation(intakePose3.getHeading(), gatepose.getHeading())
+                .build();
+
+        finalPose = follower().pathBuilder()
+                .addPath(new BezierLine(gatepose, parkpose))
+                .setLinearHeadingInterpolation(gatepose.getHeading(), parkpose.getHeading())
+                .build();
+
     }
     @Override
     public void onStartButtonPressed() {
@@ -109,72 +141,82 @@ public class RedMidClose extends NextFTCOpMode {
 
     private Command autonomousRoutine() {
         return new SequentialGroup(
-
                 // SCORE 1
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
 
                 new FollowPath(score1, true),
-                new Delay(0.65),
+                new Delay(0.5),
                 Transfer.INSTANCE.on,
-                new Delay(0.4),
+                new Delay(0.75),
                 Intake.INSTANCE.onin,
                 new Delay(2),
                 Transfer.INSTANCE.off,
+                Intake.INSTANCE.off,
 
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
 
                 // INTAKE 1
-                new FollowPath(repo1, true,0.95),
+                new FollowPath(repo1, false,0.95),
+                new Delay(0.01),
+                Intake.INSTANCE.onin,
                 Transfer.INSTANCE.onin,
-                new FollowPath(intake1, true,0.65),
-                new Delay(0.05),
+                new FollowPath(intake1, true,0.5),
+                new Delay(0.005),
                 Transfer.INSTANCE.off,
-                new Delay(0.9),
-                Intake.INSTANCE.onkeep,
+                new Delay(0.8),
+                Intake.INSTANCE.off,
 
                 // SCORE 2
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
 
                 new FollowPath(score2, true),
-                Intake.INSTANCE.off,
-                new Delay(0.6),
+                new Delay(0.5),
                 Transfer.INSTANCE.on,
-                new Delay(0.4),
+                new Delay(0.75),
                 Intake.INSTANCE.onin,
                 new Delay(2),
+                Transfer.INSTANCE.off,
+                Intake.INSTANCE.off,
 
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
                 Transfer.INSTANCE.off,
 
                 // INTAKE 2
-                new FollowPath(repo2, true,0.95),
+                new FollowPath(repo2, false,0.95),
+                new Delay(0.01),
+                Intake.INSTANCE.onin,
                 Transfer.INSTANCE.onin,
                 new FollowPath(intake2, true,0.5),
-                new Delay(0.01),
+                new Delay(0.005),
                 Transfer.INSTANCE.off,
-                new Delay(0.9),
-
+                new Delay(0.6),
 
                 new FollowPath(repogg,true),
+                Intake.INSTANCE.off,
 
                 // SCORE 3
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
 
                 new FollowPath(score3, true),
-                Intake.INSTANCE.off,
-                new Delay(0.6),
+                new Delay(0.5),
                 Transfer.INSTANCE.on,
-                new Delay(0.4),
+                new Delay(0.75),
                 Intake.INSTANCE.onin,
-                new Delay(2.5),
+                new Delay(2),
+                Transfer.INSTANCE.off,
 
                 Flywheel.INSTANCE.off,
-                Flywheel.INSTANCE.off2
+                Flywheel.INSTANCE.off2,
+                Intake.INSTANCE.off,
+
+                // INTAKE 3 + GATE
+                new FollowPath(repo3, false,0.95)
+
         );
 
     }
