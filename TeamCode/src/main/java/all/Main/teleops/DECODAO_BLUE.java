@@ -73,7 +73,7 @@ public class DECODAO_BLUE extends LinearOpMode {
 
     private ElapsedTime rbTimer = new ElapsedTime();
 
-    public double tempoParar = 0.3;
+    public double tempoParar = 0.1;
     boolean transferEnabled;
 
     boolean shooterSolo = false;
@@ -222,7 +222,7 @@ public class DECODAO_BLUE extends LinearOpMode {
 
         // INTAKE GAMEPAD
         if (gamepad1.left_trigger > 0.1) {
-            Intake.setPower(0.75);
+            Intake.setPower(0.85);
         } else if (gamepad1.dpad_left) {
             Intake.setPower(-0.75);
         } else {
@@ -240,8 +240,8 @@ public class DECODAO_BLUE extends LinearOpMode {
     public void transfer() {
 
         double distance = distanceSensor.getDistance(DistanceUnit.CM);
-        boolean ballDetected = (distance < 12);
-        boolean ballDetectedRB = (distance < 11.5);
+        boolean ballDetected = (distance < 13);
+        boolean ballDetectedRB = (distance < 12);
         boolean ltPressed = gamepad1.left_trigger > 0.1;
         boolean rbPressed = gamepad1.right_bumper;
 
@@ -339,7 +339,7 @@ public class DECODAO_BLUE extends LinearOpMode {
             targetRPM = 1350;
 
         } if (gamepad1.b || gamepad2.b) {
-            targetRPM = 1500;
+            targetRPM = 1600;
         }
         double pidPower = pidf.calculate(vl, targetTPS);
 

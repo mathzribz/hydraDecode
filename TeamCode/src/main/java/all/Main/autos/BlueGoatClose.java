@@ -1,3 +1,4 @@
+
 package all.Main.autos;
 
 import com.pedropathing.geometry.BezierLine;
@@ -52,11 +53,11 @@ public class BlueGoatClose extends NextFTCOpMode {
     }
 
     private final Pose startPose = new Pose(17, 115, Math.toRadians(90));
-    private final Pose scorePose = new Pose(44.5, 98.5, Math.toRadians(133));
-    private final Pose repoPose1 = new Pose(59, 87.5 , Math.toRadians(182));
-    private final Pose intakePose1 = new Pose(19, 87.5, Math.toRadians(182));
-    private final Pose repoPose2 = new Pose(57, 61.75, Math.toRadians(180));
-    private final Pose intakePose2 = new Pose(18.5, 61.75, Math.toRadians(180));
+    private final Pose scorePose = new Pose(43.5, 100, Math.toRadians(133));
+    private final Pose repoPose1 = new Pose(59, 86 , Math.toRadians(180));
+    private final Pose intakePose1 = new Pose(19, 86, Math.toRadians(180));
+    private final Pose repoPose2 = new Pose(57, 61, Math.toRadians(180));
+    private final Pose intakePose2 = new Pose(18, 61, Math.toRadians(180));
     private final Pose repoG = new Pose(23,61 , Math.toRadians(180));
     private final Pose repoPose3 = new Pose(57, 38.5, Math.toRadians(180));
 
@@ -149,7 +150,7 @@ public class BlueGoatClose extends NextFTCOpMode {
                 new FollowPath(score1, true),
                 new Delay(0.6),
                 Transfer.INSTANCE.on,
-                new Delay(0.4),
+                new Delay(0.5),
                 Intake.INSTANCE.onin,
                 new Delay(2),
                 Transfer.INSTANCE.off,
@@ -164,7 +165,6 @@ public class BlueGoatClose extends NextFTCOpMode {
                 new Delay(0.07),
                 Transfer.INSTANCE.off,
                 new Delay(1.3),
-                Intake.INSTANCE.onkeep,
 
                 // SCORE 2
                 Flywheel.INSTANCE.on,
@@ -173,9 +173,10 @@ public class BlueGoatClose extends NextFTCOpMode {
                 new FollowPath(score2, true),
                 new Delay(0.6),
                 Transfer.INSTANCE.on,
-                new Delay(0.4),
+                new Delay(0.5),
                 Intake.INSTANCE.onin,
                 new Delay(2),
+                Transfer.INSTANCE.off,
 
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
@@ -196,11 +197,12 @@ public class BlueGoatClose extends NextFTCOpMode {
                 Flywheel.INSTANCE.onin,
 
                 new FollowPath(score3, true),
-                new Delay(0.6),
+                new Delay(0.7),
                 Transfer.INSTANCE.on,
-                new Delay(0.4),
+                new Delay(0.6),
                 Intake.INSTANCE.onin,
-                new Delay(2.5),
+                new Delay(2),
+                Transfer.INSTANCE.off,
 
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
