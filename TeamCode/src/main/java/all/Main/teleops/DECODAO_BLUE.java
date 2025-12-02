@@ -4,9 +4,7 @@ package all.Main.teleops;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
-import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -22,12 +20,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @Config
 @TeleOp
-public class DECODAO extends LinearOpMode {
+public class DECODAO_BLUE extends LinearOpMode {
 
     private DcMotor RMF, RMB, LMF, LMB;
     private DcMotor Intake, Transfer;
@@ -38,21 +35,20 @@ public class DECODAO extends LinearOpMode {
     private VoltageSensor vs;
 
     // VALORES
-    private double driveSpeed = 0.8;
+    private double driveSpeed = 0.85;
+    double headingOffset = 0;
 
-    private static final double DEAD_ZONE = 0.2;
 
-    public static double kP = 0.0006;
+    private static final double DEAD_ZONE = 0.25;
+
+    public static double kP = 0.00065;
     public static double kI = 0.0;
     public static double kD = 0.00001;
     public static double kF = 0.0015;
 
     public static double TICKS_PER_REV = 28;
-    public static double targetRPM = 1300;
-    public static double targetAlvo = 1250;
+    public static double targetRPM = 1200;
     public static double targetTPS ;
-    public static double shSpeed = 0.5 ;
-
     public static double finalPower;
 
 
@@ -68,16 +64,17 @@ public class DECODAO extends LinearOpMode {
 
 
     private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
-    ;
-    // private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(kS, kV, kA);
+
 
     // VALORES TRANSFER SYSTEM
-    ElapsedTime rbTimer = new ElapsedTime();
-    boolean rbAtivo = false;
-    boolean rbRodando = false;
-    double tempoRodar = 0.2; ///0.05
-    double tempoParar = 0.5;
-    boolean transferEnabled = true;
+    private boolean rbAtivo = false;
+    private boolean rbRodando = false;
+    private boolean rbEsperando = false;
+
+    private ElapsedTime rbTimer = new ElapsedTime();
+
+    public double tempoParar = 0.3;
+    boolean transferEnabled;
 
     boolean shooterSolo = false;
 
@@ -147,11 +144,6 @@ public class DECODAO extends LinearOpMode {
         //INIT IMU
         imu.initialize(params);
 
-        // RESET YAW
-        imu.resetYaw();
-
-
-
         limelightLL = hardwareMap.get(Limelight3A.class, "limelight");
         limelightLL.pipelineSwitch(0);
         limelightLL.start();
@@ -165,17 +157,18 @@ public class DECODAO extends LinearOpMode {
     // FIELD CENTRIC
     public void loc() {
 
-        // GET HEADING
-        double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         // RESET PLAYER DIRECTION
-        if (gamepad1.dpad_right) imu.resetYaw();
+        if (gamepad1.dpad_right){ imu.resetYaw();
+            headingOffset = Math.PI; }
+
+
+        double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) + headingOffset;
 
         // JOYSTICKS
         double strafe = applyDeadZone(gamepad1.left_stick_x);
         double drive = -applyDeadZone(gamepad1.left_stick_y);
-        double turnInput = -applyDeadZone(gamepad1.right_stick_x);
-        double turn = turnInput;
+        double turn = -applyDeadZone(gamepad1.right_stick_x);
 
         // ================== LIMELIGHT AIM ASSIST ==================
         if (gamepad1.right_trigger > 0.15) {   // segurou RT → tracking ativado
@@ -188,7 +181,7 @@ public class DECODAO extends LinearOpMode {
 
             if (res != null && res.isValid()) {
                 double tx = res.getTx();
-                 turn = LL_PID(tx, 0);   // substitui turn pelo PID de correção
+                 turn = LL_PID(tx, -3);   // substitui turn pelo PID de correção
                 telemetry.addData("LL Tracking", "ATIVO");
                 telemetry.addData("tx", tx);
             } else {
@@ -229,19 +222,17 @@ public class DECODAO extends LinearOpMode {
 
         // INTAKE GAMEPAD
         if (gamepad1.left_trigger > 0.1) {
-            Intake.setPower(1);
+            Intake.setPower(0.75);
         } else if (gamepad1.dpad_left) {
-            Intake.setPower(-0.8);
+            Intake.setPower(-0.75);
         } else {
             Intake.setPower(0);
         }
 
 
-
-
         if(gamepad1.left_bumper){
-            Intake.setPower(0.9);
-            Transfer.setPower(0.9);
+            Intake.setPower(1);
+            Transfer.setPower(1);
 
         }
     }
@@ -250,63 +241,77 @@ public class DECODAO extends LinearOpMode {
 
         double distance = distanceSensor.getDistance(DistanceUnit.CM);
         boolean ballDetected = (distance < 12);
+        boolean ballDetectedRB = (distance < 11.5);
         boolean ltPressed = gamepad1.left_trigger > 0.1;
         boolean rbPressed = gamepad1.right_bumper;
 
-        // ---------------------------------------------------------
-        // 1) TRAVAMENTO DO LT
-        //    O Transfer trava SE:
-        //       - LT está sendo pressionado
-        //       - E uma bola já foi detectada
-        //    → RB só destrava ENQUANTO for segurado
-        // ---------------------------------------------------------
+
         boolean ltTravado = ltPressed && ballDetected;
         boolean transferPodeRodarLT = ltPressed && !ltTravado;
 
-        // ---------------------------------------------------------
-        // 2) CICLO DO RB (PRIORITÁRIO)
-        // ---------------------------------------------------------
+
+        // ---- ESTADOS ----
+        // rbAtivo  → RB está sendo segurado
+        // rbRodando → true = motor rodando; false = aguardando delay
+        // rbEsperando → true = esperando delay após detectar bola
+        // rbTimer → controla o tempo
+
+        // Início ao apertar RB
         if (rbPressed && !rbAtivo) {
             rbAtivo = true;
             rbRodando = true;
+            rbEsperando = false;
             rbTimer.reset();
         }
 
         if (rbAtivo) {
 
-            // Fase rodando
+            // ======================================================
+            // 1. ESTADO: MOTOR RODANDO ATÉ DETECTAR A BOLA NO SENSOR
+            // ======================================================
             if (rbRodando) {
-                Transfer.setPower(0.8);
-                Intake.setPower(0.7);
 
-                if (rbTimer.seconds() >= tempoRodar) {
+                Transfer.setPower(0.4);
+                Intake.setPower(0.8);
+
+                // Se bola detectada → muda para estado de ESPERA
+                if (ballDetectedRB) {
                     rbRodando = false;
-                    rbTimer.reset();
-                }
-
-            } else { // fase parado
-                Transfer.setPower(0);
-                Intake.setPower(0);
-
-                if (rbTimer.seconds() >= tempoParar) {
-                    rbRodando = true;
+                    rbEsperando = true;
                     rbTimer.reset();
                 }
             }
 
-            // Soltou RB → encerra ciclo na hora
+            // ======================================
+            // 2. ESTADO: ESPERA APÓS DETECTAR A BOLA
+            // ======================================
+            else if (rbEsperando) {
+
+                Transfer.setPower(0);
+                Intake.setPower(0);
+
+                // Espera X segundos
+                if (rbTimer.seconds() >= tempoParar) {
+                    rbEsperando = false;
+                    rbRodando = true;  // volta a rodar
+                }
+            }
+
+            // ========================================
+            // 3. SOLTOU RB → PARA TUDO AUTOMATICAMENTE
+            // ========================================
             if (!rbPressed) {
                 rbAtivo = false;
                 rbRodando = false;
+                rbEsperando = false;
+
                 Transfer.setPower(0);
+                Intake.setPower(0);
             }
 
             return; // RB domina totalmente
         }
 
-        // ---------------------------------------------------------
-        // 3) LT CONTROLANDO TRANSFER (somente se não estiver travado)
-        // ---------------------------------------------------------
         if (transferPodeRodarLT) {
             Transfer.setPower(0.5);
         } else {
@@ -320,33 +325,30 @@ public class DECODAO extends LinearOpMode {
     }
 
     public void shooter() {
-        PIDFController pidf = new PIDFController(kP, kI, kD, kF);
 
-
-        double vr = ShooterR.getVelocity();
         double vl = ShooterL.getVelocity();
-        double vAvg = vl;
+
 
         targetTPS = (targetRPM / 60.0) * TICKS_PER_REV;
 
 
         if (gamepad1.x || gamepad2.x) {
-            targetRPM = 1100;
+            targetRPM = 1200;
         }
         if (gamepad1.a || gamepad2.a) {
-            targetRPM = 1250;
+            targetRPM = 1350;
 
         } if (gamepad1.b || gamepad2.b) {
-            targetRPM = 2200;
+            targetRPM = 1500;
         }
-        double pidPower = pidf.calculate(vAvg, targetTPS);
+        double pidPower = pidf.calculate(vl, targetTPS);
 
 
         // ajustar feedforward com compensação de voltagem
         double voltage = vs.getVoltage();
         // double compensatedFF = ffPower * (12.0 / Math.max(10.0, voltage));
 
-     finalPower = pidPower;
+        finalPower = pidPower;
 
         finalPower = Math.max(-1.0, Math.min(1.0, finalPower));
 
@@ -360,44 +362,22 @@ public class DECODAO extends LinearOpMode {
         }
 
         if (gamepad1.y) {
-            ShooterR.setPower(0.6);
-            ShooterL.setPower(-0.6);
-            Transfer.setPower(-0.6);
+            ShooterR.setPower(-finalPower );
+            ShooterL.setPower(-finalPower  );
+            Transfer.setPower(-0.7);
             Intake.setPower(0.3);
         }
 
 
-        if (gamepad1.dpad_down){
-            shooterSolo = false;
-
-        }
-        if (gamepad1.dpad_up){
-            shooterSolo = true;
-
-        }
-
-        if(shooterSolo){
-            if ( gamepad2.right_trigger > 0.1 || gamepad1.right_trigger > 0.1 ) {
-                ShooterR.setPower(finalPower);
-                ShooterL.setPower(finalPower);
-            } else {
-                ShooterR.setPower(0);
-                ShooterL.setPower(0);
-                pidf.reset();
-            }
-        }
 
 
-
-
-        telemetry.addData("RPM avg", vAvg);
+        telemetry.addData("RPM ", vl);
         telemetry.addData("targetRPM", targetRPM);
         telemetry.addData("PID", pidPower);
 
         telemetry.addData("Voltagem", voltage);
         telemetry.addData("FinalPower", finalPower);
-        telemetry.addData("RPM R", vr);
-        telemetry.addData("RPM L", vl);
+
 
     }
 
