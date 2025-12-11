@@ -36,8 +36,6 @@ public class DECODAO_BLUE extends LinearOpMode {
 
     // VALORES
     private double driveSpeed = 0.85;
-    double headingOffset = 0;
-
 
     private static final double DEAD_ZONE = 0.25;
 
@@ -53,9 +51,9 @@ public class DECODAO_BLUE extends LinearOpMode {
 
 
     // =============== LIMELIGHT TRACKER VARIÁVEIS ===============
-    public static double LL_Kp = 0.065;
+    public static double LL_Kp = 0.075;
     public static double LL_Ki = 0.0;
-    public static double LL_Kd = 0.0001;
+    public static double LL_Kd = 0.004;
 
     private double llIntegral = 0;
     private double llLastError = 0;
@@ -72,11 +70,13 @@ public class DECODAO_BLUE extends LinearOpMode {
     private boolean rbEsperando = false;
 
     private ElapsedTime rbTimer = new ElapsedTime();
+    ElapsedTime timer = new ElapsedTime();
 
-    public double tempoParar = 0.1;
+    public double tempoParar = 0.5;
     boolean transferEnabled;
+    boolean bolaRegistrada = false;
 
-    boolean shooterSolo = false;
+
 
     @Override
     public void runOpMode() {
@@ -87,12 +87,15 @@ public class DECODAO_BLUE extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+
+            timer.reset();
             loc();
             intake();
             transfer();
             shooter();
 
             telemetry.addData("Drive Speed", driveSpeed);
+            telemetry.addData("ciclos em ms", timer.milliseconds());
             telemetry.update();
         }
 
@@ -157,65 +160,45 @@ public class DECODAO_BLUE extends LinearOpMode {
     // FIELD CENTRIC
     public void loc() {
 
+        double x  = applyDeadZone(-gamepad1.left_stick_x);   // STRAFE
+        double y  = applyDeadZone(gamepad1.left_stick_y);   // FORWARD/BACKWARD
+        double rx = applyDeadZone(-gamepad1.right_stick_x);   // ROTATION
 
-        // RESET PLAYER DIRECTION
-        if (gamepad1.dpad_right){ imu.resetYaw();
-            headingOffset = Math.PI; }
-
-
-        double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) + headingOffset;
-
-        // JOYSTICKS
-        double strafe = applyDeadZone(gamepad1.left_stick_x);
-        double drive = -applyDeadZone(gamepad1.left_stick_y);
-        double turn = -applyDeadZone(gamepad1.right_stick_x);
-
-        // ================== LIMELIGHT AIM ASSIST ==================
-        if (gamepad1.right_trigger > 0.15) {   // segurou RT → tracking ativado
-            YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-            limelightLL.updateRobotOrientation(
-                    orientation.getYaw(AngleUnit.DEGREES)
-            );
-
+        // --- LIMELIGHT TRACKING (opcional) ---
+        if (gamepad1.right_trigger > 0.15) {
             LLResult res = limelightLL.getLatestResult();
-
             if (res != null && res.isValid()) {
                 double tx = res.getTx();
-                 turn = LL_PID(tx, -3);   // substitui turn pelo PID de correção
-                telemetry.addData("LL Tracking", "ATIVO");
-                telemetry.addData("tx", tx);
-            } else {
-                telemetry.addData("LL Tracking", "SEM TAG");
+                rx = LL_PID(tx, -3);
             }
         } else {
-            llIntegral = 0;  // reset quando soltar
+            llIntegral = 0;
             llLastError = 0;
         }
 
-        // MECANO ANGLES
-        double fieldX = strafe * Math.cos(-heading) - drive * Math.sin(-heading);
-        double fieldY = strafe * Math.sin(-heading) + drive * Math.cos(-heading);
+        // --- Cálculo padrão do mecanum robot-centric ---
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
-        // STRAFE ERROR
-        fieldX *= 1.1;
-
-        // DENOMINATOR
-        double denominator = Math.max(Math.abs(fieldY) + Math.abs(fieldX) + Math.abs(turn), 1);
-
-        // POWERS
-        double LMFpower = (fieldY + fieldX + turn) / denominator;
-        double LMBpower = (fieldY - fieldX + turn) / denominator;
-        double RMFpower = (fieldY - fieldX - turn) / denominator;
-        double RMBpower = (fieldY + fieldX - turn) / denominator;
+        double LMFpower = (y + x + rx) / denominator;
+        double LMBpower = (y - x + rx) / denominator;
+        double RMFpower = (y - x - rx) / denominator;
+        double RMBpower = (y + x - rx) / denominator;
 
         LMF.setPower(LMFpower * driveSpeed);
         LMB.setPower(LMBpower * driveSpeed);
         RMF.setPower(RMFpower * driveSpeed);
         RMB.setPower(RMBpower * driveSpeed);
 
+        telemetry.addData("LMF power", LMF.getPower());
+        telemetry.addData("RMF power", RMF.getPower());
+        telemetry.addData("LMB power", LMB.getPower());
+        telemetry.addData("RMB power",RMB.getPower());
+
+        if (gamepad1.left_stick_button) driveSpeed = 0.9;
+
+        if (gamepad1.right_stick_button) driveSpeed = 0.6;
 
 
-        telemetry.addData("Yaw", heading);
     }
 
     public void intake() {
@@ -240,23 +223,28 @@ public class DECODAO_BLUE extends LinearOpMode {
     public void transfer() {
 
         double distance = distanceSensor.getDistance(DistanceUnit.CM);
-        boolean ballDetected = (distance < 13);
-        boolean ballDetectedRB = (distance < 12);
+        boolean ballDetected = (distance < 12);
         boolean ltPressed = gamepad1.left_trigger > 0.1;
         boolean rbPressed = gamepad1.right_bumper;
 
+        // ================================
+        // DETECÇÃO DE NOVA BOLA (EDGE)
+        // ================================
+        boolean novaBola = false;
 
-        boolean ltTravado = ltPressed && ballDetected;
-        boolean transferPodeRodarLT = ltPressed && !ltTravado;
+        if (ballDetected && !bolaRegistrada) {
+            novaBola = true;         // só dispara 1 vez por bola
+            bolaRegistrada = true;   // marca como registrada
+        }
 
+        if (!ballDetected) {
+            bolaRegistrada = false;  // libera para próxima bola
+        }
 
-        // ---- ESTADOS ----
-        // rbAtivo  → RB está sendo segurado
-        // rbRodando → true = motor rodando; false = aguardando delay
-        // rbEsperando → true = esperando delay após detectar bola
-        // rbTimer → controla o tempo
+        // ================================
+        // LÓGICA DO RB
+        // ================================
 
-        // Início ao apertar RB
         if (rbPressed && !rbAtivo) {
             rbAtivo = true;
             rbRodando = true;
@@ -266,40 +254,30 @@ public class DECODAO_BLUE extends LinearOpMode {
 
         if (rbAtivo) {
 
-            // ======================================================
-            // 1. ESTADO: MOTOR RODANDO ATÉ DETECTAR A BOLA NO SENSOR
-            // ======================================================
             if (rbRodando) {
 
                 Transfer.setPower(0.4);
                 Intake.setPower(0.8);
 
-                // Se bola detectada → muda para estado de ESPERA
-                if (ballDetectedRB) {
+                // AGORA A BOLA SÓ ATIVA UMA VEZ
+                if (novaBola) {
                     rbRodando = false;
                     rbEsperando = true;
                     rbTimer.reset();
                 }
             }
 
-            // ======================================
-            // 2. ESTADO: ESPERA APÓS DETECTAR A BOLA
-            // ======================================
             else if (rbEsperando) {
 
                 Transfer.setPower(0);
                 Intake.setPower(0);
 
-                // Espera X segundos
                 if (rbTimer.seconds() >= tempoParar) {
                     rbEsperando = false;
-                    rbRodando = true;  // volta a rodar
+                    rbRodando = true;
                 }
             }
 
-            // ========================================
-            // 3. SOLTOU RB → PARA TUDO AUTOMATICAMENTE
-            // ========================================
             if (!rbPressed) {
                 rbAtivo = false;
                 rbRodando = false;
@@ -309,19 +287,20 @@ public class DECODAO_BLUE extends LinearOpMode {
                 Intake.setPower(0);
             }
 
-            return; // RB domina totalmente
+            return; // RB domina
         }
+
+        // ================================
+        // LÓGICA DO LT
+        // ================================
+        boolean ltTravado = ltPressed && ballDetected;
+        boolean transferPodeRodarLT = ltPressed && !ltTravado;
 
         if (transferPodeRodarLT) {
             Transfer.setPower(0.5);
         } else {
             Transfer.setPower(0);
         }
-
-        telemetry.addData("distance", distance);
-        telemetry.addData("ltTravado", ltTravado);
-        telemetry.addData("transferPodeRodarLT", transferPodeRodarLT);
-        telemetry.addData("rbAtivo", rbAtivo);
     }
 
     public void shooter() {

@@ -4,6 +4,7 @@ package all.Main.autos;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import all.configPedro.Constants;
@@ -22,9 +23,9 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
-public class BlueFar extends NextFTCOpMode {
+public class BlueFarGOAT extends NextFTCOpMode {
 
-    public BlueFar() {
+    public BlueFarGOAT() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
                 new SubsystemComponent(Intake.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
@@ -44,6 +45,13 @@ public class BlueFar extends NextFTCOpMode {
     private final Pose scorePose1 = new Pose(59.5, 18.5, Math.toRadians(166));
     private final Pose turnPose1 = new Pose(50, 30.5, Math.toRadians(-90));
 
+    private final Pose repoPose3 = new Pose(57, 38.5, Math.toRadians(180));
+
+    private final Pose intakePose3 = new Pose(17, 38.5, Math.toRadians(180));
+
+    public PathChain repo3;
+    public PathChain intake3;
+
     private void buildPaths() {
 
 //------------------------------------------------------------------------------------------------------------------
@@ -52,6 +60,16 @@ public class BlueFar extends NextFTCOpMode {
 
         turn1 = new Path(new BezierLine(scorePose1, turnPose1));
         turn1.setLinearHeadingInterpolation(scorePose1.getHeading(), turnPose1.getHeading());
+
+        repo3 = follower().pathBuilder()
+                .addPath(new BezierLine(scorePose1, repoPose3))
+                .setLinearHeadingInterpolation(scorePose1.getHeading(), repoPose3.getHeading())
+                .build();
+
+        intake3 = follower().pathBuilder()
+                .addPath(new BezierLine(repoPose3, intakePose3))
+                .setLinearHeadingInterpolation(repoPose3.getHeading(), intakePose3.getHeading())
+                .build();
 
     }
 
@@ -72,6 +90,31 @@ public class BlueFar extends NextFTCOpMode {
                 Transfer.INSTANCE.on,
                 new Delay(0.1),
                 Transfer.INSTANCE.off,
+                new Delay(0.65),
+                Transfer.INSTANCE.on,
+                new Delay(0.33),
+                Intake.INSTANCE.onin,
+                new Delay(2),
+                Transfer.INSTANCE.off,
+                new Delay(2),
+                Intake.INSTANCE.off,
+                Flywheel.INSTANCE.off,
+                Flywheel.INSTANCE.off2,
+                new Delay(1),
+
+                new FollowPath(repo3, false,0.95),
+                Transfer.INSTANCE.onin,
+                new FollowPath(intake3, true,0.48),
+                new Delay(0.01),
+                Transfer.INSTANCE.off,
+                new Delay(0.7),
+                Intake.INSTANCE.onkeep,
+
+                new FollowPath(scorePreload, true),
+                new Delay(1.4),
+                Transfer.INSTANCE.on,
+                new Delay(0.1),
+                Transfer.INSTANCE.off,
                 new Delay(0.55),
                 Transfer.INSTANCE.on,
                 new Delay(0.33),
@@ -82,7 +125,7 @@ public class BlueFar extends NextFTCOpMode {
                 Intake.INSTANCE.off,
                 Flywheel.INSTANCE.off,
                 Flywheel.INSTANCE.off2,
-                new Delay(15),
+                new Delay(5),
 
 
                 new FollowPath(turn1, true)

@@ -5,7 +5,6 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import all.configPedro.Constants;
 import all.subsystems.Flywheel;
@@ -23,8 +22,8 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
-public class RedGoatClose extends NextFTCOpMode {
-    public RedGoatClose() {
+public class RedGOATClose extends NextFTCOpMode {
+    public RedGOATClose() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
                 new SubsystemComponent(Intake.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
@@ -53,13 +52,14 @@ public class RedGoatClose extends NextFTCOpMode {
     }
 
     private final Pose startPose = new Pose(128, 115, Math.toRadians(90));
-    private final Pose scorePose = new Pose(95, 97, Math.toRadians(44));
-    private final Pose repoPose1 = new Pose(84, 83.5, Math.toRadians(0));
-    private final Pose intakePose1 = new Pose(129, 83.5, Math.toRadians(0));
-    private final Pose repoPose2 = new Pose(85, 59.5, Math.toRadians(0));
-    private final Pose intakePose2 = new Pose(129, 59.5, Math.toRadians(0));
+    private final Pose scorePose = new Pose(97, 99, Math.toRadians(44));
+    private final Pose scorePose2 = new Pose(97, 99, Math.toRadians(40));
+    private final Pose repoPose1 = new Pose(84, 83, Math.toRadians(0));
+    private final Pose intakePose1 = new Pose(129, 83, Math.toRadians(0));
+    private final Pose repoPose2 = new Pose(85, 59, Math.toRadians(0));
+    private final Pose intakePose2 = new Pose(129, 59, Math.toRadians(0));
     private final Pose repoG = new Pose(119,58 , Math.toRadians(0));
-    private final Pose repoPose3 = new Pose(85, 35.5, Math.toRadians(0));
+    private final Pose repoPose3 = new Pose(85, 35, Math.toRadians(0));
     private final Pose intakePose3 = new Pose(125, 35, Math.toRadians(0));
     private final Pose gatepose  = new Pose(105, 65, Math.toRadians(180));
     private final Pose parkpose  = new Pose(127, 65, Math.toRadians(180));
@@ -84,8 +84,8 @@ public class RedGoatClose extends NextFTCOpMode {
                 .build();
 
         score2 = follower().pathBuilder()
-                .addPath(new BezierLine(intakePose1, scorePose))
-                .setLinearHeadingInterpolation(intakePose1.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(intakePose1, scorePose2))
+                .setLinearHeadingInterpolation(intakePose1.getHeading(), scorePose2.getHeading())
                 .build();
 
 //------------------------------------------------------------------------------------------------------------------
@@ -106,8 +106,8 @@ public class RedGoatClose extends NextFTCOpMode {
                 .build();
 
         score3 = follower().pathBuilder()
-                .addPath(new BezierLine(repoG, scorePose))
-                .setLinearHeadingInterpolation(repoG.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(repoG, scorePose2))
+                .setLinearHeadingInterpolation(repoG.getHeading(), scorePose2.getHeading())
                 .build();
 
 //------------------------------------------------------------------------------------------------------------------
@@ -147,9 +147,9 @@ public class RedGoatClose extends NextFTCOpMode {
                 Flywheel.INSTANCE.onin,
 
                 new FollowPath(score1, true),
-                new Delay(0.65),
+                new Delay(0.75),
                 Transfer.INSTANCE.on,
-                new Delay(0.4),
+                new Delay(0.5),
                 Intake.INSTANCE.onin,
                 new Delay(2),
                 Transfer.INSTANCE.off,
@@ -172,9 +172,9 @@ public class RedGoatClose extends NextFTCOpMode {
 
                 new FollowPath(score2, true),
                 Intake.INSTANCE.off,
-                new Delay(0.6),
+                new Delay(0.75),
                 Transfer.INSTANCE.on,
-                new Delay(0.4),
+                new Delay(0.5),
                 Intake.INSTANCE.onin,
                 new Delay(2),
 
@@ -199,9 +199,9 @@ public class RedGoatClose extends NextFTCOpMode {
 
                 new FollowPath(score3, true),
                 Intake.INSTANCE.off,
-                new Delay(0.6),
+                new Delay(0.75),
                 Transfer.INSTANCE.on,
-                new Delay(0.4),
+                new Delay(0.5),
                 Intake.INSTANCE.onin,
                 new Delay(2.5),
 

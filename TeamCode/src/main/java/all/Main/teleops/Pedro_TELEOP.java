@@ -1,14 +1,19 @@
 
 package all.Main.teleops;
-
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.HeadingInterpolator;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -18,15 +23,23 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@Config
+import java.util.function.Supplier;
+
+import all.configPedro.Constants;
+
+@Configurable
 @TeleOp
-public class DECODAO_RED extends LinearOpMode {
+public class Pedro_TELEOP extends OpMode {
+    private Follower follower;
+    public static Pose startingPose = new Pose(0, 0, Math.toRadians(90)); //See ExampleAuto to understand how to use this
+    private boolean automatedDrive;
+    private Supplier<PathChain> pathChain;
+    private TelemetryManager telemetryM;
+    private boolean slowMode = false;
+    private double slowModeMultiplier = 0.5;
 
-    private DcMotor RMF, RMB, LMF, LMB;
     private DcMotor Intake, Transfer;
     private DcMotorEx ShooterR, ShooterL;
     private DistanceSensor distanceSensor;
@@ -37,11 +50,9 @@ public class DECODAO_RED extends LinearOpMode {
     // VALORES
     private double driveSpeed = 0.85;
 
-
-
     private static final double DEAD_ZONE = 0.25;
 
-    public static double kP = 0.00065;
+    public static double kP = 0.00055;
     public static double kI = 0.0;
     public static double kD = 0.00001;
     public static double kF = 0.0015;
@@ -53,10 +64,9 @@ public class DECODAO_RED extends LinearOpMode {
 
 
     // =============== LIMELIGHT TRACKER VARIÁVEIS ===============
-    public static double LL_Kp = 0.075;
+    public static double LL_Kp = 0.065;
     public static double LL_Ki = 0.0;
-    public static double LL_Kd = 0.004;
-
+    public static double LL_Kd = 0.005;
 
     private double llIntegral = 0;
     private double llLastError = 0;
@@ -80,36 +90,87 @@ public class DECODAO_RED extends LinearOpMode {
     boolean bolaRegistrada = false;
 
 
+
+
     @Override
-    public void runOpMode() {
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
+    public void init() {
+        follower = Constants.createFollower(hardwareMap);
+        follower.setPose(follower.getPose().withHeading(180));
+        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
+        follower.update();
+        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
+
+                .build();
+
         initHardware();
 
-        waitForStart();
+    }
+    @Override
+    public void start() {
+        //The parameter controls whether the Follower should use break mode on the motors (using it is recommended).
+        //In order to use float mode, add .useBrakeModeInTeleOp(true); to your Drivetrain Constants in Constant.java (for Mecanum)
+        //If you don't pass anything in, it uses the default (false)
+        follower.startTeleopDrive();
+    }
+    @Override
+    public void loop() {
+        double turn  =  -gamepad1.right_stick_x;
 
-        while (opModeIsActive()) {
-
-            timer.reset();
-            loc();
-            intake();
-            transfer();
-            shooter();
-
-            telemetry.addData("Drive Speed", driveSpeed);
-            telemetry.addData("ciclos em ms", timer.milliseconds());
-            telemetry.update();
+        if (gamepad1.right_trigger > 0.15) {
+            LLResult res = limelightLL.getLatestResult();
+            if (res != null && res.isValid()) {
+                double tx = res.getTx();
+                turn = LL_PID(tx, -3);
+            }
+        } else {
+            llIntegral = 0;
+            llLastError = 0;
         }
 
+        //Call this once per loop
+        follower.update();
+        telemetryM.update();
+        if (!automatedDrive) {
+            //Make the last parameter false for field-centric
+            //In case the drivers want to use a "slowMode" you can scale the vectors
+            //This is the normal version to use in the TeleOp
+            if (!slowMode) follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y,
+                    -gamepad1.left_stick_x,
+                    turn,
+                    false // Robot Centric
+            );
+
+
+        }
+        //Automated PathFollowing
+
+
+        timer.reset();
+
+        intake();
+        transfer();
+        shooter();
+
+
+
+
+        if(gamepad1.dpad_right) {
+            follower.setPose(follower.getPose().withHeading(0));
+
+        }
+        telemetryM.debug("position", follower.getPose());
+        telemetryM.debug("velocity", follower.getVelocity());
+        telemetryM.debug("automatedDrive", automatedDrive);
     }
+
 
     private void initHardware() {
 
-        // MOTORS
-        RMF = hardwareMap.get(DcMotor.class, "RMF");
-        RMB = hardwareMap.get(DcMotor.class, "RMB");
-        LMF = hardwareMap.get(DcMotor.class, "LMF");
-        LMB = hardwareMap.get(DcMotor.class, "LMB");
+
 
         Intake = hardwareMap.get(DcMotor.class, "intake");
 
@@ -123,11 +184,7 @@ public class DECODAO_RED extends LinearOpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         vs = hardwareMap.voltageSensor.iterator().next();
 
-        // DIRECTIONS
-        RMF.setDirection(DcMotorSimple.Direction.FORWARD);
-        RMB.setDirection(DcMotorSimple.Direction.FORWARD);
-        LMF.setDirection(DcMotorSimple.Direction.REVERSE);
-        LMB.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         Intake.setDirection(DcMotorSimple.Direction.REVERSE);
         Transfer.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -138,70 +195,13 @@ public class DECODAO_RED extends LinearOpMode {
 
 
         // IMU
-        imu = hardwareMap.get(IMU.class, "imu");
-        IMU.Parameters params = new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                        RevHubOrientationOnRobot.UsbFacingDirection.UP
-                )
-        );
 
-        //INIT IMU
-        imu.initialize(params);
 
         limelightLL = hardwareMap.get(Limelight3A.class, "limelight");
-        limelightLL.pipelineSwitch(3);
+        limelightLL.pipelineSwitch(0);
         limelightLL.start();
     }
 
-    // DEADZONE
-    private double applyDeadZone(double v) {
-        return Math.abs(v) > DEAD_ZONE ? v : 0;
-    }
-
-    // FIELD CENTRIC
-    public void loc() {
-
-        double x  = applyDeadZone(-gamepad1.left_stick_x);   // STRAFE
-        double y  = applyDeadZone(gamepad1.left_stick_y);   // FORWARD/BACKWARD
-        double rx = applyDeadZone(-gamepad1.right_stick_x);   // ROTATION
-
-        // --- LIMELIGHT TRACKING (opcional) ---
-        if (gamepad1.right_trigger > 0.15) {
-            LLResult res = limelightLL.getLatestResult();
-            if (res != null && res.isValid()) {
-                double tx = res.getTx();
-                rx = LL_PID(tx, -1.8);
-            }
-        } else {
-            llIntegral = 0;
-            llLastError = 0;
-        }
-
-        // --- Cálculo padrão do mecanum robot-centric ---
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-
-        double LMFpower = (y + x + rx) / denominator;
-        double LMBpower = (y - x + rx) / denominator;
-        double RMFpower = (y - x - rx) / denominator;
-        double RMBpower = (y + x - rx) / denominator;
-
-        LMF.setPower(LMFpower * driveSpeed);
-        LMB.setPower(LMBpower * driveSpeed);
-        RMF.setPower(RMFpower * driveSpeed);
-        RMB.setPower(RMBpower * driveSpeed);
-
-        telemetry.addData("LMF power", LMF.getPower());
-        telemetry.addData("RMF power", RMF.getPower());
-        telemetry.addData("LMB power", LMB.getPower());
-        telemetry.addData("RMB power",RMB.getPower());
-
-
-
-        if (gamepad1.left_stick_button) driveSpeed = 0.9;
-
-        if (gamepad1.right_stick_button) driveSpeed = 0.6;
-    }
 
     public void intake() {
 
@@ -333,7 +333,7 @@ public class DECODAO_RED extends LinearOpMode {
 
         finalPower = Math.max(-1.0, Math.min(1.0, finalPower));
 
-        if ( gamepad2.right_trigger > 0.1) {
+        if ( gamepad1.right_trigger > 0.1) {
             ShooterR.setPower(finalPower);
             ShooterL.setPower(finalPower);
         } else {
@@ -379,5 +379,4 @@ public class DECODAO_RED extends LinearOpMode {
     private double clamp(double v, double min, double max) {
         return Math.max(min, Math.min(max, v));
     }
-
 }

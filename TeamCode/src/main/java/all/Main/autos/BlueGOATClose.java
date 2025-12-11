@@ -22,9 +22,9 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
-public class BlueGoatClose extends NextFTCOpMode {
+public class BlueGOATClose extends NextFTCOpMode {
 
-    public BlueGoatClose() {
+    public BlueGOATClose() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
                 new SubsystemComponent(Intake.INSTANCE, Transfer.INSTANCE, Flywheel.INSTANCE),
@@ -52,16 +52,17 @@ public class BlueGoatClose extends NextFTCOpMode {
         follower().setStartingPose(startPose);
     }
 
-    private final Pose startPose = new Pose(17, 115, Math.toRadians(90));
-    private final Pose scorePose = new Pose(43.5, 100, Math.toRadians(133));
-    private final Pose repoPose1 = new Pose(59, 86 , Math.toRadians(180));
-    private final Pose intakePose1 = new Pose(19, 86, Math.toRadians(180));
-    private final Pose repoPose2 = new Pose(57, 61, Math.toRadians(180));
-    private final Pose intakePose2 = new Pose(18, 61, Math.toRadians(180));
+    private final Pose startPose = new Pose(17, 115, Math.toRadians(89));
+    private final Pose scorePose = new Pose(41.5, 102, Math.toRadians(134));
+    private final Pose scorePose2 = new Pose(41.5, 102, Math.toRadians(135));
+    private final Pose repoPose1 = new Pose(59, 85 , Math.toRadians(180));
+    private final Pose intakePose1 = new Pose(18.5, 85, Math.toRadians(180));
+    private final Pose repoPose2 = new Pose(57, 60.5, Math.toRadians(180));
+    private final Pose intakePose2 = new Pose(16, 60.5, Math.toRadians(180));
     private final Pose repoG = new Pose(23,61 , Math.toRadians(180));
-    private final Pose repoPose3 = new Pose(57, 38.5, Math.toRadians(180));
+    private final Pose repoPose3 = new Pose(57, 38, Math.toRadians(180));
 
-    private final Pose intakePose3 = new Pose(17, 38.5, Math.toRadians(180));
+    private final Pose intakePose3 = new Pose(17, 38, Math.toRadians(180));
     private final Pose gatepose  = new Pose(37, 68.5, Math.toRadians(0));
     private final Pose parkpose  = new Pose(19, 68.5, Math.toRadians(0));
 
@@ -84,7 +85,7 @@ public class BlueGoatClose extends NextFTCOpMode {
                 .build();
 
         score2 = follower().pathBuilder()
-                .addPath(new BezierLine(intakePose1, scorePose))
+                .addPath(new BezierLine(intakePose1, scorePose2))
                 .setLinearHeadingInterpolation(intakePose1.getHeading(), scorePose.getHeading())
                 .build();
 
@@ -106,7 +107,7 @@ public class BlueGoatClose extends NextFTCOpMode {
                 .build();
 
         score3 = follower().pathBuilder()
-                .addPath(new BezierLine(repoG, scorePose))
+                .addPath(new BezierLine(repoG, scorePose2))
                 .setLinearHeadingInterpolation(repoG.getHeading(), scorePose.getHeading())
                 .build();
         
@@ -142,13 +143,13 @@ public class BlueGoatClose extends NextFTCOpMode {
 
     private Command autonomousRoutine() {
         return new SequentialGroup(
-                
+
                 // SCORE 1
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
 
                 new FollowPath(score1, true),
-                new Delay(0.6),
+                new Delay(0.75),
                 Transfer.INSTANCE.on,
                 new Delay(0.5),
                 Intake.INSTANCE.onin,
@@ -159,19 +160,20 @@ public class BlueGoatClose extends NextFTCOpMode {
                 Flywheel.INSTANCE.off2,
 
                 // INTAKE 1
-                new FollowPath(repo1, false,0.95),
+                new FollowPath(repo1, true,0.95),
                 Transfer.INSTANCE.onin,
                 new FollowPath(intake1, true,0.65),
-                new Delay(0.07),
+                new Delay(0.05),
                 Transfer.INSTANCE.off,
-                new Delay(1.3),
+                new Delay(0.9),
+                Intake.INSTANCE.onkeep,
 
                 // SCORE 2
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
-    
+
                 new FollowPath(score2, true),
-                new Delay(0.6),
+                new Delay(0.75),
                 Transfer.INSTANCE.on,
                 new Delay(0.5),
                 Intake.INSTANCE.onin,
@@ -183,21 +185,23 @@ public class BlueGoatClose extends NextFTCOpMode {
                 Transfer.INSTANCE.off,
 
                 // INTAKE 2
-                new FollowPath(repo2, false,0.95),
+                new FollowPath(repo2, true,0.95),
                 Transfer.INSTANCE.onin,
-                new FollowPath(intake2, true,0.5),
-                new Delay(0.01),
+                new FollowPath(intake2, true,0.65),
+                new Delay(0.07),
                 Transfer.INSTANCE.off,
-                new Delay(0.7),
+                new Delay(0.9),
+                Intake.INSTANCE.onkeep,
 
-                new FollowPath(repogg,true),
+
+
 
                 // SCORE 3
                 Flywheel.INSTANCE.on,
                 Flywheel.INSTANCE.onin,
 
                 new FollowPath(score3, true),
-                new Delay(0.7),
+                new Delay(0.75),
                 Transfer.INSTANCE.on,
                 new Delay(0.6),
                 Intake.INSTANCE.onin,
@@ -208,16 +212,16 @@ public class BlueGoatClose extends NextFTCOpMode {
                 Flywheel.INSTANCE.off2,
 
                 // INTAKE 3 + GATE
-                new FollowPath(repo3, false,0.95),
+                new FollowPath(repo3, true,0.95),
                 Transfer.INSTANCE.onin,
                 new FollowPath(intake3, true,0.48),
-                new Delay(0.01),
+                new Delay(0.03),
                 Transfer.INSTANCE.off,
-                new Delay(0.7),
+                new Delay(0.9),
                 Intake.INSTANCE.onkeep,
 
-                new FollowPath(finalPose, false,0.98),
-                new FollowPath(gate, true,0.98)
+                new FollowPath(finalPose, true),
+                new FollowPath(gate, true)
 
         );
 

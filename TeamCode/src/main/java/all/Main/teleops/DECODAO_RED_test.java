@@ -24,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @Config
 @TeleOp
-public class DECODAO_RED extends LinearOpMode {
+public class DECODAO_RED_test extends LinearOpMode {
 
     private DcMotor RMF, RMB, LMF, LMB;
     private DcMotor Intake, Transfer;
@@ -196,11 +196,11 @@ public class DECODAO_RED extends LinearOpMode {
         telemetry.addData("LMB power", LMB.getPower());
         telemetry.addData("RMB power",RMB.getPower());
 
-
-
         if (gamepad1.left_stick_button) driveSpeed = 0.9;
 
         if (gamepad1.right_stick_button) driveSpeed = 0.6;
+
+
     }
 
     public void intake() {
@@ -333,7 +333,7 @@ public class DECODAO_RED extends LinearOpMode {
 
         finalPower = Math.max(-1.0, Math.min(1.0, finalPower));
 
-        if ( gamepad2.right_trigger > 0.1) {
+        if ( gamepad1.right_trigger > 0.1) {
             ShooterR.setPower(finalPower);
             ShooterL.setPower(finalPower);
         } else {

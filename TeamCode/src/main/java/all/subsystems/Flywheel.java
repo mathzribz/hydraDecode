@@ -15,7 +15,7 @@ import dev.nextftc.hardware.powerable.SetPower;
 public class  Flywheel implements Subsystem {
 
     private VoltageSensor vs;
-    private double FlywheelSpeed = 0.57;
+    private double FlywheelSpeed = 0.55;
     public static final Flywheel INSTANCE = new Flywheel();
     private Flywheel() { }
 

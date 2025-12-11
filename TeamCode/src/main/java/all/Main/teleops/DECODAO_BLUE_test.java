@@ -24,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @Config
 @TeleOp
-public class DECODAO_RED extends LinearOpMode {
+public class DECODAO_BLUE_test extends LinearOpMode {
 
     private DcMotor RMF, RMB, LMF, LMB;
     private DcMotor Intake, Transfer;
@@ -36,8 +36,6 @@ public class DECODAO_RED extends LinearOpMode {
 
     // VALORES
     private double driveSpeed = 0.85;
-
-
 
     private static final double DEAD_ZONE = 0.25;
 
@@ -56,7 +54,6 @@ public class DECODAO_RED extends LinearOpMode {
     public static double LL_Kp = 0.075;
     public static double LL_Ki = 0.0;
     public static double LL_Kd = 0.004;
-
 
     private double llIntegral = 0;
     private double llLastError = 0;
@@ -78,6 +75,7 @@ public class DECODAO_RED extends LinearOpMode {
     public double tempoParar = 0.5;
     boolean transferEnabled;
     boolean bolaRegistrada = false;
+
 
 
     @Override
@@ -150,7 +148,7 @@ public class DECODAO_RED extends LinearOpMode {
         imu.initialize(params);
 
         limelightLL = hardwareMap.get(Limelight3A.class, "limelight");
-        limelightLL.pipelineSwitch(3);
+        limelightLL.pipelineSwitch(0);
         limelightLL.start();
     }
 
@@ -171,7 +169,7 @@ public class DECODAO_RED extends LinearOpMode {
             LLResult res = limelightLL.getLatestResult();
             if (res != null && res.isValid()) {
                 double tx = res.getTx();
-                rx = LL_PID(tx, -1.8);
+                rx = LL_PID(tx, -3);
             }
         } else {
             llIntegral = 0;
@@ -196,11 +194,11 @@ public class DECODAO_RED extends LinearOpMode {
         telemetry.addData("LMB power", LMB.getPower());
         telemetry.addData("RMB power",RMB.getPower());
 
-
-
         if (gamepad1.left_stick_button) driveSpeed = 0.9;
 
         if (gamepad1.right_stick_button) driveSpeed = 0.6;
+
+
     }
 
     public void intake() {
@@ -333,7 +331,7 @@ public class DECODAO_RED extends LinearOpMode {
 
         finalPower = Math.max(-1.0, Math.min(1.0, finalPower));
 
-        if ( gamepad2.right_trigger > 0.1) {
+        if ( gamepad1.right_trigger > 0.1) {
             ShooterR.setPower(finalPower);
             ShooterL.setPower(finalPower);
         } else {
