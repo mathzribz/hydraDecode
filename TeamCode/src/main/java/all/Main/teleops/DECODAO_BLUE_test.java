@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -31,6 +32,7 @@ public class DECODAO_BLUE_test extends LinearOpMode {
     private DcMotorEx ShooterR, ShooterL;
     private DistanceSensor distanceSensor;
     private Limelight3A limelight;
+    private GoBildaPinpointDriver pinpoint;
     private IMU imu;
     private VoltageSensor vs;
 
@@ -119,6 +121,7 @@ public class DECODAO_BLUE_test extends LinearOpMode {
         // SENSORES
         distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         vs = hardwareMap.voltageSensor.iterator().next();
 
         // DIRECTIONS
@@ -160,7 +163,7 @@ public class DECODAO_BLUE_test extends LinearOpMode {
     // FIELD CENTRIC
     public void loc() {
 
-        double x  = applyDeadZone(-gamepad1.left_stick_x);   // STRAFE
+        double x  = applyDeadZone(-gamepad1.left_stick_x);   // x
         double y  = applyDeadZone(gamepad1.left_stick_y);   // FORWARD/BACKWARD
         double rx = applyDeadZone(-gamepad1.right_stick_x);   // ROTATION
 
@@ -176,29 +179,40 @@ public class DECODAO_BLUE_test extends LinearOpMode {
             llLastError = 0;
         }
 
-        // --- Cálculo padrão do mecanum robot-centric ---
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        double botHeading = pinpoint.getHeading(AngleUnit.DEGREES);
+        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-        double LMFpower = (y + x + rx) / denominator;
-        double LMBpower = (y - x + rx) / denominator;
-        double RMFpower = (y - x - rx) / denominator;
-        double RMBpower = (y + x - rx) / denominator;
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
 
-        LMF.setPower(LMFpower * driveSpeed);
-        LMB.setPower(LMBpower * driveSpeed);
-        RMF.setPower(RMFpower * driveSpeed);
-        RMB.setPower(RMBpower * driveSpeed);
+        double powerLMF = (rotY + rotX + rx) / denominator;
+        double powerLMB = (rotY - rotX + rx) / denominator;
+        double powerRMF = (rotY - rotX - rx) / denominator;
+        double powerRMB = (rotY + rotX - rx) / denominator;
+
+
+        LMF.setPower(powerLMF * driveSpeed);
+        LMB.setPower(powerLMB * driveSpeed);
+        RMF.setPower(powerRMF * driveSpeed);
+        RMB.setPower(powerRMB * driveSpeed);
 
         telemetry.addData("LMF power", LMF.getPower());
         telemetry.addData("RMF power", RMF.getPower());
         telemetry.addData("LMB power", LMB.getPower());
         telemetry.addData("RMB power",RMB.getPower());
+        telemetry.addData("pionpoint YAW ",pinpoint.getHeading(AngleUnit.DEGREES));
+        telemetry.addData("pionpoint Y ",pinpoint.getEncoderY());
+        telemetry.addData("pionpoint scalar ",pinpoint.getYawScalar());
 
         if (gamepad1.left_stick_button) driveSpeed = 0.9;
 
         if (gamepad1.right_stick_button) driveSpeed = 0.6;
 
 
+        if (gamepad1.dpad_right){
+            pinpoint.recalibrateIMU();
+
+        }
     }
 
     public void intake() {
