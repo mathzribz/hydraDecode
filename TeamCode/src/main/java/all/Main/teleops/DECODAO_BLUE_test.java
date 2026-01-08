@@ -179,7 +179,7 @@ public class DECODAO_BLUE_test extends LinearOpMode {
             llLastError = 0;
         }
 
-        double botHeading = pinpoint.getHeading(AngleUnit.DEGREES);
+        double botHeading = pinpoint.getHeading(AngleUnit.RADIANS);
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 

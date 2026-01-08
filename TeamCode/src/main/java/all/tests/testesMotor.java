@@ -50,7 +50,8 @@ public class testesMotor extends LinearOpMode {
             }
 
 
-            telemetry.addData("AR", AR.getPower());
+            telemetry.addData("power AR", AR.getPower());
+            telemetry.addData("ticks AR", AR.getCurrentPosition());
 
 
             telemetry.update();

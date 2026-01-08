@@ -8,9 +8,9 @@ import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import all.subsystems.Commands.IntakeOff;
-import all.subsystems.Commands.IntakeOn;
-import all.subsystems.SubsystemsTeste;
+import all.Commands.Intake.IntakeOff;
+import all.Commands.Intake.IntakeOn;
+import all.subsystems.IntakeSubsystem;
 
 @TeleOp
 public class CommandOpModeTeste extends CommandOpMode {
@@ -18,7 +18,7 @@ public class CommandOpModeTeste extends CommandOpMode {
     private MotorEx motor;
     private Servo servo;
     private GamepadEx gamepads1;
-    private SubsystemsTeste subsystem;
+    private IntakeSubsystem subsystem;
     private IntakeOn IntakeOn;
     private IntakeOff IntakeOff;
 
@@ -26,7 +26,7 @@ public class CommandOpModeTeste extends CommandOpMode {
     public void initialize() {
         gamepads1 = new GamepadEx(gamepad1);
 
-        subsystem = new SubsystemsTeste(hardwareMap, "subsystem");
+        subsystem = new IntakeSubsystem(hardwareMap, "subsystem");
         IntakeOn = new IntakeOn(subsystem);
         IntakeOff = new IntakeOff(subsystem);
 
