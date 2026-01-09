@@ -2,7 +2,7 @@ package all.Commands.Intake;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
-import all.subsystems.IntakeSubsystem;
+import all.Subsystems.IntakeSubsystem;
 
 public class IntakeOff extends CommandBase {
 

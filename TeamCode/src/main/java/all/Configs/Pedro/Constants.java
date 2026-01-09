@@ -1,4 +1,4 @@
-package all.configPedro;
+package all.Configs.Pedro;
 
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;

@@ -1,5 +1,5 @@
 
-package all.subsystems;
+package all.Subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;

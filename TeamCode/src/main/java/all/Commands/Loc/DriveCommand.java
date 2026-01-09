@@ -2,7 +2,7 @@ package all.Commands.Loc;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import all.subsystems.DriveSubsystem;
+import all.Subsystems.DriveSubsystem;
 
 public class DriveCommand extends CommandBase {
 

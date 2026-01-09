@@ -1,11 +1,11 @@
-package all.configPedro;
+package all.Configs.Pedro;
 
-import static all.configPedro.Tuning.changes;
-import static all.configPedro.Tuning.drawOnlyCurrent;
-import static all.configPedro.Tuning.draw;
-import static all.configPedro.Tuning.follower;
-import static all.configPedro.Tuning.stopRobot;
-import static all.configPedro.Tuning.telemetryM;
+import static all.Configs.Pedro.Tuning.changes;
+import static all.Configs.Pedro.Tuning.drawOnlyCurrent;
+import static all.Configs.Pedro.Tuning.draw;
+import static all.Configs.Pedro.Tuning.follower;
+import static all.Configs.Pedro.Tuning.stopRobot;
+import static all.Configs.Pedro.Tuning.telemetryM;
 
 import com.bylazar.configurables.PanelsConfigurables;
 import com.bylazar.configurables.annotations.Configurable;

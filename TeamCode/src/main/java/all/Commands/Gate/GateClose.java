@@ -3,7 +3,7 @@ package all.Commands.Gate;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
-import all.subsystems.IntakeSubsystem;
+import all.Subsystems.IntakeSubsystem;
 
 public class GateClose extends CommandBase {
 

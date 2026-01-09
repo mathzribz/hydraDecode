@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.function.Supplier;
 
-import all.configPedro.Constants;
+import all.Configs.Pedro.Constants;
 
 @Configurable
 @TeleOp

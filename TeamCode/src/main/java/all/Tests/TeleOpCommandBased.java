@@ -1,4 +1,4 @@
-package all.tests;
+package all.Tests;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
 import all.Commands.Loc.SetDriveSpeed;
-import all.subsystems.DriveSubsystem;
+import all.Subsystems.DriveSubsystem;
 
 @TeleOp
 public class TeleOpCommandBased extends CommandOpMode {

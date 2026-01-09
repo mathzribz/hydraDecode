@@ -1,5 +1,5 @@
 
-package all.tests;
+package all.Tests;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import all.Commands.Intake.IntakeOff;
 import all.Commands.Intake.IntakeOn;
-import all.subsystems.IntakeSubsystem;
+import all.Subsystems.IntakeSubsystem;
 
 @TeleOp
 public class CommandOpModeTeste extends CommandOpMode {
