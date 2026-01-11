@@ -18,7 +18,7 @@ public class Turret extends SubsystemBase {
 
     /* hardware */
     private final DcMotorEx motor;
-    public final GoBildaPinpointDriver pinpoint;
+    private final GoBildaPinpointDriver pinpoint;
 
     /* PID tuning */
     public static double TICKS_PER_REV = 537.7;
@@ -87,8 +87,8 @@ public class Turret extends SubsystemBase {
      */
     public void seguirPose(Pose fieldTarget) {
         // lê Pinpoint (mm)
-        double robotXmm = pinpoint.getPosX(DistanceUnit.MM);
-        double robotYmm = pinpoint.getPosY(DistanceUnit.MM);
+        double robotXmm = pinpoint.getPosX(DistanceUnit.INCH);
+        double robotYmm = pinpoint.getPosY(DistanceUnit.INCH);
         double robotHeadingRad = pinpoint.getHeading(AngleUnit.DEGREES);
 
         // converte mm → polegadas
@@ -128,15 +128,9 @@ public class Turret extends SubsystemBase {
     }
 
     public void manual(double p) {
-        double currentDeg = getAngleDeg();
-        if ((currentDeg >= MAX_DEG && p > 0) ||
-                (currentDeg <= -MAX_DEG && p < 0)) {
-            motor.setPower(0); // trava nesses limites
-        } else {
-            motor.setPower(p);
-        }
+        manualMode = true;
+        manualPower = p;
     }
-
 
     public void automatic() {
         manualMode = false;
@@ -167,6 +161,4 @@ public class Turret extends SubsystemBase {
         while (rad < -Math.PI) rad += 2*Math.PI;
         return rad;
     }
-
-
 }

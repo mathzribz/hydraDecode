@@ -1,6 +1,7 @@
 package all.Tests;
 
 import static all.Configs.Pedro.Tuning.follower;
+import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -47,12 +48,8 @@ public class testTurret extends LinearOpMode {
             // ----------------------
             if (gamepad1.a) {
                 // EXEMPLO – troque por qualquer pose do Pedro
-                Pose targetPose = new Pose(
-                        16,      // X do field
-                        132,      // Y do field
-                        Math.toRadians(300) // heading (pode ser usado em outra lógica)
-                );
-                turret.seguirPose(targetPose);
+
+                turret.seguirPose(BLUE_GOAL);
             }
 
             // ----------------------
