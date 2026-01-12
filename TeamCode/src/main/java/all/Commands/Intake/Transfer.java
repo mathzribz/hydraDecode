@@ -3,13 +3,13 @@ package all.Commands.Intake;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
-import all.Subsystems.IntakeSubsystem;
+import all.subsystems.Intake;
 
 public class Transfer extends CommandBase {
 
-    private final IntakeSubsystem intakeTransfer;
+    private final Intake intakeTransfer;
 
-    public Transfer(IntakeSubsystem subsystem) {
+    public Transfer(Intake subsystem) {
         intakeTransfer = subsystem;
         addRequirements(intakeTransfer);
     }

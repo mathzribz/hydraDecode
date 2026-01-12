@@ -1,4 +1,4 @@
-package all.Subsystems;
+package all.subsystems;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
@@ -9,14 +9,14 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-public class DriveSubsystem extends SubsystemBase {
+public class Drive extends SubsystemBase {
 
     private final DcMotorEx LMF, LMB, RMF, RMB;
     private final GoBildaPinpointDriver pinpoint;
     private double headingOffset = 0.0;
     private double driveSpeed = 0.85;
 
-    public DriveSubsystem(HardwareMap hwMap) {
+    public Drive(HardwareMap hwMap) {
 
         LMF = hwMap.get(DcMotorEx.class, "LMF");
         LMB = hwMap.get(DcMotorEx.class, "LMB");

@@ -1,24 +1,26 @@
-package all.Subsystems;
+package all.subsystems;
+
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.control.PIDFController;
 import com.pedropathing.control.PIDFCoefficients;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import com.pedropathing.geometry.Pose;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import all.Configs.Pedro.Constants;
 
 @Config
 public class Turret extends SubsystemBase {
 
     /* hardware */
     private final DcMotorEx motor;
-    private final GoBildaPinpointDriver pinpoint;
+
+    Follower follower;
+
 
     /* PID tuning */
     public static double TICKS_PER_REV = 537.7;
@@ -31,7 +33,7 @@ public class Turret extends SubsystemBase {
     public static double pidSwitchTicks = 30;
     public static double MAX_DEG = 180.0;
 
-    private final PIDFController fastPID;
+
     private final PIDFController slowPID;
 
     private double targetTicks = 0;
@@ -39,24 +41,23 @@ public class Turret extends SubsystemBase {
     private boolean manualMode = false;
     private double manualPower = 0;
 
-    public Turret(HardwareMap hw) {
-        motor = hw.get(DcMotorEx.class, "t");
+    public Turret(HardwareMap hw, String subsystem) {
+        motor = hw.get(DcMotorEx.class, "turret");
+        follower = Constants.createFollower(hw);
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         motor.setPower(0);
 
         // Inicializa Pinpoint (odometria)
-        pinpoint = hw.get(GoBildaPinpointDriver.class, "pinpoint");
-        pinpoint.update(); // garante valores iniciais
 
-        fastPID = new PIDFController(new PIDFCoefficients(kpFast, 0, kdFast, kfFast));
+
         slowPID = new PIDFController(new PIDFCoefficients(kpSlow, 0, kdSlow, kfSlow));
     }
 
     @Override
     public void periodic() {
         // atualiza Pinpoint toda chamada de loop
-        pinpoint.update();
+        follower.update();
 
         if (manualMode) {
             motor.setPower(manualPower);
@@ -65,14 +66,14 @@ public class Turret extends SubsystemBase {
 
         double error = targetTicks - motor.getCurrentPosition();
 
-        fastPID.setCoefficients(new PIDFCoefficients(kpFast, 0, kdFast, kfFast));
+
         slowPID.setCoefficients(new PIDFCoefficients(kpSlow, 0, kdSlow, kfSlow));
 
         double power;
         if (Math.abs(error) > pidSwitchTicks) {
-            fastPID.updateError(error);
-            fastPID.updateFeedForwardInput(Math.signum(error));
-            power = fastPID.run();
+            slowPID.updateError(error);
+            slowPID.updateFeedForwardInput(Math.signum(error));
+            power = slowPID.run();
         } else {
             slowPID.updateError(error);
             power = slowPID.run();
@@ -87,9 +88,9 @@ public class Turret extends SubsystemBase {
      */
     public void seguirPose(Pose fieldTarget) {
         // lê Pinpoint (mm)
-        double robotXmm = pinpoint.getPosX(DistanceUnit.INCH);
-        double robotYmm = pinpoint.getPosY(DistanceUnit.INCH);
-        double robotHeadingRad = pinpoint.getHeading(AngleUnit.DEGREES);
+        double robotXmm = follower.getPose().getX();
+        double robotYmm = follower.getPose().getY();
+        double robotHeadingRad = follower.getPose().getHeading();
 
         // converte mm → polegadas
         double robotX = robotXmm * 0.0393701;
@@ -124,7 +125,7 @@ public class Turret extends SubsystemBase {
     }
 
     public double getHeadingDeg() {
-        return Math.toDegrees(pinpoint.getHeading(AngleUnit.DEGREES));
+        return follower.getPose().getHeading();
     }
 
     public void manual(double p) {
@@ -140,6 +141,7 @@ public class Turret extends SubsystemBase {
         motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         targetTicks = 0;
+        slowPID.reset();
     }
 
     /* ====== util ====== */
@@ -161,4 +163,5 @@ public class Turret extends SubsystemBase {
         while (rad < -Math.PI) rad += 2*Math.PI;
         return rad;
     }
+
 }

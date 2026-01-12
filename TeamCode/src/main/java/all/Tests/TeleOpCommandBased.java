@@ -8,19 +8,19 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
 import all.Commands.Loc.SetDriveSpeed;
-import all.Subsystems.DriveSubsystem;
+import all.subsystems.Drive;
 
 @TeleOp
 public class TeleOpCommandBased extends CommandOpMode {
 
-    private DriveSubsystem drive;
+    private Drive drive;
     private GamepadEx gamepad1Ex;
 
     @Override
     public void initialize() {
 
         gamepad1Ex = new GamepadEx(gamepad1);
-        drive = new DriveSubsystem(hardwareMap);
+        drive = new Drive(hardwareMap);
 
         drive.setDefaultCommand(
                 new DriveCommand(drive, gamepad1Ex)

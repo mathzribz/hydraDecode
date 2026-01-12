@@ -1,5 +1,5 @@
 
-package all.Subsystems;
+package all.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
@@ -7,9 +7,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 
-public class IntakeSubsystem extends SubsystemBase {
+public class Intake extends SubsystemBase {
 
-    public IntakeSubsystem(final HardwareMap hwMap, String name) {
+    public Intake(final HardwareMap hwMap, String name) {
         motor = new MotorEx(hwMap, "intake");
         servo = hwMap.get(Servo.class, "portinha");
     }

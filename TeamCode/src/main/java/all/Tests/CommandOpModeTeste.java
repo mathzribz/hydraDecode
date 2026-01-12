@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import all.Commands.Intake.IntakeOff;
 import all.Commands.Intake.IntakeOn;
-import all.Subsystems.IntakeSubsystem;
+import all.subsystems.Intake;
 
 @TeleOp
 public class CommandOpModeTeste extends CommandOpMode {
@@ -18,7 +18,7 @@ public class CommandOpModeTeste extends CommandOpMode {
     private MotorEx motor;
     private Servo servo;
     private GamepadEx gamepads1;
-    private IntakeSubsystem subsystem;
+    private Intake subsystem;
     private IntakeOn IntakeOn;
     private IntakeOff IntakeOff;
 
@@ -26,7 +26,7 @@ public class CommandOpModeTeste extends CommandOpMode {
     public void initialize() {
         gamepads1 = new GamepadEx(gamepad1);
 
-        subsystem = new IntakeSubsystem(hardwareMap, "subsystem");
+        subsystem = new Intake(hardwareMap, "subsystem");
         IntakeOn = new IntakeOn(subsystem);
         IntakeOff = new IntakeOff(subsystem);
 
@@ -34,5 +34,7 @@ public class CommandOpModeTeste extends CommandOpMode {
         gamepads1.getGamepadButton(GamepadKeys.Button.B).whenPressed(IntakeOff);
 
     }
+
+
 
 }

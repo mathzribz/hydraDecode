@@ -3,13 +3,13 @@ package all.Commands.Gate;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
-import all.Subsystems.IntakeSubsystem;
+import all.subsystems.Intake;
 
 public class GateOpen extends CommandBase {
 
-    private final IntakeSubsystem intakeTransfer;
+    private final Intake intakeTransfer;
 
-    public GateOpen(IntakeSubsystem subsystem) {
+    public GateOpen(Intake subsystem) {
         intakeTransfer = subsystem;
         addRequirements(intakeTransfer);
     }

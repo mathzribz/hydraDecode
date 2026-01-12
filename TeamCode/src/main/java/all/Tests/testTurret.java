@@ -1,36 +1,46 @@
+
 package all.Tests;
 
-import static all.Configs.Pedro.Tuning.follower;
+
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.pedropathing.geometry.Pose;
-import all.Subsystems.Turret;
+
+import all.Configs.Pedro.Constants;
+import all.subsystems.Turret;
+
 
 @TeleOp(name="Debug Turret - Manual + Auto", group="Test")
 public class testTurret extends LinearOpMode {
 
     private Turret turret;
+    private Follower follower;
 
 
 
     @Override
     public void runOpMode() {
 
-        turret = new Turret(hardwareMap);
+
+        turret = new Turret(hardwareMap, "subsystem");
+        follower = Constants.createFollower(hardwareMap);
+
         Pose startPos = new Pose(
-                60,      // X do field
-                85,      // Y do field
-                Math.toRadians(135) // heading (pode ser usado em outra lógica)
+                0,      // X do field
+                0,      // Y do field
+                Math.toRadians(90) // heading (pode ser usado em outra lógica)
         );
         follower.setStartingPose(startPos);
 
         waitForStart();
 
         while (opModeIsActive()) {
+                follower.update();
 
             // ----------------------
             // 1) MANUAL CONTROLE
@@ -46,11 +56,11 @@ public class testTurret extends LinearOpMode {
             // ----------------------
             // 2) AUTO SEGUIR POSE
             // ----------------------
-            if (gamepad1.a) {
+
                 // EXEMPLO – troque por qualquer pose do Pedro
 
                 turret.seguirPose(BLUE_GOAL);
-            }
+
 
             // ----------------------
             // 3) TELEMETRIA
@@ -83,5 +93,8 @@ public class testTurret extends LinearOpMode {
             telemetry.update();
             CommandScheduler.getInstance().run();
         }
+            turret.resetEncoder();
+            turret.automatic();
+
     }
 }
