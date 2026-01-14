@@ -1,5 +1,7 @@
 package all.subsystems;
 
+
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
@@ -12,12 +14,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class Drive extends SubsystemBase {
 
     private final DcMotorEx LMF, LMB, RMF, RMB;
-    public final GoBildaPinpointDriver pinpoint;
+    private final GoBildaPinpointDriver pinpoint;
+
     private double headingOffset = 0.0;
     private double driveSpeed = 0.85;
 
-    public Drive(HardwareMap hwMap) {
+    private double currentHeadingRad = 0.0;
+    private double currentHeadingDeg = 0.0;
 
+    public Drive(HardwareMap hwMap) {
         LMF = hwMap.get(DcMotorEx.class, "LMF");
         LMB = hwMap.get(DcMotorEx.class, "LMB");
         RMF = hwMap.get(DcMotorEx.class, "RMF");
@@ -25,76 +30,51 @@ public class Drive extends SubsystemBase {
 
         LMF.setDirection(DcMotorEx.Direction.REVERSE);
         LMB.setDirection(DcMotorEx.Direction.REVERSE);
-        RMF.setDirection(DcMotorEx.Direction.FORWARD);
-        RMB.setDirection(DcMotorEx.Direction.FORWARD);
 
         pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint");
     }
 
+    /** CHAMAR UMA VEZ POR LOOP */
+    public void updatePinpoint() {
+        pinpoint.update();
+        currentHeadingRad = pinpoint.getHeading(AngleUnit.RADIANS);
+        currentHeadingDeg = pinpoint.getHeading(AngleUnit.DEGREES);
+    }
 
     public void resetFieldOrientation() {
-        headingOffset = getRawHeading();
+        headingOffset = currentHeadingRad;
     }
-
-    public void adjustFieldOrientation(double deltaRadians) {
-        headingOffset += deltaRadians;
-    }
-
-    private double getRawHeading() {
-        pinpoint.update();
-        return pinpoint.getHeading(AngleUnit.RADIANS);
-    }
-
-    // =================== DRIVE ===================
-
-    /**
-     * @param x  strafe (-1 a 1)
-     * @param y  frente/trás (-1 a 1)
-     * @param rx rotação (-1 a 1)
-     */
 
     public void drive(double x, double y, double rx) {
 
-        double botHeading = getRawHeading() - headingOffset;
+        double botHeading = currentHeadingRad - headingOffset;
 
-        // Field Centric transform
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
         double denominator = Math.max(
-                Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx),
-                1.0
+                Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1.0
         );
 
-        double powerLMF = (rotY + rotX + rx) / denominator;
-        double powerLMB = (rotY - rotX + rx) / denominator;
-        double powerRMF = (rotY - rotX - rx) / denominator;
-        double powerRMB = (rotY + rotX - rx) / denominator;
-
-        LMF.setPower(powerLMF * driveSpeed);
-        LMB.setPower(powerLMB * driveSpeed);
-        RMF.setPower(powerRMF * driveSpeed);
-        RMB.setPower(powerRMB * driveSpeed);
+        LMF.setPower((rotY + rotX + rx) / denominator * driveSpeed);
+        LMB.setPower((rotY - rotX + rx) / denominator * driveSpeed);
+        RMF.setPower((rotY - rotX - rx) / denominator * driveSpeed);
+        RMB.setPower((rotY + rotX - rx) / denominator * driveSpeed);
     }
 
-
-    public void stop() {
-        LMF.setPower(0);
-        LMB.setPower(0);
-        RMF.setPower(0);
-        RMB.setPower(0);
+    public double getHeadingDeg() {
+        return currentHeadingDeg;
     }
 
-    public void setDriveSpeed(double speed) {
-        driveSpeed = Math.max(0.1, Math.min(1.0, speed));
+    public double getHeadingRad() {
+        return currentHeadingRad;
     }
 
     public double getDriveSpeed() {
         return driveSpeed;
     }
 
-    @Override
-    public void periodic() {
-
+    public void setDriveSpeed(double speed) {
+        driveSpeed = Math.max(0.1, Math.min(1.0, speed));
     }
 }

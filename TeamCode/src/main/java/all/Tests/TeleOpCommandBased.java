@@ -1,3 +1,4 @@
+
 package all.Tests;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
@@ -13,26 +14,25 @@ import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
 import all.Commands.Loc.SetDriveSpeed;
 import all.subsystems.Drive;
+import all.subsystems.LLturret;
 
 @TeleOp
 public class TeleOpCommandBased extends CommandOpMode {
 
     private Drive drive;
+    private LLturret ll;
     private GamepadEx gamepad1Ex;
 
     @Override
     public void initialize() {
 
-        gamepad1Ex = new GamepadEx(gamepad1);
         drive = new Drive(hardwareMap);
+        gamepad1Ex = new GamepadEx(gamepad1);
 
-
-
-        double x  = gamepad1Ex.getLeftX();
-        double y  = gamepad1Ex.getLeftY();
-        double rx = gamepad1Ex.getRightX();
-
-        drive.drive(x, y, rx);
+        // DEFAULT COMMAND (ESSENCIAL)
+        drive.setDefaultCommand(
+                new DriveCommand(drive, gamepad1Ex)
+        );
 
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.A)
                 .whenPressed(new SetDriveSpeed(drive, 0.65));
@@ -40,20 +40,18 @@ public class TeleOpCommandBased extends CommandOpMode {
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.Y)
                 .whenPressed(new SetDriveSpeed(drive, 1.0));
 
-
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenPressed(new ResetFieldCentric(drive));
-
     }
 
     @Override
-    public void runOpMode() throws InterruptedException {
-        waitForStart();
+    public void run() {
 
-        // run the scheduler
-        while (!isStopRequested() && opModeIsActive()) {
+        drive.updatePinpoint();
+        super.run();
 
-        }
-        }
+        telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
+        telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
+        telemetry.update();
     }
-
+}

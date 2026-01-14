@@ -15,22 +15,14 @@ public class DriveCommand extends CommandBase {
         addRequirements(drive);
     }
 
-    private double applyDeadZone(double value) {
-        return Math.abs(value) > 0.05 ? value : 0;
-    }
-
     @Override
     public void execute() {
-
-        double x  = applyDeadZone(-gamepad.getLeftX());
-        double y  = applyDeadZone(gamepad.getLeftY());
-        double rx = applyDeadZone(-gamepad.getRightX());
+        double x  = -gamepad.getLeftX();
+        double y  = -gamepad.getLeftY();
+        double rx = -gamepad.getRightX();
 
         drive.drive(x, y, rx);
     }
 
-    @Override
-    public boolean isFinished() {
-        return false; // comando default
-    }
+
 }
