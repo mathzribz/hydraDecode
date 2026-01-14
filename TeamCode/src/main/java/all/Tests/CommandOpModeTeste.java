@@ -33,6 +33,7 @@ public class CommandOpModeTeste extends CommandOpMode {
         gamepads1.getGamepadButton(GamepadKeys.Button.A).whenPressed(IntakeOn);
         gamepads1.getGamepadButton(GamepadKeys.Button.B).whenPressed(IntakeOff);
 
+
     }
 
 

@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class Drive extends SubsystemBase {
 
     private final DcMotorEx LMF, LMB, RMF, RMB;
-    private final GoBildaPinpointDriver pinpoint;
+    public final GoBildaPinpointDriver pinpoint;
     private double headingOffset = 0.0;
     private double driveSpeed = 0.85;
 
@@ -95,7 +95,6 @@ public class Drive extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetry.addData("pionpoint YAW ",pinpoint.getHeading(AngleUnit.DEGREES));
-        telemetry.addData("Drive Speed", driveSpeed);
+
     }
 }

@@ -1,5 +1,6 @@
 package all.Tests;
 
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -8,8 +9,12 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import all.Commands.Gate.GateClose;
+import all.Commands.Gate.GateOpen;
 import all.Commands.Intake.IntakeOff;
 import all.Commands.Intake.IntakeOn;
+import all.Commands.Shooter.ShooterOff;
+import all.Commands.Shooter.ShooterOn;
 import all.Configs.Pedro.Constants;
 import all.subsystems.Intake;
 import all.subsystems.Shooter;
@@ -21,12 +26,25 @@ public class SwitchCaseAuto extends OpMode {
     private Timer pathTimer, opModeTimer;
 
     private Shooter shooterSubsystem;
+    private Intake intakeSubsystem;
+
+    private IntakeOn intakeOn;
+    private IntakeOff intakeOff;
+    private GateOpen gateOpen;
+    private GateClose gateClose;
+    private ShooterOn shooterOn;
+    private ShooterOff shooterOff;
+
+    private boolean gateOpened = false;
+    private boolean intakeWorking = false;
+    private boolean shooterWorking = false;
 
     public enum PathState {
 
         DRIVE_STARTPOSE_SCOREPOSE,
-        SCORE,
-        DRIVE_SCOREPOSE_REPOPOSE1
+        START_SCORE,
+        DRIVE_SCOREPOSE_REPOPOSE1,
+        END
 
     }
 
@@ -60,19 +78,30 @@ public class SwitchCaseAuto extends OpMode {
 
             case DRIVE_STARTPOSE_SCOREPOSE:
                 follower.followPath(drive_start_score, true);
-                setPathState(PathState.SCORE);
+                CommandScheduler.getInstance().schedule(gateClose);
+                if (pathTimer.getElapsedTime() > 0.1) {
+                    CommandScheduler.getInstance().schedule(intakeOn);
+                    CommandScheduler.getInstance().schedule(shooterOn);
+                }
+                if (pathTimer.getElapsedTime() > 0.2) {
+                    setPathState(PathState.START_SCORE);
+                }
                 break;
 
-            case SCORE:
-                if (!follower.isBusy()) {
-
+            case START_SCORE:
+                if (!follower.isBusy() && !gateOpened) {
+                    CommandScheduler.getInstance().schedule(gateOpen);
+                    gateOpened = true;
+                }
+                if (pathTimer.getElapsedTime() > 0.2) {
                     setPathState(PathState.DRIVE_SCOREPOSE_REPOPOSE1);
                 }
                 break;
 
             case DRIVE_SCOREPOSE_REPOPOSE1:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() && gateOpened) {
                     follower.followPath(drive_score_repo1, true);
+                    CommandScheduler.getInstance().schedule(gateClose);
                 }
                 break;
 
@@ -97,6 +126,16 @@ public class SwitchCaseAuto extends OpMode {
 
         follower = Constants.createFollower(hardwareMap);
 
+        intakeSubsystem = new Intake(hardwareMap, "intakeSubsystem");
+        shooterSubsystem = new Shooter(hardwareMap, "shooterSubsystem");
+
+        intakeOn = new IntakeOn(intakeSubsystem);
+        intakeOff = new IntakeOff(intakeSubsystem);
+        gateOpen = new GateOpen(intakeSubsystem);
+        gateClose = new GateClose(intakeSubsystem);
+        shooterOn = new ShooterOn(shooterSubsystem);
+        shooterOff = new ShooterOff(shooterSubsystem);
+
         buildPaths();
         follower.setPose(starterPose);
     }
@@ -110,6 +149,7 @@ public class SwitchCaseAuto extends OpMode {
     public void loop() {
         follower.update();
         statePathUpdate();
+        CommandScheduler.getInstance().run();
     }
 
 }

@@ -34,6 +34,7 @@ public class testTurretCommand extends CommandOpMode {
         follower.setStartingPose(startPos);
 
 
+
     }
 
     @Override
@@ -66,7 +67,6 @@ public class testTurretCommand extends CommandOpMode {
 
 
 
-            telemetry.addData("PID Fast (kp)", "%.4f", Turret.kpFast);
             telemetry.addData("PID Slow (kp)", "%.4f", Turret.kpSlow);
 
             telemetry.addData("D-pad Left  = Manual Left", "true");

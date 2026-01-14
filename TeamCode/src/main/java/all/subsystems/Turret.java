@@ -16,28 +16,16 @@ import all.Configs.Pedro.Constants;
 @Config
 public class Turret extends SubsystemBase {
 
-    /* hardware */
     private final DcMotorEx motor;
-
     Follower follower;
-
-
-    /* PID tuning */
     public static double TICKS_PER_REV = 537.7;
-    public static double kpFast = 0.003;
-    public static double kdFast = 0.0;
-    public static double kfFast = 0.0;
     public static double kpSlow = 0.005;
     public static double kdSlow = 0.0001;
     public static double kfSlow = 0.0;
     public static double pidSwitchTicks = 30;
     public static double MAX_DEG = 180.0;
-
-
     private final PIDFController slowPID;
-
     private double targetTicks = 0;
-
     private boolean manualMode = false;
     private double manualPower = 0;
 
@@ -45,18 +33,14 @@ public class Turret extends SubsystemBase {
         motor = hw.get(DcMotorEx.class, "turret");
         follower = Constants.createFollower(hw);
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         motor.setPower(0);
-
-        // Inicializa Pinpoint (odometria)
-
 
         slowPID = new PIDFController(new PIDFCoefficients(kpSlow, 0, kdSlow, kfSlow));
     }
 
     @Override
     public void periodic() {
-        // atualiza Pinpoint toda chamada de loop
         follower.update();
 
         if (manualMode) {
@@ -66,10 +50,10 @@ public class Turret extends SubsystemBase {
 
         double error = targetTicks - motor.getCurrentPosition();
 
-
         slowPID.setCoefficients(new PIDFCoefficients(kpSlow, 0, kdSlow, kfSlow));
 
         double power;
+
         if (Math.abs(error) > pidSwitchTicks) {
             slowPID.updateError(error);
             slowPID.updateFeedForwardInput(Math.signum(error));
@@ -82,10 +66,6 @@ public class Turret extends SubsystemBase {
         motor.setPower(power);
     }
 
-    /**
-     * Faz a turret apontar para uma pose de campo
-     * @param fieldTarget pose de destino (Pedro), em polegadas
-     */
     public void seguirPose(Pose fieldTarget) {
         // lê Pinpoint (mm)
         double robotXmm = follower.getPose().getX();
@@ -153,7 +133,7 @@ public class Turret extends SubsystemBase {
     }
     private double normalizeDeg(double d) {
         d %= 360;
-        if (d > 180)  d -= 360;
+        if (d > 180) d -= 360;
         if (d < -180) d += 360;
         return d;
     }

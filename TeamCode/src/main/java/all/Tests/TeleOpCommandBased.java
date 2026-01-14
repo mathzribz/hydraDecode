@@ -1,9 +1,13 @@
 package all.Tests;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
@@ -22,10 +26,13 @@ public class TeleOpCommandBased extends CommandOpMode {
         gamepad1Ex = new GamepadEx(gamepad1);
         drive = new Drive(hardwareMap);
 
-        drive.setDefaultCommand(
-                new DriveCommand(drive, gamepad1Ex)
-        );
 
+
+        double x  = gamepad1Ex.getLeftX();
+        double y  = gamepad1Ex.getLeftY();
+        double rx = gamepad1Ex.getRightX();
+
+        drive.drive(x, y, rx);
 
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.A)
                 .whenPressed(new SetDriveSpeed(drive, 0.65));
@@ -38,4 +45,15 @@ public class TeleOpCommandBased extends CommandOpMode {
                 .whenPressed(new ResetFieldCentric(drive));
 
     }
-}
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        waitForStart();
+
+        // run the scheduler
+        while (!isStopRequested() && opModeIsActive()) {
+
+        }
+        }
+    }
+
