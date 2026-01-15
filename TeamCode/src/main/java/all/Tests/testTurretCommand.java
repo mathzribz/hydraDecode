@@ -21,19 +21,15 @@ public class testTurretCommand extends CommandOpMode {
 
     @Override
     public void initialize() {
+        subsystem.resetEncoder();
         gamepads1 = new GamepadEx(gamepad1);
 
         subsystem = new Turret(hardwareMap, "subsystem");
         follower = Constants.createFollower(hardwareMap);
 
-        Pose startPos = new Pose(
-                0,      // X do field
-                0,      // Y do field
-                Math.toRadians(90) // heading (pode ser usado em outra lógica)
-        );
+        Pose startPos = new Pose(0, 0);
+
         follower.setStartingPose(startPos);
-
-
 
     }
 

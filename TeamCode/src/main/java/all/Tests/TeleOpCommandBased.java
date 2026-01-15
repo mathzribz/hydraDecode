@@ -27,7 +27,11 @@ public class TeleOpCommandBased extends CommandOpMode {
     public void initialize() {
 
         drive = new Drive(hardwareMap);
+        ll = new LLturret(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
+
+        ll.switchPipeline(0);
+        ll.start();
 
         // DEFAULT COMMAND (ESSENCIAL)
         drive.setDefaultCommand(
@@ -52,6 +56,8 @@ public class TeleOpCommandBased extends CommandOpMode {
 
         telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
         telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
+        telemetry.addData("cood pedro", ll.getPedroRobotPose());
+
         telemetry.update();
     }
 }

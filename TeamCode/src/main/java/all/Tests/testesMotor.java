@@ -7,6 +7,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 @Config
 @TeleOp
@@ -27,8 +28,8 @@ public class testesMotor extends LinearOpMode {
 
 
 
-            AR.setDirection(DcMotor.Direction.FORWARD);
-            AL.setDirection(DcMotor.Direction.REVERSE);
+            AR.setDirection(DcMotor.Direction.REVERSE);
+            AL.setDirection(DcMotor.Direction.FORWARD);
 
 
 
