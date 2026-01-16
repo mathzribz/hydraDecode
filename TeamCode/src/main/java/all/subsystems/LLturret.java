@@ -39,13 +39,8 @@ public class LLturret extends SubsystemBase {
                 mtPose.getOrientation().getYaw()
         );
 
-        Pose ftcStandard = PoseConverter.pose2DToPose(
+        Pose pedroPose = PoseConverter.pose2DToPose(
                 ftcPose2d,
-                InvertedFTCCoordinates.INSTANCE
-        );
-
-
-        Pose pedroPose = ftcStandard.getAsCoordinateSystem(
                 PedroCoordinates.INSTANCE
         );
 
