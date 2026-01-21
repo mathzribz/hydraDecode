@@ -64,6 +64,8 @@ public class Turret extends SubsystemBase {
         }
 
         motor.setPower(power);
+
+
     }
 
     public void seguirPose(Pose fieldTarget) {

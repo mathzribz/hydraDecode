@@ -60,6 +60,7 @@ public class Drive extends SubsystemBase {
         LMB.setPower((rotY - rotX + rx) / denominator * driveSpeed);
         RMF.setPower((rotY - rotX - rx) / denominator * driveSpeed);
         RMB.setPower((rotY + rotX - rx) / denominator * driveSpeed);
+
     }
 
     public double getHeadingDeg() {
