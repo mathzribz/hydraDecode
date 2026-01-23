@@ -11,7 +11,7 @@ public class Intake extends SubsystemBase {
 
     public Intake(final HardwareMap hwMap, String name) {
         motor = new MotorEx(hwMap, "intake");
-        servo = hwMap.get(Servo.class, "portinha");
+        servo = hwMap.get(Servo.class, "gate");
     }
 
     private MotorEx motor;
@@ -28,7 +28,7 @@ public class Intake extends SubsystemBase {
     public void IntakeOut() {motor.set(-intakeSpeed);}
 
     public void GateOpen() {
-        servo.setPosition(0.5);
+        servo.setPosition(0.2   );
     }
 
     public void GateClose() {
