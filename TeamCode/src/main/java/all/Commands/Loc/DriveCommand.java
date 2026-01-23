@@ -19,7 +19,7 @@ public class DriveCommand extends CommandBase {
     public void execute() {
         double x  = -gamepad.getLeftX();
         double y  = -gamepad.getLeftY();
-        double rx = -gamepad.getRightX();
+        double rx = gamepad.getRightX();
 
         drive.drive(x, y, rx);
     }
