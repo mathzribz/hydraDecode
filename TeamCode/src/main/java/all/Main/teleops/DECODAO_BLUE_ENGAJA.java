@@ -239,7 +239,7 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         }
         if (gamepad1.a || gamepad2.a) {
             targetRPM = 1350;
-            shooterS = 0.55;
+            shooterS = 0.45;
 
         } if (gamepad1.b || gamepad2.b) {
             targetRPM = 1600;

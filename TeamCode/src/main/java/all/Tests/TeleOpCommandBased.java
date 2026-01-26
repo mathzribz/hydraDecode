@@ -40,7 +40,7 @@ TeleOpCommandBased extends CommandOpMode {
 
         drive = new Drive(hardwareMap);
         ll = new LLturret(hardwareMap);
-        turret = new Turret(hardwareMap, "turret");
+        turret = new Turret(hardwareMap);
         intake = new Intake(hardwareMap, "intake");
         follower = Constants.createFollower(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
@@ -70,6 +70,7 @@ TeleOpCommandBased extends CommandOpMode {
 
     @Override
     public void run() {
+        follower.update();
         TriggerReader triggerReader = new TriggerReader(
                 gamepad1Ex, GamepadKeys.Trigger.RIGHT_TRIGGER
         );
@@ -77,7 +78,7 @@ TeleOpCommandBased extends CommandOpMode {
 
 
         if(gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
-            turret.seguirPose(BLUE_GOAL);
+
         }
 
         if(gamepad1Ex.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.1) {
@@ -90,9 +91,10 @@ TeleOpCommandBased extends CommandOpMode {
         telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
         telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
 
-        telemetry.addData("Turret Angle (deg)", "%.2f", turret.getAngleDeg());
+
 //        telemetry.addData("cood pedro", ll.getPedroRobotPose());
        telemetry.addData("cood pedro",follower.getPose());
+        telemetry.addData("t ticks", turret.motor.getCurrentPosition());
 
         telemetry.update();
     }

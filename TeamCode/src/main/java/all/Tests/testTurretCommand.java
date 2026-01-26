@@ -3,33 +3,44 @@ package all.Tests;
 
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import all.Commands.t;
 import all.Configs.Pedro.Constants;
+import all.subsystems.Drive;
 import all.subsystems.Turret;
-
+@Config
 @TeleOp
 public class testTurretCommand extends CommandOpMode {
 
     private Follower follower;
     private GamepadEx gamepads1;
-    private Turret subsystem;
+    private Turret turret;
+    private Drive drive;
+
+    public static double x = 6;
+    public static double y = 67;
 
     @Override
     public void initialize() {
-        subsystem.resetEncoder();
+
+
         gamepads1 = new GamepadEx(gamepad1);
 
-        subsystem = new Turret(hardwareMap, "subsystem");
+        turret = new Turret(hardwareMap);
+        drive = new Drive(hardwareMap);
         follower = Constants.createFollower(hardwareMap);
 
-        Pose startPos = new Pose(0, 0);
+
+        Pose startPos = new Pose(64, 80);
 
         follower.setStartingPose(startPos);
+
 
     }
 
@@ -44,30 +55,18 @@ public class testTurretCommand extends CommandOpMode {
         while (!isStopRequested() && opModeIsActive()) {
             run();
 
-            subsystem.seguirPose(BLUE_GOAL);
+            turret.setDefaultCommand(
+                    new t(
+                            turret,
+                            drive
+                            ,
+                            () -> new Pose(x, y)
+                    )
+            );
+            telemetry.addData("cood", follower.getPose());
+            telemetry.addData("target", Turret.errorDeg);
 
 
-            double headingDeg = subsystem.getHeadingDeg();
-            double currentDeg = subsystem.getAngleDeg();
-            double targetDeg  = subsystem.getAngleDeg(); // turrets sempre convergem pro targetTicks
-            double errorDeg   = currentDeg - targetDeg;
-
-            telemetry.addData("=== TURRET STATE ===", "");
-
-
-            telemetry.addData("Robot Heading (deg)", "%.2f", headingDeg);
-
-            telemetry.addData("Turret Angle (deg)", "%.2f", currentDeg);
-            telemetry.addData("Turret Target (deg)", "%.2f", targetDeg);
-            telemetry.addData("Turret Error (deg)", "%.2f", errorDeg);
-
-
-
-            telemetry.addData("PID Slow (kp)", "%.4f", Turret.kpSlow);
-
-            telemetry.addData("D-pad Left  = Manual Left", "true");
-            telemetry.addData("D-pad Right = Manual Right", "true");
-            telemetry.addData("Button A    = Follow Pose", "true");
 
             telemetry.update();
             follower.update();

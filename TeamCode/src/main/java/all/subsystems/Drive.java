@@ -5,16 +5,22 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gam
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+import all.Configs.Pedro.Constants;
+
 public class Drive extends SubsystemBase {
 
     private final DcMotorEx LMF, LMB, RMF, RMB;
     private final GoBildaPinpointDriver pinpoint;
+
+    private Follower follower;
 
     private double headingOffset = 0.0;
     private double driveSpeed = 0.85;
@@ -32,6 +38,12 @@ public class Drive extends SubsystemBase {
         LMB.setDirection(DcMotorEx.Direction.REVERSE);
 
         pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint");
+         follower = Constants.createFollower(hwMap);
+    }
+
+    @Override
+    public void periodic() {
+        follower.update(); // 🔴 obrigatório
     }
 
     /** CHAMAR UMA VEZ POR LOOP */
@@ -77,5 +89,9 @@ public class Drive extends SubsystemBase {
 
     public void setDriveSpeed(double speed) {
         driveSpeed = Math.max(0.1, Math.min(1.0, speed));
+    }
+
+    public Pose getPose() {
+        return follower.getPose();
     }
 }

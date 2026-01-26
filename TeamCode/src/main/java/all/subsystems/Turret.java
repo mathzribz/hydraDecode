@@ -1,3 +1,4 @@
+
 package all.subsystems;
 
 
@@ -6,6 +7,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.control.PIDFController;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -16,11 +18,11 @@ import all.Configs.Pedro.Constants;
 @Config
 public class Turret extends SubsystemBase {
 
-    private final DcMotorEx motor;
+    public final DcMotorEx motor;
     Follower follower;
     public static double TICKS_PER_REV = 537.7;
-    public static double kpSlow = 0.005;
-    public static double kdSlow = 0.0001;
+    public static double kpSlow = 0.0065;
+    public static double kdSlow = 0.00012;
     public static double kfSlow = 0.0;
     public static double pidSwitchTicks = 30;
     public static double MAX_DEG = 180.0;
@@ -28,12 +30,13 @@ public class Turret extends SubsystemBase {
     private double targetTicks = 0;
     private boolean manualMode = false;
     private double manualPower = 0;
+    public static double errorDeg;
 
-    public Turret(HardwareMap hw, String subsystem) {
+    public Turret(HardwareMap hw) {
         motor = hw.get(DcMotorEx.class, "turret");
         follower = Constants.createFollower(hw);
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         motor.setPower(0);
 
         slowPID = new PIDFController(new PIDFCoefficients(kpSlow, 0, kdSlow, kfSlow));
@@ -70,23 +73,21 @@ public class Turret extends SubsystemBase {
 
     public void seguirPose(Pose fieldTarget) {
         // lê Pinpoint (mm)
-        double robotXmm = follower.getPose().getX();
-        double robotYmm = follower.getPose().getY();
+        double robotX = follower.getPose().getX();
+        double robotY = follower.getPose().getY();
         double robotHeadingRad = follower.getPose().getHeading();
 
-        // converte mm → polegadas
-        double robotX = robotXmm * 0.0393701;
-        double robotY = robotYmm * 0.0393701;
 
         double dx = fieldTarget.getX() - robotX;
         double dy = fieldTarget.getY() - robotY;
 
         // ângulo absoluto até o alvo (radianos)
-        double absoluteAngleRad = Math.atan2(dy, dx);
+        double absoluteAngleRad = Math.atan2(dy, dx) ;
 
         // diferença entre o heading do robô e o vetor para o alvo
-        double errorRad = angleWrap(absoluteAngleRad - robotHeadingRad);
-        double errorDeg = Math.toDegrees(errorRad);
+         double errorRad = angleWrap(absoluteAngleRad - robotHeadingRad);
+         errorDeg = Math.toDegrees(errorRad);
+
 
         setAngleDeg(errorDeg);
     }
