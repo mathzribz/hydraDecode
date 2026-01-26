@@ -21,7 +21,7 @@ public class Turret extends SubsystemBase {
     public final DcMotorEx motor;
     Follower follower;
     public static double TICKS_PER_REV = 537.7;
-    public static double kpSlow = 0.0065;
+    public static double kpSlow = 0.00065;
     public static double kdSlow = 0.00012;
     public static double kfSlow = 0.0;
     public static double pidSwitchTicks = 30;
@@ -129,7 +129,7 @@ public class Turret extends SubsystemBase {
 
     /* ====== util ====== */
     private double degToTicks(double d) {
-        return (d / 360.0) * TICKS_PER_REV;
+        return (d / 360.0) * TICKS_PER_REV * 4;
     }
     private double ticksToDeg(double t) {
         return (t / TICKS_PER_REV) * 360.0;
