@@ -24,7 +24,7 @@ public class testTurretCommand extends CommandOpMode {
     private Drive drive;
 
     public static double x = 6;
-    public static double y = 67;
+    public static double y = 143;
 
     @Override
     public void initialize() {
@@ -64,7 +64,7 @@ public class testTurretCommand extends CommandOpMode {
                     )
             );
             telemetry.addData("cood", follower.getPose());
-            telemetry.addData("target", Turret.errorDeg);
+            telemetry.addData("target", Turret.targetTurret);
 
 
 

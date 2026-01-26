@@ -1,150 +1,104 @@
-
 package all.subsystems;
 
-
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.acmerobotics.dashboard.config.Config;
-import com.pedropathing.control.PIDFController;
-import com.pedropathing.control.PIDFCoefficients;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.follower.Follower;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import com.pedropathing.geometry.Pose;
 
 import all.Configs.Pedro.Constants;
 
-@Config
 public class Turret extends SubsystemBase {
 
-    public final DcMotorEx motor;
-    Follower follower;
+    private final DcMotorEx motor;
+    private final Follower follower;
+
     public static double TICKS_PER_REV = 537.7;
-    public static double kpSlow = 0.0065;
-    public static double kdSlow = 0.00012;
-    public static double kfSlow = 0.0;
-    public static double pidSwitchTicks = 30;
-    public static double MAX_DEG = 180.0;
-    private final PIDFController slowPID;
-    private double targetTicks = 0;
-    private boolean manualMode = false;
-    private double manualPower = 0;
-    public static double errorDeg;
+    public static double kp = 0.00065;
+    public static double kd = 0.0001;
+
+    private final PIDController pid;
+    private double targetAngle = 0.0;
+
+    public static double MAX_ANGLE = Math.toRadians(180);
+
+    public static double gear_ratio = 4.0;
 
     public Turret(HardwareMap hw) {
         motor = hw.get(DcMotorEx.class, "turret");
         follower = Constants.createFollower(hw);
+
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         motor.setPower(0);
 
-        slowPID = new PIDFController(new PIDFCoefficients(kpSlow, 0, kdSlow, kfSlow));
+        pid = new PIDController(kp, 0.0, kd);
     }
 
     @Override
     public void periodic() {
         follower.update();
 
-        if (manualMode) {
-            motor.setPower(manualPower);
-            return;
-        }
+        pid.setPID(kp, 0, kd);
 
-        double error = targetTicks - motor.getCurrentPosition();
-
-        slowPID.setCoefficients(new PIDFCoefficients(kpSlow, 0, kdSlow, kfSlow));
-
-        double power;
-
-        if (Math.abs(error) > pidSwitchTicks) {
-            slowPID.updateError(error);
-            slowPID.updateFeedForwardInput(Math.signum(error));
-            power = slowPID.run();
-        } else {
-            slowPID.updateError(error);
-            power = slowPID.run();
-        }
+        double current = getCurrentAngle();
+        double power = pid.calculate(current, targetAngle);
 
         motor.setPower(power);
-
-
     }
 
-    public void seguirPose(Pose fieldTarget) {
-        // lê Pinpoint (mm)
-        double robotX = follower.getPose().getX();
-        double robotY = follower.getPose().getY();
-        double robotHeadingRad = follower.getPose().getHeading();
-
+    public void seguirPose(Pose fieldTarget, Pose robot) {
+        double robotX = robot.getPose().getX();
+        double robotY = robot.getPose().getY();
+        double robotHeading = robot.getPose().getHeading();
 
         double dx = fieldTarget.getX() - robotX;
         double dy = fieldTarget.getY() - robotY;
 
-        // ângulo absoluto até o alvo (radianos)
-        double absoluteAngleRad = Math.atan2(dy, dx) ;
+        double absoluteAngle = Math.atan2(dy, dx);
 
-        // diferença entre o heading do robô e o vetor para o alvo
-         double errorRad = angleWrap(absoluteAngleRad - robotHeadingRad);
-         errorDeg = Math.toDegrees(errorRad);
+        double relativeAngle = absoluteAngle - robotHeading;
+        relativeAngle = wrap(relativeAngle);
 
-
-        setAngleDeg(errorDeg);
+        setTarget(relativeAngle);
     }
 
-    public void setAngleDeg(double deg) {
-        double normalized = normalizeDeg(deg);
-        normalized = Math.max(-MAX_DEG, Math.min(MAX_DEG, normalized));
-        targetTicks = degToTicks(normalized);
-        manualMode = false;
+    public void setTarget(double angle) {
+        angle = wrap(angle);
+        angle = clamp(angle);
+
+        targetAngle = angle;
     }
 
-    public void addAngleDeg(double delta) {
-        setAngleDeg(getAngleDeg() + delta);
+    public double getCurrentAngle() {
+        double ticks = motor.getCurrentPosition();
+        return ticksToRads(ticks);
     }
 
-    public double getAngleDeg() {
-        return ticksToDeg(motor.getCurrentPosition());
-    }
-
-    public double getHeadingDeg() {
-        return follower.getPose().getHeading();
-    }
-
-    public void manual(double p) {
-        manualMode = true;
-        manualPower = p;
-    }
-
-    public void automatic() {
-        manualMode = false;
+    public double getTargetAngle() {
+        return targetAngle;
     }
 
     public void resetEncoder() {
         motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        targetTicks = 0;
-        slowPID.reset();
+        pid.reset();
     }
 
-    /* ====== util ====== */
-    private double degToTicks(double d) {
-        return (d / 360.0) * TICKS_PER_REV;
-    }
-    private double ticksToDeg(double t) {
-        return (t / TICKS_PER_REV) * 360.0;
-    }
-    private double normalizeDeg(double d) {
-        d %= 360;
-        if (d > 180) d -= 360;
-        if (d < -180) d += 360;
-        return d;
-    }
-    private double angleWrap(double rad) {
-        // mantém entre -π…π
-        while (rad > Math.PI)  rad -= 2*Math.PI;
-        while (rad < -Math.PI) rad += 2*Math.PI;
-        return rad;
+    private double ticksToRads(double ticks) {
+        return ticks / TICKS_PER_REV * (2 * Math.PI) * gear_ratio;
     }
 
+    private double clamp(double angle) {
+        return Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, angle));
+    }
+
+    private double wrap(double angle) {
+        while (angle > Math.PI)  angle -= 2 * Math.PI;
+        while (angle < -Math.PI) angle += 2 * Math.PI;
+        return angle;
+    }
 }
