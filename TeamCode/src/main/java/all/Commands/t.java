@@ -37,7 +37,7 @@ public class t extends CommandBase {
     @Override
     public void execute() {
 
-        turret.seguirPose(targetPose.get());
+
     }
 
     @Override
