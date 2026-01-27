@@ -6,7 +6,6 @@ import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import com.pedropathing.geometry.Pose;
 
 import all.Configs.Pedro.Constants;
