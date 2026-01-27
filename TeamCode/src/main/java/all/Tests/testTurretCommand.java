@@ -23,9 +23,9 @@ public class testTurretCommand extends CommandOpMode {
     private Turret turret;
     private Drive drive;
 
-    public static double x = 6;
-    public static double y = 143;
 
+
+    Pose startPos = new Pose(0, 0);
     @Override
     public void initialize() {
 
@@ -37,7 +37,7 @@ public class testTurretCommand extends CommandOpMode {
         follower = Constants.createFollower(hardwareMap);
 
 
-        Pose startPos = new Pose(64, 80);
+
 
         follower.setStartingPose(startPos);
 
@@ -55,16 +55,11 @@ public class testTurretCommand extends CommandOpMode {
         while (!isStopRequested() && opModeIsActive()) {
             run();
 
-            turret.setDefaultCommand(
-                    new t(
-                            turret,
-                            drive
-                            ,
-                            () -> new Pose(x, y)
-                    )
-            );
+
+           turret.seguirPose(BLUE_GOAL,follower.getPose());
+
             telemetry.addData("cood", follower.getPose());
-            telemetry.addData("target", Turret.targetTurret);
+
 
 
 

@@ -49,6 +49,8 @@ TeleOpCommandBased extends CommandOpMode {
 
         follower.setStartingPose(startPos);
 
+        turret.resetEncoder();
+
 //        ll.switchPipeline(0);
 //        ll.start();
 
@@ -78,6 +80,7 @@ TeleOpCommandBased extends CommandOpMode {
 
 
         if(gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
+            turret.seguirPose(BLUE_GOAL,follower.getPose());
 
         }
 
@@ -94,7 +97,7 @@ TeleOpCommandBased extends CommandOpMode {
 
 //        telemetry.addData("cood pedro", ll.getPedroRobotPose());
        telemetry.addData("cood pedro",follower.getPose());
-        telemetry.addData("t ticks", turret.motor.getCurrentPosition());
+
 
         telemetry.update();
     }
