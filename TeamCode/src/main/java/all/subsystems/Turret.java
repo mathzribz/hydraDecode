@@ -17,11 +17,8 @@ import all.Configs.Pedro.Constants;
 public class Turret extends SubsystemBase {
 
     private final DcMotorEx motor;
-    private final Follower follower;
 
     public static double TICKS_PER_REV = 537.7;
-//    public static double kp = 0.05;
-//    public static double kd = 0.0001;
 
     private final PIDController pid;
     private double targetAngle = 0.0;
@@ -29,7 +26,7 @@ public class Turret extends SubsystemBase {
     public static double MAX_ANGLE = Math.toRadians(180);
 
     public static double gear_ratio = 4.0;
-    private PIDFController p, s; // pidf controller for turret
+    private PIDFController p, s;
     private double t = 0;
     public static double pidfSwitch = 30; // target for turret
     public static double kp = 0.003, kf = 0.0, kd = 0.000, sp = 0.005, sf = 0, sd = 0.00001;
@@ -38,7 +35,6 @@ public class Turret extends SubsystemBase {
 
     public Turret(HardwareMap hw) {
         motor = hw.get(DcMotorEx.class, "turret");
-        follower = Constants.createFollower(hw);
 
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -54,9 +50,6 @@ public class Turret extends SubsystemBase {
         t = ticks;
     }
 
-    public double getTurretTarget() {
-        return t;
-    }
 
     public double getTurret() {
         return motor.getCurrentPosition();
@@ -65,18 +58,15 @@ public class Turret extends SubsystemBase {
     @Override
     public void periodic() {
 
-        // converte target angular (rad) → ticks
         double targetTicks = radsToTicks(targetAngle);
         setTurretTarget(targetTicks);
 
         double currentTicks = getTurret();
         error = targetTicks - currentTicks;
 
-        // atualiza coeficientes
         p.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
         s.setCoefficients(new PIDFCoefficients(sp, 0, sd, sf));
 
-        // zona morta para evitar jitter
         if (Math.abs(error) < 5) {
             motor.setPower(0);
             p.reset();
@@ -84,7 +74,6 @@ public class Turret extends SubsystemBase {
             return;
         }
 
-        // PID rápido ou lento
         double power = 0;
         if (Math.abs(error) > pidfSwitch) {
             p.updateError(error);
@@ -116,32 +105,21 @@ public class Turret extends SubsystemBase {
 
     public void setTarget(double angle) {
         angle = wrap(angle);
-        angle = clamp(angle);
+        double current = getCurrentAngle();
+        angle = flipAngle(angle, current);
 
+        angle = clamp(angle);
         targetAngle = angle;
     }
-
-    public double getCurrentAngle() {
-        double ticks = motor.getCurrentPosition();
-        return ticksToRads(ticks);
-    }
-
-    public double getTargetAngle() {
-        return targetAngle;
-    }
-
 
     private double radsToTicks(double rad) {
         return (rad / (2 * Math.PI)) * TICKS_PER_REV * gear_ratio;
     }
+
     public void resetEncoder() {
         motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         pid.reset();
-    }
-
-    private double ticksToRads(double ticks) {
-        return (ticks / TICKS_PER_REV / gear_ratio) * (2 * Math.PI) ;
     }
 
     private double clamp(double angle) {
@@ -153,4 +131,29 @@ public class Turret extends SubsystemBase {
         while (angle < -Math.PI) angle += 2 * Math.PI;
         return angle;
     }
+
+    public double getCurrentAngle() {
+        double ticks = motor.getCurrentPosition();
+        return ticksToRads(ticks);
+    }
+
+    private double ticksToRads(double ticks) {
+        return (ticks / TICKS_PER_REV / gear_ratio) * (2 * Math.PI);
+    }
+
+    private double flipAngle(double target, double current) {
+        double best = target;
+
+        if (target > MAX_ANGLE)
+            best = target - 2 * Math.PI;
+
+        else if (target < -MAX_ANGLE)
+            best = target + 2 * Math.PI;
+
+        if (Math.abs(best - current) > Math.abs(target - current))
+            best = target;
+
+        return best;
+    }
+
 }
