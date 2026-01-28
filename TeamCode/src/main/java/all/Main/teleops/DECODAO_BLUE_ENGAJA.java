@@ -30,7 +30,7 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
     private DcMotor RMF, RMB, LMF, LMB;
     private DcMotor Intake;
     private DcMotorEx ShooterR, ShooterL;
-    private Servo porta, capuz;
+    private Servo porta, capuz, servo_teste;
     private DistanceSensor distanceSensor;
     private Limelight3A limelight;
     private GoBildaPinpointDriver pinpoint;
@@ -51,6 +51,8 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
     public static double targetRPM = 1200;
     public static double targetTPS ;
     public static double finalPower;
+    public double servo1pos = 0.15;
+    public static double servoPos = 0.32;
 
 
     // =============== LIMELIGHT TRACKER VARIÁVEIS ===============
@@ -85,6 +87,12 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
             intake();
             shooter();
 
+            if (gamepad1.a)
+                servo_teste.setPosition(servo1pos);
+
+            if (gamepad1.b)
+                servo_teste.setPosition(servoPos);
+
             telemetry.addData("Drive Speed", driveSpeed);
 
             telemetry.update();
@@ -107,6 +115,7 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
 
         porta = hardwareMap.get(Servo.class, "gate");
         capuz = hardwareMap.get(Servo.class, "capuz");
+        servo_teste = hardwareMap.get(Servo.class, "servo");
 
         // SENSORES
 
@@ -196,8 +205,8 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
     public void intake() {
 
         // INTAKE GAMEPAD
-        if (gamepad1.left_trigger > 0.1) {
-            Intake.setPower(0.85);
+        if (gamepad1.left_trigger > 0.1 || gamepad2.left_trigger > 0.1) {
+            Intake.setPower(0.5);
         } else if (gamepad1.right_bumper) {
             Intake.setPower(-0.75);
         } else {
