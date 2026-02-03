@@ -31,7 +31,7 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
     private DcMotor Intake;
     private DcMotorEx ShooterR, ShooterL;
     private Servo porta, capuz, servo_teste;
-    private DistanceSensor distanceSensor;
+    private DistanceSensor up, down;
     private Limelight3A limelight;
     private GoBildaPinpointDriver pinpoint;
     private IMU imu;
@@ -51,8 +51,8 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
     public static double targetRPM = 1200;
     public static double targetTPS ;
     public static double finalPower;
-    public double servo1pos = 0.15;
-    public static double servoPos = 0.32;
+    public static double servo1pos = 0.2;
+    public static double servoPos = 0.3;
 
 
     // =============== LIMELIGHT TRACKER VARIÁVEIS ===============
@@ -62,10 +62,16 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
 
     private double llIntegral = 0;
     private double llLastError = 0;
-    private ElapsedTime llTimer = new ElapsedTime();
+
+
     private Limelight3A limelightLL;
 
     double shooterS;
+
+    boolean EnabledTransfer = true;
+    ElapsedTime fullTimer = new ElapsedTime();
+    boolean countingFull = false;
+
 
     private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
 
@@ -77,6 +83,8 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         FtcDashboard dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
         initHardware();
+
+
 
         waitForStart();
 
@@ -129,16 +137,22 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         LMF.setDirection(DcMotorSimple.Direction.REVERSE);
         LMB.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        RMF.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        RMB.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        LMF.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        LMB.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+
         Intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         ShooterR.setDirection(DcMotorSimple.Direction.FORWARD);
         ShooterL.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        up = hardwareMap.get(DistanceSensor.class, "up");
+        down = hardwareMap.get(DistanceSensor.class, "down");
 
 
         limelightLL = hardwareMap.get(Limelight3A.class, "limelight");
-//        limelightLL.pipelineSwitch(0);
-//        limelightLL.start();
+
     }
 
     // DEADZONE
@@ -156,17 +170,6 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         double y  = applyDeadZone(-gamepad1.left_stick_y);   // FORWARD/BACKWARD
         double rx = applyDeadZone(-gamepad1.right_stick_x);   // ROTATION
 
-        // --- LIMELIGHT TRACKING (opcional) ---
-//        if (gamepad1.right_trigger > 0.15) {
-//            LLResult res = limelightLL.getLatestResult();
-//            if (res != null && res.isValid()) {
-//                double tx = res.getTx();
-//                rx = LL_PID(tx, -3);
-//            }
-//        } else {
-//            llIntegral = 0;
-//            llLastError = 0;
-//        }
 
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
@@ -204,33 +207,60 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
 
     public void intake() {
 
-        // INTAKE GAMEPAD
-        if (gamepad1.left_trigger > 0.1 || gamepad2.left_trigger > 0.1) {
-            Intake.setPower(0.5);
-        } else if (gamepad1.right_bumper) {
-            Intake.setPower(-0.75);
+        double distanceUp   = up.getDistance(DistanceUnit.CM);
+        double distanceDown = down.getDistance(DistanceUnit.CM);
+
+        boolean upBlocked   = distanceUp < 8;
+        boolean downBlocked = distanceDown < 8;
+
+        double intakePower = 0.0;
+
+        if (gamepad1.right_bumper) {
+            intakePower = -0.75;
+        }
+
+        if (upBlocked && downBlocked) {
+
+            if (!countingFull) {
+                fullTimer.reset();
+                countingFull = true;
+            }
+
+            if (fullTimer.seconds() >= 0.1) {
+                EnabledTransfer = false;
+            }
+
         } else {
-            Intake.setPower(0);
+            countingFull = false;
+            fullTimer.reset();
         }
 
-
-        if(gamepad1.left_bumper){
-            Intake.setPower(1);
-
+        if (!gamepad1.right_bumper) {
+            if (gamepad1.left_trigger > 0.1 && EnabledTransfer) {
+                intakePower = 0.9;
+            }
         }
 
+        if (gamepad1.left_bumper) {
+            EnabledTransfer = true;
+            countingFull = false;
+            fullTimer.reset();
+            intakePower = 1.0;
+        }
 
-        if(gamepad1.dpad_left){
+        if (gamepad1.dpad_left) {
             porta.setPosition(0);
-        }
-        else if(gamepad1.dpad_right){
-            double pos = 0.5;
-            porta.setPosition(pos);
+        } else if (gamepad1.dpad_right) {
+            porta.setPosition(0.5);
         }
 
+        Intake.setPower(intakePower);
+
+        telemetry.addData("Up (cm)", distanceUp);
+        telemetry.addData("Down (cm)", distanceDown);
+        telemetry.addData("EnabledTransfer", EnabledTransfer);
+        telemetry.addData("FullTimer", fullTimer.seconds());
     }
-
-
 
 
     public void shooter() {
@@ -296,20 +326,6 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         telemetry.addData("FinalPower", finalPower);
 
 
-    }
-
-    private double LL_PID(double target, double state) {
-        double error = target - state;
-        double dt = Math.max(llTimer.seconds(), 0.001);
-
-        llIntegral += error * dt;
-        double derivative = (error - llLastError) / dt;
-
-        llLastError = error;
-        llTimer.reset();
-
-        double output = (LL_Kp * error) + (LL_Ki * llIntegral) + (LL_Kd * derivative);
-        return clamp(output, -0.5, 0.5);
     }
 
     private double clamp(double v, double min, double max) {

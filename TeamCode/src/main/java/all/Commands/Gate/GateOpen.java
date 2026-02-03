@@ -16,7 +16,7 @@ public class GateOpen extends CommandBase {
 
     @Override
     public void initialize() {
-        intakeTransfer.GateOpen();
+        intakeTransfer.gateOpen();
 
 
     }

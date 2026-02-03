@@ -3,41 +3,106 @@ package all.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Intake extends SubsystemBase {
 
-    public Intake(final HardwareMap hwMap, String name) {
-        motor = new MotorEx(hwMap, "intake");
-        servo = hwMap.get(Servo.class, "gate");
+    private final MotorEx motor;
+    private final Servo gate;
+
+    private final DistanceSensor up, down;
+    private final ElapsedTime fullTimer = new ElapsedTime();
+
+    private boolean countingFull = false;
+    private boolean enabledTransfer = true;
+
+    public static boolean upBlocked, downBlocked;
+
+    private double motorPower = 0;
+
+    public Intake(HardwareMap hw) {
+        motor = new MotorEx(hw, "intake");
+        gate  = hw.get(Servo.class, "gate");
+
+        up   = hw.get(DistanceSensor.class, "up");
+        down = hw.get(DistanceSensor.class, "down");
+
     }
 
-    private MotorEx motor;
-    private final Servo servo;
+    public void updateAutoLogic() {
 
-    public double intakeSpeed = 0.8;
-    public double transferSpeed = 1;
+         upBlocked   = up.getDistance(DistanceUnit.CM) < 8;
+         downBlocked = down.getDistance(DistanceUnit.CM) < 8;
 
-    public void IntakeOn() {motor.set(intakeSpeed);}
+        if (upBlocked && downBlocked) {
+            if (!countingFull) {
+                fullTimer.reset();
+                countingFull = true;
+            }
 
-    public void Transfer() {motor.set(transferSpeed);}
+            if (fullTimer.seconds() >= 0.08) {
+                enabledTransfer = false;
+            }
 
-    public void IntakeOff() {motor.set(0);}
-    public void IntakeOut() {motor.set(-intakeSpeed);}
-
-    public void GateOpen() {
-        servo.setPosition(0.2   );
+        } else {
+            countingFull = false;
+            fullTimer.reset();
+        }
     }
 
-    public void GateClose() {
-        servo.setPosition(0.5);
+    // ===============================
+    // CONTROLES
+    // ===============================
+    public void intakeOn() {
+        if (enabledTransfer) {
+            motorPower = -0.9;
+        }
     }
 
+    public void intakeOut() {
+        motorPower = 0.75;
+    }
+
+    public void intakeStop() {
+        motorPower = 0;
+    }
+
+    public void Transfer() {
+        enabledTransfer = true;
+        countingFull = false;
+        fullTimer.reset();
+        motorPower = -1.0;
+    }
+
+    public void gateOpen() {
+        gate.setPosition(0.2);
+    }
+
+    public void gateClose() {
+        gate.setPosition(0.3);
+    }
+
+    // ===============================
+    // LOOP DO SUBSYSTEM
+    // ===============================
     @Override
     public void periodic() {
-
+        updateAutoLogic();
+        motor.set(motorPower);
     }
 
+    // ===============================
+    // TELEMETRIA (opcional)
+    // ===============================
+    public boolean isTransferEnabled() {
+        return enabledTransfer;
+    }
+
+    public double getFullTime() {
+        return fullTimer.seconds();
+    }
 }

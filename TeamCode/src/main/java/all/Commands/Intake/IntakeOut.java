@@ -16,7 +16,7 @@ public class IntakeOut extends CommandBase {
 
     @Override
     public void initialize() {
-        intakeTransfer.IntakeOut();
+        intakeTransfer.intakeOut();
 
 
     }

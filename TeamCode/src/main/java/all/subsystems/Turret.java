@@ -98,7 +98,7 @@ public class Turret extends SubsystemBase {
         power = Math.max(-1.0, Math.min(1.0, power));
         motor.setPower(power);
     }
-    public void seguirPose(Pose fieldTarget, Pose robot) {
+    public void followPose(Pose fieldTarget, Pose robot) {
         double robotX = robot.getX();
         double robotY = robot.getY();
         double robotHeading = robot.getHeading();
@@ -153,4 +153,21 @@ public class Turret extends SubsystemBase {
         while (angle < -Math.PI) angle += 2 * Math.PI;
         return angle;
     }
+
+    private double flipAngle(double target, double current) {
+        double best = target;
+
+        if (target > MAX_ANGLE)
+            best = target - 2 * Math.PI;
+
+        else if (target < -MAX_ANGLE)
+            best = target + 2 * Math.PI;
+
+        // Garante que escolhemos o caminho mais curto
+        if (Math.abs(best - current) > Math.abs(target - current))
+            best = target;
+
+        return best;
+    }
+
 }

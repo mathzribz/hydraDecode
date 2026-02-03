@@ -43,7 +43,7 @@ public class Drive extends SubsystemBase {
 
     @Override
     public void periodic() {
-        follower.update(); // 🔴 obrigatório
+        follower.update();
     }
 
     /** CHAMAR UMA VEZ POR LOOP */
@@ -94,4 +94,5 @@ public class Drive extends SubsystemBase {
     public Pose getPose() {
         return follower.getPose();
     }
+
 }

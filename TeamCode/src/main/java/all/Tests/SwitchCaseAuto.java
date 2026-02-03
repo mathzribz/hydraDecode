@@ -11,8 +11,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import all.Commands.Gate.GateClose;
 import all.Commands.Gate.GateOpen;
-import all.Commands.Intake.IntakeOff;
+import all.Commands.Intake.IntakeStop;
 import all.Commands.Intake.IntakeOn;
+import all.Commands.Intake.IntakeStop;
 import all.Commands.Shooter.ShooterOff;
 import all.Commands.Shooter.ShooterOn;
 import all.Configs.Pedro.Constants;
@@ -29,7 +30,7 @@ public class SwitchCaseAuto extends OpMode {
     private Intake intakeSubsystem;
 
     private IntakeOn intakeOn;
-    private IntakeOff intakeOff;
+    private IntakeStop intakeOff;
     private GateOpen gateOpen;
     private GateClose gateClose;
     private ShooterOn shooterOn;
@@ -126,11 +127,11 @@ public class SwitchCaseAuto extends OpMode {
 
         follower = Constants.createFollower(hardwareMap);
 
-        intakeSubsystem = new Intake(hardwareMap, "intakeSubsystem");
+        intakeSubsystem = new Intake(hardwareMap);
         shooterSubsystem = new Shooter(hardwareMap, "shooterSubsystem");
 
         intakeOn = new IntakeOn(intakeSubsystem);
-        intakeOff = new IntakeOff(intakeSubsystem);
+        intakeOff = new IntakeStop(intakeSubsystem);
         gateOpen = new GateOpen(intakeSubsystem);
         gateClose = new GateClose(intakeSubsystem);
         shooterOn = new ShooterOn(shooterSubsystem);

@@ -16,7 +16,7 @@ public class GateClose extends CommandBase {
 
     @Override
     public void initialize() {
-        intakeTransfer.GateClose();
+        intakeTransfer.gateClose();
 
 
     }

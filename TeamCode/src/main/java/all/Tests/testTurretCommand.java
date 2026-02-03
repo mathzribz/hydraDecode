@@ -56,7 +56,7 @@ public class testTurretCommand extends CommandOpMode {
             run();
 
 
-           turret.seguirPose(BLUE_GOAL,follower.getPose());
+           turret.followPose(BLUE_GOAL,follower.getPose());
 
             telemetry.addData("cood", follower.getPose());
 
