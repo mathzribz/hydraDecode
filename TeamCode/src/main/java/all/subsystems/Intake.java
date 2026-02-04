@@ -65,6 +65,9 @@ public class Intake extends SubsystemBase {
     }
 
     public void intakeOut() {
+        enabledTransfer = true;
+        countingFull = false;
+        fullTimer.reset();
         motorPower = 0.75;
     }
 

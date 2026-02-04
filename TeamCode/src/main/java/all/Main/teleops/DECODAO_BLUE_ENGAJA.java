@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -44,8 +45,8 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
 
     public static double kP = 0.00065;
     public static double kI = 0.0;
-    public static double kD = 0.00001;
-    public static double kF = 0.0015;
+    public static double kD = 0.0;
+    public static double kF = 0.000335;
 
     public static double TICKS_PER_REV = 28;
     public static double targetRPM = 1200;
@@ -95,10 +96,10 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
             intake();
             shooter();
 
-            if (gamepad1.a)
+            if (gamepad1.dpad_up)
                 servo_teste.setPosition(servo1pos);
 
-            if (gamepad1.b)
+            if (gamepad1.dpad_down)
                 servo_teste.setPosition(servoPos);
 
             telemetry.addData("Drive Speed", driveSpeed);
@@ -121,9 +122,10 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         ShooterR = hardwareMap.get(DcMotorEx.class, "shooterR");
         ShooterL = hardwareMap.get(DcMotorEx.class, "shooterL");
 
-        porta = hardwareMap.get(Servo.class, "gate");
+
+
         capuz = hardwareMap.get(Servo.class, "capuz");
-        servo_teste = hardwareMap.get(Servo.class, "servo");
+        servo_teste = hardwareMap.get(Servo.class, "gate");
 
         // SENSORES
 
@@ -144,8 +146,15 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
 
         Intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        ShooterR.setDirection(DcMotorSimple.Direction.FORWARD);
+        ShooterR.setDirection(DcMotorSimple.Direction.REVERSE);
         ShooterL.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+        ShooterL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        ShooterR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+
 
         up = hardwareMap.get(DistanceSensor.class, "up");
         down = hardwareMap.get(DistanceSensor.class, "down");
@@ -236,7 +245,7 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         }
 
         if (!gamepad1.right_bumper) {
-            if (gamepad1.left_trigger > 0.1 && EnabledTransfer) {
+            if (gamepad1.left_trigger > 0.08 && EnabledTransfer) {
                 intakePower = 0.9;
             }
         }
@@ -265,68 +274,35 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
 
     public void shooter() {
 
-        double vl = ShooterL.getVelocity();
+        pidf.setPIDF(kP, kI, kD, kF);
 
-
+        double currentTPS = ShooterL.getVelocity();
         targetTPS = (targetRPM / 60.0) * TICKS_PER_REV;
 
+        double ff = targetTPS * kF;
+        double pid = pidf.calculate(currentTPS, targetTPS);
 
-        if (gamepad1.x || gamepad2.x) {
-            targetRPM = 1200;
-            shooterS = 0.35;
+        finalPower = ff + pid;
+        finalPower = clamp(finalPower, -1.0, 1.0);
 
-        }
-        if (gamepad1.a || gamepad2.a) {
-            targetRPM = 1350;
-            shooterS = 0.45;
-
-        } if (gamepad1.b || gamepad2.b) {
-            targetRPM = 1600;
-            shooterS = 0.75;
-        }
-        double pidPower = pidf.calculate(vl, targetTPS);
-
-
-        // ajustar feedforward com compensação de voltagem
-        double voltage = vs.getVoltage();
-        // double compensatedFF = ffPower * (12.0 / Math.max(10.0, voltage));
-
-        finalPower = pidPower;
-
-        finalPower = Math.max(-1.0, Math.min(1.0, finalPower));
-
-        if ( gamepad1.right_trigger > 0.1) {
-            ShooterR.setPower(shooterS);
-            ShooterL.setPower(shooterS);
+        if (gamepad1.right_trigger > 0.1) {
+            ShooterR.setPower(finalPower);
+            ShooterL.setPower(finalPower);
         } else {
             ShooterR.setPower(0);
             ShooterL.setPower(0);
-//            pidf.reset();
+            pidf.reset();
         }
 
-        if (gamepad1.y) {
-            ShooterR.setPower(-finalPower );
-            ShooterL.setPower(-finalPower  );
-            Intake.setPower(0.3);
-        }
+        double rpm = (currentTPS / TICKS_PER_REV) * 60.0;
 
-        if(gamepad1.dpad_down){
-            capuz.setPosition(0);
-        }
-        else if(gamepad1.dpad_up){
-            double pos2 = 0.5;
-            capuz.setPosition(pos2);
-        }
-
-        telemetry.addData("RPM ", vl);
-        telemetry.addData("targetRPM", targetRPM);
-        telemetry.addData("PID", pidPower);
-
-        telemetry.addData("Voltagem", voltage);
-        telemetry.addData("FinalPower", finalPower);
-
-
+        telemetry.addData("RPM", rpm);
+        telemetry.addData("Target RPM", targetRPM);
+        telemetry.addData("PID", pid);
+        telemetry.addData("FF", ff);
+        telemetry.addData("Final Power", finalPower);
     }
+
 
     private double clamp(double v, double min, double max) {
         return Math.max(min, Math.min(max, v));

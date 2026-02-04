@@ -17,7 +17,7 @@ public class ShooterOff extends CommandBase {
 
     @Override
     public void initialize() {
-        shoot.ShooterOff();
+        shoot.shooterOff();
 
 
     }

@@ -34,11 +34,13 @@ public class TeleOpCommandBased extends CommandOpMode {
         turret.resetEncoder();
 
         Pose startPos = new Pose(0, 0,90 );
+
         drive.setStartingPose(startPos);
 
         drive.setDefaultCommand(
                 new DriveCommand(drive, gamepad1Ex)
         );
+
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.A)
                 .whenPressed(new SetDriveSpeed(drive, 0.65));
 
@@ -52,12 +54,12 @@ public class TeleOpCommandBased extends CommandOpMode {
 
     @Override
     public void run() {
+        super.run();
 
         turret.followPose(BLUE_GOAL,drive.getPose());
 
         intakeWorking();
         gateWorking();
-
 
         telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
         telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());

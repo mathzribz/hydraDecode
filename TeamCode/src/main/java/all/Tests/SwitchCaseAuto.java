@@ -128,7 +128,7 @@ public class SwitchCaseAuto extends OpMode {
         follower = Constants.createFollower(hardwareMap);
 
         intakeSubsystem = new Intake(hardwareMap);
-        shooterSubsystem = new Shooter(hardwareMap, "shooterSubsystem");
+        shooterSubsystem = new Shooter(hardwareMap);
 
         intakeOn = new IntakeOn(intakeSubsystem);
         intakeOff = new IntakeStop(intakeSubsystem);
