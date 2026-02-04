@@ -1,4 +1,3 @@
-
 package all.subsystems;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
@@ -6,58 +5,90 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.tel
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDFController;
-import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
 public class Shooter extends SubsystemBase {
 
-    public Shooter(final HardwareMap hwMap, String name) {
-        m1 = new MotorEx(hwMap, "shooterL");
-        m2 = new MotorEx(hwMap, "shooterR");
-        servo = hwMap.get(Servo.class, "hood");
+    private final DcMotorEx shooterL, shooterR;
+    private final Servo hood;
 
-    }
-
-    private MotorEx m1, m2;
-    private final Servo servo;
-    public static double kP = 0.00065;
-    public static double kI = 0.0;
+    public static double kP = 0.0006;
     public static double kD = 0.00001;
-    public static double kF = 0.0015;
+    public static double kF = 0.00018;
+
+    private final PIDFController pidf = new PIDFController(kP, 0, kD, 0);
+
 
     public static double TICKS_PER_REV = 28;
     public static double targetRPM = 1200;
-    public static double targetTPS = (targetRPM / 60.0) * TICKS_PER_REV;
-    private final PIDFController pidf = new PIDFController(kP, kI, kD, kF);
-    double Lp = m1.getVelocity();
-    double pidPower = pidf.calculate(Lp, targetTPS);
 
-    public double getPidPower() {
-        return  pidPower = Math.max(-1.0, Math.min(1.0, pidPower));
+    private boolean enabled = false;
+    private double power = 0;
+
+    public Shooter(HardwareMap hwMap) {
+
+        shooterL = hwMap.get(DcMotorEx.class, "shooterL");
+        shooterR = hwMap.get(DcMotorEx.class, "shooterR");
+        hood = hwMap.get(Servo.class, "capuz");
+
+        shooterL.setDirection(DcMotorSimple.Direction.REVERSE);
+        shooterR.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        shooterL.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        shooterR.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
-    public void ShooterOn() {
-        m1.set(getPidPower());
-        m2.set(getPidPower());
-
+    public void shooterOn() {
+        enabled = true;
     }
-    public void ShooterOff() {
-        m1.set(0);
-        m2.set(0);
+
+    public void shooterOff() {
+        enabled = false;
+        power = 0;
         pidf.reset();
-
+        shooterL.setPower(0);
+        shooterR.setPower(0);
     }
 
+    public void setTargetRPM(double rpm) {
+        targetRPM = rpm;
+    }
 
-
+    public double getCurrentRPM() {
+        return (shooterL.getVelocity() / TICKS_PER_REV) * 60.0;
+    }
 
     @Override
     public void periodic() {
-        telemetry.addData("RPM ", Lp);
-        telemetry.addData("targetRPM", targetRPM);
+
+        pidf.setPIDF(kP, 0, kD, kF);
+
+        double currentTPS = shooterL.getVelocity();
+        double targetTPS = (targetRPM / 60.0) * TICKS_PER_REV;
+
+        if (enabled) {
+            double ff = targetTPS * kF;
+            double pid = pidf.calculate(currentTPS, targetTPS);
+
+            power = ff + pid;
+            power = Math.max(0.0, Math.min(1.0, power));
+
+            shooterL.setPower(power);
+            shooterR.setPower(power);
+        } else {
+            shooterL.setPower(0);
+            shooterR.setPower(0);
+            pidf.reset();
+        }
+
+        telemetry.addData("Shooter Enabled", enabled);
+        telemetry.addData("Target RPM", targetRPM);
+        telemetry.addData("Current RPM", getCurrentRPM());
+        telemetry.addData("Power", power);
         telemetry.update();
     }
-
 }
