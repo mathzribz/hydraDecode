@@ -1,8 +1,6 @@
+
 package all.subsystems;
 
-
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.pedropathing.follower.Follower;
@@ -20,7 +18,7 @@ public class Drive extends SubsystemBase {
     private final DcMotorEx LMF, LMB, RMF, RMB;
     private final GoBildaPinpointDriver pinpoint;
 
-    private Follower follower;
+    private final Follower follower;
 
     private double headingOffset = 0.0;
     private double driveSpeed = 0.85;
@@ -43,6 +41,9 @@ public class Drive extends SubsystemBase {
 
     @Override
     public void periodic() {
+        pinpoint.update();
+        currentHeadingRad = pinpoint.getHeading(AngleUnit.RADIANS);
+        currentHeadingDeg = pinpoint.getHeading(AngleUnit.DEGREES);
         follower.update();
     }
 
@@ -73,6 +74,10 @@ public class Drive extends SubsystemBase {
         RMF.setPower((rotY - rotX - rx) / denominator * driveSpeed);
         RMB.setPower((rotY + rotX - rx) / denominator * driveSpeed);
 
+    }
+
+    public void setStartingPose(Pose pose) {
+        follower.setStartingPose(pose);
     }
 
     public double getHeadingDeg() {

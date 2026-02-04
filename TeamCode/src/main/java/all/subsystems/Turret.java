@@ -17,11 +17,8 @@ import all.Configs.Pedro.Constants;
 public class Turret extends SubsystemBase {
 
     private final DcMotorEx motor;
-    private final Follower follower;
 
     public static double TICKS_PER_REV = 537.7;
-//    public static double kp = 0.05;
-//    public static double kd = 0.0001;
 
     private final PIDController pid;
     private double targetAngle = 0.0;
@@ -38,7 +35,6 @@ public class Turret extends SubsystemBase {
 
     public Turret(HardwareMap hw) {
         motor = hw.get(DcMotorEx.class, "turret");
-        follower = Constants.createFollower(hw);
 
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -65,18 +61,15 @@ public class Turret extends SubsystemBase {
     @Override
     public void periodic() {
 
-        // converte target angular (rad) → ticks
         double targetTicks = radsToTicks(targetAngle);
         setTurretTarget(targetTicks);
 
         double currentTicks = getTurret();
         error = targetTicks - currentTicks;
 
-        // atualiza coeficientes
         p.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
         s.setCoefficients(new PIDFCoefficients(sp, 0, sd, sf));
 
-        // zona morta para evitar jitter
         if (Math.abs(error) < 5) {
             motor.setPower(0);
             p.reset();
@@ -154,20 +147,5 @@ public class Turret extends SubsystemBase {
         return angle;
     }
 
-    private double flipAngle(double target, double current) {
-        double best = target;
-
-        if (target > MAX_ANGLE)
-            best = target - 2 * Math.PI;
-
-        else if (target < -MAX_ANGLE)
-            best = target + 2 * Math.PI;
-
-        // Garante que escolhemos o caminho mais curto
-        if (Math.abs(best - current) > Math.abs(target - current))
-            best = target;
-
-        return best;
-    }
 
 }

@@ -1,37 +1,26 @@
 
 package all.Tests;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
-
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.gamepad.TriggerReader;
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
 import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
 import all.Commands.Loc.SetDriveSpeed;
-import all.Configs.Pedro.Constants;
 import all.subsystems.Drive;
 import all.subsystems.Intake;
 import all.subsystems.LLturret;
 import all.subsystems.Turret;
 @TeleOp
-public class
-TeleOpCommandBased extends CommandOpMode {
+public class TeleOpCommandBased extends CommandOpMode {
     private Drive drive;
     private LLturret ll;
     private Turret turret;
     private Intake intake;
     private GamepadEx gamepad1Ex;
-    private Follower follower;
 
     @Override
     public void initialize() {
@@ -40,23 +29,16 @@ TeleOpCommandBased extends CommandOpMode {
         ll = new LLturret(hardwareMap);
         turret = new Turret(hardwareMap);
         intake = new Intake(hardwareMap);
-        follower = Constants.createFollower(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
-
-        Pose startPos = new Pose(0, 0,90 );
-
-        follower.setStartingPose(startPos);
 
         turret.resetEncoder();
 
-//        ll.switchPipeline(0);
-//        ll.start();
+        Pose startPos = new Pose(0, 0,90 );
+        drive.setStartingPose(startPos);
 
-        // DEFAULT COMMAND (ESSENCIAL)
         drive.setDefaultCommand(
                 new DriveCommand(drive, gamepad1Ex)
         );
-
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.A)
                 .whenPressed(new SetDriveSpeed(drive, 0.65));
 
@@ -66,17 +48,12 @@ TeleOpCommandBased extends CommandOpMode {
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenPressed(new ResetFieldCentric(drive));
 
-
-
     }
 
     @Override
     public void run() {
-        super.run();
 
-        follower.update();
-        drive.updatePinpoint();
-        turret.followPose(BLUE_GOAL,follower.getPose());
+        turret.followPose(BLUE_GOAL,drive.getPose());
 
         intakeWorking();
         gateWorking();
@@ -87,8 +64,8 @@ TeleOpCommandBased extends CommandOpMode {
         telemetry.addData("Up (cm)", Intake.upBlocked);
         telemetry.addData("Down (cm)", Intake.downBlocked);
         telemetry.addData("Full Timer", intake.getFullTime());
-        telemetry.addData("cood pedro",follower.getPose());
-        // telemetry.addData("cood pedro", ll.getPedroRobotPose());
+        telemetry.addData("cood pedro",drive.getPose());
+        // telemetry.addData("cood LL", ll.getPedroRobotPose());
 
         telemetry.update();
     }
