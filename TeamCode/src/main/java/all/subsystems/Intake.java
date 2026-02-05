@@ -83,7 +83,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void gateOpen() {
-        gate.setPosition(0.2);
+        gate.setPosition(0.16);
     }
 
     public void gateClose() {
