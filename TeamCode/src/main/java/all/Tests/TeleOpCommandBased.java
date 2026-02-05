@@ -13,6 +13,7 @@ import all.Commands.Loc.SetDriveSpeed;
 import all.subsystems.Drive;
 import all.subsystems.Intake;
 import all.subsystems.LLturret;
+import all.subsystems.Shooter;
 import all.subsystems.Turret;
 @TeleOp
 public class TeleOpCommandBased extends CommandOpMode {
@@ -20,6 +21,7 @@ public class TeleOpCommandBased extends CommandOpMode {
     private LLturret ll;
     private Turret turret;
     private Intake intake;
+    private Shooter shooter;
     private GamepadEx gamepad1Ex;
 
     @Override
@@ -29,6 +31,7 @@ public class TeleOpCommandBased extends CommandOpMode {
         ll = new LLturret(hardwareMap);
         turret = new Turret(hardwareMap);
         intake = new Intake(hardwareMap);
+        shooter = new Shooter(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
 
         turret.resetEncoder();

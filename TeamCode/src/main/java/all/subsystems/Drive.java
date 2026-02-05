@@ -26,6 +26,8 @@ public class Drive extends SubsystemBase {
     private double currentHeadingRad = 0.0;
     private double currentHeadingDeg = 0.0;
 
+    private boolean headingInitialized = false;
+
     public Drive(HardwareMap hwMap) {
         LMF = hwMap.get(DcMotorEx.class, "LMF");
         LMB = hwMap.get(DcMotorEx.class, "LMB");
@@ -45,6 +47,12 @@ public class Drive extends SubsystemBase {
         currentHeadingRad = pinpoint.getHeading(AngleUnit.RADIANS);
         currentHeadingDeg = pinpoint.getHeading(AngleUnit.DEGREES);
         follower.update();
+
+        if (!headingInitialized) {
+            headingOffset = currentHeadingRad;
+            headingInitialized = true;
+        }
+
     }
 
     /** CHAMAR UMA VEZ POR LOOP */
