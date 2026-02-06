@@ -1,7 +1,5 @@
 package all.subsystems;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDFController;
@@ -16,15 +14,15 @@ public class Shooter extends SubsystemBase {
     private final DcMotorEx shooterL, shooterR;
     private final Servo hood;
 
-    public static double kP = 0.0006;
-    public static double kD = 0.00001;
-    public static double kF = 0.00018;
+    public static double kP = 0.004;
+    public static double kD = 0.0000;
+    public static double kF = 0.0003455;
 
     private final PIDFController pidf = new PIDFController(kP, 0, kD, 0);
 
 
     public static double TICKS_PER_REV = 28;
-    public static double targetRPM = 1200;
+    public static double targetRPM = 1800;
 
     private boolean enabled = false;
     private double power = 0;
@@ -38,8 +36,17 @@ public class Shooter extends SubsystemBase {
         shooterL.setDirection(DcMotorSimple.Direction.REVERSE);
         shooterR.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        shooterL.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        shooterR.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        shooterL.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        shooterR.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+
+    public void HoodHigh() {
+        hood.setPosition(0.8);
+    }
+
+    public void HoodLow() {
+        hood.setPosition(0.5);
     }
 
     public void shooterOn() {
@@ -56,6 +63,9 @@ public class Shooter extends SubsystemBase {
 
     public void setTargetRPM(double rpm) {
         targetRPM = rpm;
+    }
+    public double getTargetRPM() {
+        return targetRPM ;
     }
 
     public double getCurrentRPM() {
@@ -85,10 +95,7 @@ public class Shooter extends SubsystemBase {
             pidf.reset();
         }
 
-        telemetry.addData("Shooter Enabled", enabled);
-        telemetry.addData("Target RPM", targetRPM);
-        telemetry.addData("Current RPM", getCurrentRPM());
-        telemetry.addData("Power", power);
-        telemetry.update();
+
+
     }
 }

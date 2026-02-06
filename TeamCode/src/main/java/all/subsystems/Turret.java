@@ -1,4 +1,5 @@
 
+
 package all.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
@@ -23,15 +24,21 @@ public class Turret extends SubsystemBase {
     private final PIDController pid;
     private double targetAngle = 0.0;
 
-    public static double MAX_ANGLE = Math.toRadians(180);
+    public static double MAX_ANGLE = Math.toRadians(150);
 
-    public static double gear_ratio = 4.0;
+    public static double gear_ratio = 3.906976744186047;
     private PIDFController p, s; // pidf controller for turret
     private double t = 0;
     public static double pidfSwitch = 30; // target for turret
-    public static double kp = 0.003, kf = 0.0, kd = 0.000, sp = 0.005, sf = 0, sd = 0.00001;
+    public static double kp = 0.0025, kf = 0.0, kd = 0.000, sp = 0.005, sf = 0, sd = 0.00001;
 
     private double error = 0;
+
+    private double encoderOffsetTicks = 0;
+
+
+
+
 
     public Turret(HardwareMap hw) {
         motor = hw.get(DcMotorEx.class, "turret");
@@ -55,7 +62,9 @@ public class Turret extends SubsystemBase {
     }
 
     public double getTurret() {
-        return motor.getCurrentPosition();
+
+
+        return motor.getCurrentPosition() ;
     }
 
     @Override
@@ -108,7 +117,7 @@ public class Turret extends SubsystemBase {
     }
 
     public void setTarget(double angle) {
-        angle = wrap(angle);
+        angle = wrap(angle );
         angle = clamp(angle);
 
         targetAngle = angle;
@@ -127,6 +136,8 @@ public class Turret extends SubsystemBase {
     private double radsToTicks(double rad) {
         return (rad / (2 * Math.PI)) * TICKS_PER_REV * gear_ratio;
     }
+
+
     public void resetEncoder() {
         motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -141,11 +152,18 @@ public class Turret extends SubsystemBase {
         return Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, angle));
     }
 
+
+    public void setInitialAngle(double angleRad) {
+        encoderOffsetTicks = radsToTicks(angleRad);
+    }
+
     private double wrap(double angle) {
         while (angle > Math.PI)  angle -= 2 * Math.PI;
         while (angle < -Math.PI) angle += 2 * Math.PI;
         return angle;
     }
+
+
 
 
 }

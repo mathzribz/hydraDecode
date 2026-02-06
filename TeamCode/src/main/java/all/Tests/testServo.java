@@ -15,7 +15,7 @@ public class testServo extends LinearOpMode {
 
     public void initservoA () {
 
-        servoG = hardwareMap.get(Servo.class, "servo");
+        servoG = hardwareMap.get(Servo.class, "capuz");
 
 
     }

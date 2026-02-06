@@ -43,10 +43,10 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
     private double headingOffset = 0.0;
     private static final double DEAD_ZONE = 0.25;
 
-    public static double kP = 0.00065;
+    public static double kP = 0.0007;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kF = 0.000335;
+    public static double kF = 0.0003455;
 
     public static double TICKS_PER_REV = 28;
     public static double targetRPM = 1200;

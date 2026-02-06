@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
@@ -35,8 +36,10 @@ public class TeleOpCommandBased extends CommandOpMode {
         gamepad1Ex = new GamepadEx(gamepad1);
 
         turret.resetEncoder();
+        turret.setInitialAngle(Math.PI);
+        turret.setTarget(0);
 
-        Pose startPos = new Pose(0, 0,90 );
+        Pose startPos = new Pose(33, 111,0 );
 
         drive.setStartingPose(startPos);
 
@@ -47,11 +50,12 @@ public class TeleOpCommandBased extends CommandOpMode {
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.A)
                 .whenPressed(new SetDriveSpeed(drive, 0.65));
 
-        gamepad1Ex.getGamepadButton(GamepadKeys.Button.Y)
+        gamepad1Ex.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(new SetDriveSpeed(drive, 1.0));
 
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenPressed(new ResetFieldCentric(drive));
+
 
     }
 
@@ -62,7 +66,7 @@ public class TeleOpCommandBased extends CommandOpMode {
         turret.followPose(BLUE_GOAL,drive.getPose());
 
         intakeWorking();
-        gateWorking();
+        shooterWorking();
 
         telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
         telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
@@ -70,6 +74,8 @@ public class TeleOpCommandBased extends CommandOpMode {
         telemetry.addData("Down (cm)", Intake.downBlocked);
         telemetry.addData("Full Timer", intake.getFullTime());
         telemetry.addData("cood pedro",drive.getPose());
+        telemetry.addData("target RPM",shooter.getTargetRPM());
+        telemetry.addData("current RPM",shooter.getCurrentRPM());
         // telemetry.addData("cood LL", ll.getPedroRobotPose());
 
         telemetry.update();
@@ -91,12 +97,33 @@ public class TeleOpCommandBased extends CommandOpMode {
         else { intake.intakeStop();}
     }
 
-    public void gateWorking(){
+    public void shooterWorking() {
 
-        if(gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
+        if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
             intake.gateOpen();
+            shooter.shooterOn();
+        } else {
+            intake.gateClose();
+            shooter.shooterOff();
         }
 
-        else { intake.gateClose();}
+
+        if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
+            shooter.setTargetRPM(2000);
+        }
+        if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
+            shooter.setTargetRPM(2200);
+        }
+
+        if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_UP)) {
+            shooter.HoodHigh();
+        }
+        if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_DOWN)) {
+            shooter.HoodLow();
+        }
+
+
+
     }
+
 }

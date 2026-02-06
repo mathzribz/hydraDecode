@@ -83,25 +83,19 @@ public class Intake extends SubsystemBase {
     }
 
     public void gateOpen() {
-        gate.setPosition(0.16);
+        gate.setPosition(0.20955);
     }
 
     public void gateClose() {
         gate.setPosition(0.3);
     }
 
-    // ===============================
-    // LOOP DO SUBSYSTEM
-    // ===============================
     @Override
     public void periodic() {
         updateAutoLogic();
         motor.set(motorPower);
     }
 
-    // ===============================
-    // TELEMETRIA (opcional)
-    // ===============================
     public boolean isTransferEnabled() {
         return enabledTransfer;
     }
