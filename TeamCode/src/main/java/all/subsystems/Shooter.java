@@ -42,11 +42,11 @@ public class Shooter extends SubsystemBase {
 
 
     public void HoodHigh() {
-        hood.setPosition(0.8);
+        hood.setPosition(0.92);
     }
 
     public void HoodLow() {
-        hood.setPosition(0.5);
+        hood.setPosition(0.75);
     }
 
     public void shooterOn() {

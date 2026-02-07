@@ -2,6 +2,8 @@
 package all.Tests;
 
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
+import static all.Configs.Turret.FieldConstants.RED_GOAL;
+
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -63,7 +65,7 @@ public class TeleOpCommandBased extends CommandOpMode {
     public void run() {
         super.run();
 
-        turret.followPose(BLUE_GOAL,drive.getPose());
+        turret.followPose(RED_GOAL,drive.getPose());
 
         intakeWorking();
         shooterWorking();
@@ -109,10 +111,10 @@ public class TeleOpCommandBased extends CommandOpMode {
 
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
-            shooter.setTargetRPM(2000);
+            shooter.setTargetRPM(2300);
         }
         if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
-            shooter.setTargetRPM(2200);
+            shooter.setTargetRPM(2700);
         }
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_UP)) {

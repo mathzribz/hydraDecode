@@ -20,9 +20,7 @@ import all.subsystems.Intake;
 import all.subsystems.LLturret;
 import all.subsystems.Shooter;
 import all.subsystems.Turret;
-import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.groups.SequentialGroup;
-import dev.nextftc.extensions.pedro.FollowPath;
+
 
 @Config
 @TeleOp
@@ -94,7 +92,8 @@ public class engaja_maldito_red extends CommandOpMode {
         intake.gateClose();
 
         if (timer.seconds() > 2){
-            new FollowPath(score1, true);
+            follower.followPath(repo1, true);
+
         }
 
         if (timer.seconds() > 5){
@@ -111,7 +110,8 @@ public class engaja_maldito_red extends CommandOpMode {
 
 
         if (timer.seconds() > 14){
-            new FollowPath(repo1, true);
+            follower.followPath(repo1, true);
+
         }
 
 

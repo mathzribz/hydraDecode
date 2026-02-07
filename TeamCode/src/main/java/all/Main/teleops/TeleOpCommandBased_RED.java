@@ -42,7 +42,7 @@ public class TeleOpCommandBased_RED extends CommandOpMode {
         turret.setInitialAngle(Math.PI);
         turret.setTarget(0);
 
-        Pose startPos =  new Pose(86, 66 , Math.toRadians(0));
+        Pose startPos = new Pose(110, 135, 0);
 
         drive.setStartingPose(startPos);
 
@@ -112,10 +112,10 @@ public class TeleOpCommandBased_RED extends CommandOpMode {
 
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
-            shooter.setTargetRPM(2000);
+            shooter.setTargetRPM(2300);
         }
         if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
-            shooter.setTargetRPM(2200);
+            shooter.setTargetRPM(2700);
         }
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_UP)) {
