@@ -97,10 +97,10 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
             shooter();
 
             if (gamepad1.dpad_up)
-                servo_teste.setPosition(servo1pos);
+                capuz.setPosition(servo1pos);
 
             if (gamepad1.dpad_down)
-                servo_teste.setPosition(servoPos);
+                capuz.setPosition(0);
 
             telemetry.addData("Drive Speed", driveSpeed);
 
@@ -288,10 +288,12 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         if (gamepad1.right_trigger > 0.1) {
             ShooterR.setPower(finalPower);
             ShooterL.setPower(finalPower);
+            servo_teste.setPosition(0.195);
         } else {
             ShooterR.setPower(0);
             ShooterL.setPower(0);
             pidf.reset();
+            servo_teste.setPosition(0.3);
         }
 
         double rpm = (currentTPS / TICKS_PER_REV) * 60.0;
