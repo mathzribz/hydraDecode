@@ -1,135 +1,165 @@
 
-
 package all.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.control.PIDFController;
-import com.pedropathing.follower.Follower;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import com.pedropathing.geometry.Pose;
-
-import all.Configs.Pedro.Constants;
-
 public class Turret extends SubsystemBase {
 
+
     private final DcMotorEx motor;
+    private final Limelight3A limelight;
+
+
+    private enum TurretMode {
+        ODOMETRY,
+        LIMELIGHT
+    }
+
+    private TurretMode mode = TurretMode.ODOMETRY;
 
     public static double TICKS_PER_REV = 537.7;
-
-    private final PIDController pid;
-    private double targetAngle = 0.0;
-
+    public static double gear_ratio = 3.906976744186047;
     public static double MAX_ANGLE = Math.toRadians(150);
 
-    public static double gear_ratio = 3.906976744186047;
-    private PIDFController p, s; // pidf controller for turret
-    private double t = 0;
-    public static double pidfSwitch = 30; // target for turret
-    public static double kp = 0.0025, kf = 0.0, kd = 0.000, sp = 0.005, sf = 0, sd = 0.00001;
+    public static double kp = 0.0025, kd = 0.000, kf = 0.0;
+    public static double sp = 0.005, sd = 0.00001, sf = 0.0;
+    public static double pidfSwitch = 30;
 
+    private final PIDFController pFast;
+    private final PIDFController pSlow;
+
+    public static double LL_kP = 0.075;
+    public static double LL_kD = 0.004;
+
+    private double targetTx = 0;
+
+    private double targetAngle = 0;
     private double error = 0;
 
     private double encoderOffsetTicks = 0;
 
-
-
-
-
     public Turret(HardwareMap hw) {
+
         motor = hw.get(DcMotorEx.class, "turret");
+        limelight = hw.get(Limelight3A.class, "limelight");
 
-        motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        motor.setPower(0);
+        motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
-        pid = new PIDController(kp, 0.0, kd);
+        limelight.pipelineSwitch(0);
+        limelight.start();
 
-        p = new PIDFController(new PIDFCoefficients(kp, 0, kd, kf));
-        s = new PIDFController(new PIDFCoefficients(sp, 0, sd, sf));
-
-    }
-    private void setTurretTarget(double ticks) {
-        t = ticks;
-    }
-
-    public double getTurretTarget() {
-        return t;
-    }
-
-    public double getTurret() {
-
-
-        return motor.getCurrentPosition() ;
+        pFast = new PIDFController(new PIDFCoefficients(kp, 0, kd, kf));
+        pSlow = new PIDFController(new PIDFCoefficients(sp, 0, sd, sf));
     }
 
     @Override
     public void periodic() {
 
+        if (mode == TurretMode.LIMELIGHT) {
+            updateLimelight();
+        } else {
+            updateOdom();
+        }
+    }
+
+    // ================== ODOMETRIA ==================
+    private void updateOdom() {
+
         double targetTicks = radsToTicks(targetAngle);
-        setTurretTarget(targetTicks);
+        double currentTicks = motor.getCurrentPosition();
 
-        double currentTicks = getTurret();
         error = targetTicks - currentTicks;
-
-        p.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
-        s.setCoefficients(new PIDFCoefficients(sp, 0, sd, sf));
 
         if (Math.abs(error) < 5) {
             motor.setPower(0);
-            p.reset();
-            s.reset();
+            pFast.reset();
+            pSlow.reset();
             return;
         }
 
-        // PID rápido ou lento
-        double power = 0;
+        double power;
         if (Math.abs(error) > pidfSwitch) {
-            p.updateError(error);
-            p.updateFeedForwardInput(Math.signum(error));
-            power = p.run();
+            pFast.updateError(error);
+            pFast.updateFeedForwardInput(Math.signum(error));
+            power = pFast.run();
         } else {
-            s.updateError(error);
-            power = s.run();
+            pSlow.updateError(error);
+            power = pSlow.run();
         }
 
-        power = Math.max(-1.0, Math.min(1.0, power));
-        motor.setPower(power);
+        motor.setPower(clamp(power, -1, 1));
     }
-    public void followPose(Pose fieldTarget, Pose robot) {
-        double robotX = robot.getX();
-        double robotY = robot.getY();
-        double robotHeading = robot.getHeading();
 
-        double dx = fieldTarget.getX() - robotX;
-        double dy = fieldTarget.getY() - robotY;
+    // ================== LIMELIGHT ==================
+    private void updateLimelight() {
+
+        LLResult res = limelight.getLatestResult();
+
+        if (res == null || !res.isValid()) {
+            motor.setPower(0);
+            return;
+        }
+
+        double tx = res.getTx();
+        double error = tx - targetTx;
+
+        double power = (LL_kP * error) + (LL_kD * (error - this.error));
+        this.error = error;
+
+        motor.setPower(clamp(power, -0.5, 0.5));
+    }
+
+
+    public void followPose(Pose fieldTarget, Pose robot) {
+
+        if (mode != TurretMode.ODOMETRY) return;
+
+        double dx = fieldTarget.getX() - robot.getX();
+        double dy = fieldTarget.getY() - robot.getY();
 
         double absoluteAngle = Math.atan2(dy, dx);
-
-        double relativeAngle = absoluteAngle - robotHeading;
-        relativeAngle = wrap(relativeAngle);
+        double relativeAngle = wrap(absoluteAngle - robot.getHeading());
 
         setTarget(relativeAngle);
     }
 
     public void setTarget(double angle) {
-        angle = wrap(angle );
-        angle = clamp(angle);
-
+        angle = wrap(angle);
+        angle = clampAngle(angle);
         targetAngle = angle;
     }
 
-    public double getCurrentAngle() {
-        double ticks = motor.getCurrentPosition();
-        return ticksToRads(ticks);
+
+    public void enableLimelight(double targetTx) {
+        this.targetTx = targetTx;
+        error = 0;
+        pFast.reset();
+        pSlow.reset();
+        mode = TurretMode.LIMELIGHT;
     }
 
-    public double getTargetAngle() {
-        return targetAngle;
+    public void disableLimelight() {
+
+        // sincroniza referência
+        targetAngle = getCurrentAngle();
+
+        pFast.reset();
+        pSlow.reset();
+        mode = TurretMode.ODOMETRY;
+        error = 0;
+
+    }
+
+    public double getCurrentAngle() {
+        return ticksToRads(motor.getCurrentPosition());
     }
 
 
@@ -137,33 +167,36 @@ public class Turret extends SubsystemBase {
         return (rad / (2 * Math.PI)) * TICKS_PER_REV * gear_ratio;
     }
 
-
-    public void resetEncoder() {
-        motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        pid.reset();
-    }
-
     private double ticksToRads(double ticks) {
-        return (ticks / TICKS_PER_REV / gear_ratio) * (2 * Math.PI) ;
-    }
-
-    private double clamp(double angle) {
-        return Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, angle));
-    }
-
-
-    public void setInitialAngle(double angleRad) {
-        encoderOffsetTicks = radsToTicks(angleRad);
+        return (ticks / TICKS_PER_REV / gear_ratio) * (2 * Math.PI);
     }
 
     private double wrap(double angle) {
-        while (angle > Math.PI)  angle -= 2 * Math.PI;
+        while (angle > Math.PI) angle -= 2 * Math.PI;
         while (angle < -Math.PI) angle += 2 * Math.PI;
         return angle;
     }
 
+    // clamp genérico
+    private double clamp(double v, double min, double max) {
+        return Math.max(min, Math.min(max, v));
+    }
 
+    // clamp físico da turret
+    private double clampAngle(double angle) {
+        return Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, angle));
+    }
+
+    public void resetEncoder() {
+        motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        pFast.reset();
+        pSlow.reset();
+    }
+
+    public void setInitialAngle(double angleRad) {
+        encoderOffsetTicks = radsToTicks(angleRad);
+    }
 
 
 }

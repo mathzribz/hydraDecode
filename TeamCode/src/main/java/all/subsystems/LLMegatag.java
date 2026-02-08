@@ -16,11 +16,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.Optional;
 
-public class LLturret extends SubsystemBase {
+public class LLMegatag extends SubsystemBase {
 
     private final Limelight3A ll;
 
-    public LLturret(HardwareMap hw) {
+    public LLMegatag(HardwareMap hw) {
         ll = hw.get(Limelight3A.class, "limelight");
     }
 
