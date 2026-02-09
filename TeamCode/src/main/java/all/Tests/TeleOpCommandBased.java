@@ -60,13 +60,14 @@ public class TeleOpCommandBased extends CommandOpMode {
                 .whenPressed(new ResetFieldCentric(drive));
 
 
+
     }
 
     @Override
     public void run() {
         super.run();
 
-       ll.enableTracking(0);
+       turret.followPose(BLUE_GOAL,drive.getPose(),drive.getVelocity());
 
         intakeWorking();
         shooterWorking();

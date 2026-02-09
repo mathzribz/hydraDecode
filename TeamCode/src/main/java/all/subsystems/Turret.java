@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.control.PIDFController;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -70,7 +71,7 @@ public class Turret extends SubsystemBase {
         }
     }
 
-    // ================== ODOMETRIA ==================
+
     private void updateOdom() {
 
         double targetTicks = radsToTicks(targetAngle);
@@ -98,7 +99,6 @@ public class Turret extends SubsystemBase {
         motor.setPower(clamp(power, -1, 1));
     }
 
-    // ================== LIMELIGHT ==================
     private void updateLimelight() {
 
         LLResult res = limelight.getLatestResult();
@@ -118,7 +118,7 @@ public class Turret extends SubsystemBase {
     }
 
 
-    public void followPose(Pose fieldTarget, Pose robot) {
+    public void followPose(Pose fieldTarget, Pose robot, Vector velocity) {
 
         if (mode != TurretMode.ODOMETRY) return;
 
@@ -128,7 +128,20 @@ public class Turret extends SubsystemBase {
         double absoluteAngle = Math.atan2(dy, dx);
         double relativeAngle = wrap(absoluteAngle - robot.getHeading());
 
-        setTarget(relativeAngle);
+        double distance = Math.hypot(dx, dy);
+
+        double compensation = 0;
+
+        if (distance > 1e-3) {
+
+            double vLateral = velocity.getYComponent();
+
+            compensation = vLateral / distance;
+        }
+
+        double compensatedAngle = relativeAngle + compensation;
+
+        setTarget(compensatedAngle);
     }
 
     public void setTarget(double angle) {
@@ -148,7 +161,6 @@ public class Turret extends SubsystemBase {
 
     public void disableLimelight() {
 
-        // sincroniza referência
         targetAngle = getCurrentAngle();
 
         pFast.reset();
