@@ -22,7 +22,6 @@ import all.subsystems.Turret;
 @TeleOp
 public class TeleOpCommandBased extends CommandOpMode {
     private Drive drive;
-    private LLTurret ll;
     private Turret turret;
     private Intake intake;
     private Shooter shooter;
@@ -32,7 +31,6 @@ public class TeleOpCommandBased extends CommandOpMode {
     public void initialize() {
 
         drive = new Drive(hardwareMap);
-        ll = new LLTurret(hardwareMap);
         turret = new Turret(hardwareMap);
         intake = new Intake(hardwareMap);
         shooter = new Shooter(hardwareMap);
@@ -43,7 +41,7 @@ public class TeleOpCommandBased extends CommandOpMode {
 
 
 
-        Pose startPos = new Pose(33, 111,0 );
+        Pose startPos = new Pose(0, 0,0 );
 
         drive.setStartingPose(startPos);
 
@@ -60,8 +58,6 @@ public class TeleOpCommandBased extends CommandOpMode {
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenPressed(new ResetFieldCentric(drive));
 
-
-
     }
 
     @Override
@@ -71,8 +67,6 @@ public class TeleOpCommandBased extends CommandOpMode {
         turret.followPose(BLUE_GOAL, drive.getPose());
 
 
-
-
         intakeWorking();
         shooterWorking();
 
@@ -80,7 +74,6 @@ public class TeleOpCommandBased extends CommandOpMode {
         telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
         telemetry.addData("Up (cm)", Intake.upBlocked);
         telemetry.addData("Down (cm)", Intake.downBlocked);
-        telemetry.addData("Full Timer", intake.getFullTime());
         telemetry.addData("cood pedro",drive.getPose());
         telemetry.addData("target RPM",shooter.getTargetRPM());
         telemetry.addData("current RPM",shooter.getCurrentRPM());
