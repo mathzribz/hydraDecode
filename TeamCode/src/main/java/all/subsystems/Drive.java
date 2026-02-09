@@ -5,6 +5,7 @@ package all.subsystems;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -53,9 +54,9 @@ public class Drive extends SubsystemBase {
             headingInitialized = true;
         }
 
+
     }
 
-    /** CHAMAR UMA VEZ POR LOOP */
     public void updatePinpoint() {
         pinpoint.update();
         currentHeadingRad = pinpoint.getHeading(AngleUnit.RADIANS);
@@ -106,6 +107,10 @@ public class Drive extends SubsystemBase {
 
     public Pose getPose() {
         return follower.getPose();
+    }
+
+    public Vector getVelocity() {
+        return follower.getVelocity();
     }
 
 }
