@@ -39,8 +39,9 @@ public class TeleOpCommandBased extends CommandOpMode {
         gamepad1Ex = new GamepadEx(gamepad1);
 
         turret.resetEncoder();
-        turret.setInitialAngle(Math.PI);
-        turret.setTarget(0);
+        turret.calibrateZero();
+
+
 
         Pose startPos = new Pose(33, 111,0 );
 
@@ -67,7 +68,10 @@ public class TeleOpCommandBased extends CommandOpMode {
     public void run() {
         super.run();
 
-       turret.followPose(BLUE_GOAL,drive.getPose(),drive.getVelocity());
+        turret.followPose(BLUE_GOAL, drive.getPose());
+
+
+
 
         intakeWorking();
         shooterWorking();

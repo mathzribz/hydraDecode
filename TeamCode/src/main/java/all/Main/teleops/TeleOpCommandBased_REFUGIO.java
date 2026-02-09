@@ -14,14 +14,13 @@ import all.Commands.Loc.ResetFieldCentric;
 import all.Commands.Loc.SetDriveSpeed;
 import all.subsystems.Drive;
 import all.subsystems.Intake;
-import all.subsystems.LLturret;
+
 import all.subsystems.Shooter;
 import all.subsystems.Turret;
 
 @TeleOp
 public class TeleOpCommandBased_REFUGIO extends CommandOpMode {
     private Drive drive;
-    private LLturret ll;
     private Turret turret;
     private Intake intake;
     private Shooter shooter;
@@ -31,15 +30,13 @@ public class TeleOpCommandBased_REFUGIO extends CommandOpMode {
     public void initialize() {
 
         drive = new Drive(hardwareMap);
-        ll = new LLturret(hardwareMap);
         turret = new Turret(hardwareMap);
         intake = new Intake(hardwareMap);
         shooter = new Shooter(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
 
         turret.resetEncoder();
-        turret.setInitialAngle(Math.PI);
-        turret.setTarget(0);
+
 
         Pose startPos =  new Pose(59, 86 , Math.toRadians(0));
 
@@ -65,7 +62,7 @@ public class TeleOpCommandBased_REFUGIO extends CommandOpMode {
     public void run() {
         super.run();
 
-        turret.setTarget(0);
+
 
         intakeWorking();
         shooterWorking();

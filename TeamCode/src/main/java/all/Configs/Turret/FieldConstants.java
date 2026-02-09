@@ -5,7 +5,7 @@ import com.pedropathing.geometry.Pose;
 @Config
 public class FieldConstants {
 
-    // EM GRAUS
+
 
     public static final Pose RED_GOAL  = new Pose(143, 144);
     public static final Pose BLUE_GOAL = new Pose(0, 144);
