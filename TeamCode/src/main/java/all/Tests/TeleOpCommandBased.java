@@ -41,7 +41,7 @@ public class TeleOpCommandBased extends CommandOpMode {
 
 
 
-        Pose startPos = new Pose(0, 0,0 );
+        Pose startPos = new Pose(33, 111,0 );
 
         drive.setStartingPose(startPos);
 
