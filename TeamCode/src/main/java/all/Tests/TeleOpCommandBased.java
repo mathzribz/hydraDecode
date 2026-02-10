@@ -2,21 +2,19 @@
 package all.Tests;
 
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
-import static all.Configs.Turret.FieldConstants.RED_GOAL;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
 import all.Commands.Loc.SetDriveSpeed;
 import all.subsystems.Drive;
 import all.subsystems.Intake;
-import all.subsystems.LLTurret;
 
+import all.subsystems.LLMegatag;
 import all.subsystems.Shooter;
 import all.subsystems.Turret;
 @TeleOp
@@ -25,6 +23,7 @@ public class TeleOpCommandBased extends CommandOpMode {
     private Turret turret;
     private Intake intake;
     private Shooter shooter;
+    private LLMegatag ll;
     private GamepadEx gamepad1Ex;
 
     @Override
@@ -34,12 +33,11 @@ public class TeleOpCommandBased extends CommandOpMode {
         turret = new Turret(hardwareMap);
         intake = new Intake(hardwareMap);
         shooter = new Shooter(hardwareMap);
+        ll = new LLMegatag(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
 
-        turret.resetEncoder();
-        turret.calibrateZero();
-
-
+        ll.switchPipeline(0);
+        ll.start();
 
         Pose startPos = new Pose(33, 111,0 );
 
@@ -63,8 +61,9 @@ public class TeleOpCommandBased extends CommandOpMode {
     @Override
     public void run() {
         super.run();
+        drive.updatePinpoint();
 
-        turret.followPose(BLUE_GOAL, drive.getPose());
+        turret.followPose(BLUE_GOAL, drive.getFusedPose());
 
 
         intakeWorking();
@@ -77,6 +76,7 @@ public class TeleOpCommandBased extends CommandOpMode {
         telemetry.addData("cood pedro",drive.getPose());
         telemetry.addData("target RPM",shooter.getTargetRPM());
         telemetry.addData("current RPM",shooter.getCurrentRPM());
+        telemetry.addData("cood LL",ll.getPedroRobotPose());
         // telemetry.addData("cood LL", ll.getPedroRobotPose());
 
         telemetry.update();
@@ -107,7 +107,6 @@ public class TeleOpCommandBased extends CommandOpMode {
             intake.gateClose();
             shooter.shooterOff();
         }
-
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
             shooter.setTargetRPM(2300);

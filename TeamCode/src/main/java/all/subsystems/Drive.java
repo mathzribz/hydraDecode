@@ -21,6 +21,8 @@ public class Drive extends SubsystemBase {
 
     private final Follower follower;
 
+    private LLMegatag ll;
+
     private double headingOffset = 0.0;
     private double driveSpeed = 0.85;
 
@@ -40,14 +42,17 @@ public class Drive extends SubsystemBase {
 
         pinpoint = hwMap.get(GoBildaPinpointDriver.class, "pinpoint");
          follower = Constants.createFollower(hwMap);
+
+        ll = new LLMegatag(hwMap);
+
     }
 
     @Override
     public void periodic() {
-        pinpoint.update();
+
         currentHeadingRad = pinpoint.getHeading(AngleUnit.RADIANS);
         currentHeadingDeg = pinpoint.getHeading(AngleUnit.DEGREES);
-        follower.update();
+
 
         if (!headingInitialized) {
             headingOffset = currentHeadingRad;
@@ -58,9 +63,7 @@ public class Drive extends SubsystemBase {
     }
 
     public void updatePinpoint() {
-        pinpoint.update();
-        currentHeadingRad = pinpoint.getHeading(AngleUnit.RADIANS);
-        currentHeadingDeg = pinpoint.getHeading(AngleUnit.DEGREES);
+        follower.update();
     }
 
     public void resetFieldOrientation() {
@@ -112,5 +115,42 @@ public class Drive extends SubsystemBase {
     public Vector getVelocity() {
         return follower.getVelocity();
     }
+
+    public Pose getFusedPose() {
+
+        Pose pinpointPose = follower.getPose();
+        double heading = currentHeadingRad;
+
+        Pose llPose = ll.getPedroRobotPose();
+
+        if (llPose == null || !ll.isPoseReliable()) {
+            return new Pose(
+                    pinpointPose.getX(),
+                    pinpointPose.getY(),
+                    heading
+            );
+        }
+
+        double dx = llPose.getX() - pinpointPose.getX();
+        double dy = llPose.getY() - pinpointPose.getY();
+
+        if (Math.hypot(dx, dy) > 50) {
+            return new Pose(
+                    pinpointPose.getX(),
+                    pinpointPose.getY(),
+                    heading
+            );
+        }
+
+        double alpha = 0.15;
+
+        return new Pose(
+                pinpointPose.getX() + alpha * dx,
+                pinpointPose.getY() + alpha * dy,
+                heading
+        );
+    }
+
+
 
 }

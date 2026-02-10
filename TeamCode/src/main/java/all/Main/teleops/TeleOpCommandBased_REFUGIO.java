@@ -35,7 +35,6 @@ public class TeleOpCommandBased_REFUGIO extends CommandOpMode {
         shooter = new Shooter(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
 
-        turret.resetEncoder();
 
 
         Pose startPos =  new Pose(59, 86 , Math.toRadians(0));
