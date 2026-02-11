@@ -116,38 +116,21 @@ public class Drive extends SubsystemBase {
         return follower.getVelocity();
     }
 
-    public Pose getFusedPose() {
+    public void relocalizeWithLimelight(Pose llPose) {
 
-        Pose pinpointPose = follower.getPose();
-        double heading = currentHeadingRad;
+        Pose odo = follower.getPose();
 
-        Pose llPose = ll.getPedroRobotPose();
+        double dx = llPose.getX() - odo.getX();
+        double dy = llPose.getY() - odo.getY();
 
-        if (llPose == null || !ll.isPoseReliable()) {
-            return new Pose(
-                    pinpointPose.getX(),
-                    pinpointPose.getY(),
-                    heading
-            );
-        }
+        if (Math.hypot(dx, dy) > 40) return;
 
-        double dx = llPose.getX() - pinpointPose.getX();
-        double dy = llPose.getY() - pinpointPose.getY();
-
-        if (Math.hypot(dx, dy) > 50) {
-            return new Pose(
-                    pinpointPose.getX(),
-                    pinpointPose.getY(),
-                    heading
-            );
-        }
-
-        double alpha = 0.15;
-
-        return new Pose(
-                pinpointPose.getX() + alpha * dx,
-                pinpointPose.getY() + alpha * dy,
-                heading
+        follower.setPose(
+                new Pose(
+                        odo.getX() + 0.6 * dx,
+                        odo.getY() + 0.6 * dy,
+                        odo.getHeading()
+                )
         );
     }
 

@@ -63,11 +63,16 @@ public class TeleOpCommandBased extends CommandOpMode {
         super.run();
         drive.updatePinpoint();
 
-        turret.followPose(BLUE_GOAL, drive.getFusedPose());
+
+            turret.followPose(BLUE_GOAL, drive.getPose(), drive.getHeadingRad());
+
+        if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
+            drive.relocalizeWithLimelight(ll.getPedroRobotPose());
+        }
 
 
         intakeWorking();
-        shooterWorking();
+
 
         telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
         telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());

@@ -39,7 +39,7 @@ public class Turret extends SubsystemBase {
         pid.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
     }
 
-    public void followPose(Pose fieldTarget, Pose robotPose) {
+    public void followPose(Pose fieldTarget, Pose robotPose, Double head) {
 
         double dx = fieldTarget.getX() - robotPose.getX();
         double dy = fieldTarget.getY() - robotPose.getY();
@@ -48,7 +48,7 @@ public class Turret extends SubsystemBase {
         targetFieldAngle = Math.atan2(dy, dx) + Math.PI;
         targetFieldAngle = wrap(targetFieldAngle);
 
-        updateControl(robotPose.getHeading());
+        updateControl(head);
     }
 
     private void updateControl(double robotHeading) {
