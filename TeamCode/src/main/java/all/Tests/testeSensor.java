@@ -6,9 +6,11 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -21,6 +23,8 @@ public class testeSensor extends LinearOpMode {
     private DcMotor AR, AL, KITL, KITR;
 
     private DistanceSensor up, down;
+
+    private NormalizedColorSensor mid;
 
     public static double posPulseOpen = 0, posPulseClose = 0.58;
     @Override
@@ -38,6 +42,8 @@ public class testeSensor extends LinearOpMode {
             double distanceUp = up.getDistance(DistanceUnit.CM);
 
             double distanceDown = down.getDistance(DistanceUnit.CM);
+
+            double distanceMid = ((DistanceSensor) mid).getDistance(DistanceUnit.CM);
 
 
 
@@ -72,6 +78,7 @@ public class testeSensor extends LinearOpMode {
 
             telemetry.addData("distance up", distanceUp);
             telemetry.addData("distance down", distanceDown);
+            telemetry.addData("distance mid", distanceMid);
 
 
 

@@ -1,4 +1,3 @@
-
 package all.subsystems;
 
 
@@ -14,15 +13,16 @@ public class Turret extends SubsystemBase {
     private final DcMotorEx motor;
 
     public static double TICKS_PER_REV = 537.7;
-    public static double GEAR_RATIO = 4.0;
+    public static double GEAR_RATIO = 3.906976744186047;
     public static double MAX_ANGLE = Math.toRadians(180);
 
     public static double kp = 0.003, kd = 0.000, kf = 0.0;
 
     private final PIDFController pid;
 
-    // alvo ABSOLUTO no campo
     private double targetFieldAngle = 0.0;
+
+    private double relocalizationAngleOffset = 0.0;
 
     public Turret(HardwareMap hw) {
         motor = hw.get(DcMotorEx.class, "turret");
@@ -39,6 +39,10 @@ public class Turret extends SubsystemBase {
         pid.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
     }
 
+    public void setRelocalizationOffset(double offsetRad) {
+        relocalizationAngleOffset = offsetRad;
+    }
+
     public void followPose(Pose fieldTarget, Pose robotPose, Double head) {
 
         double dx = fieldTarget.getX() - robotPose.getX();
@@ -46,22 +50,19 @@ public class Turret extends SubsystemBase {
 
         // ângulo ABSOLUTO do alvo no campo
         targetFieldAngle = Math.atan2(dy, dx) + Math.PI;
-        targetFieldAngle = wrap(targetFieldAngle);
+        targetFieldAngle = wrap(targetFieldAngle + relocalizationAngleOffset);
 
         updateControl(head);
     }
 
     private void updateControl(double robotHeading) {
 
-        // ângulo atual da turret NO CAMPO
         double turretRelative = ticksToRads(motor.getCurrentPosition());
         double turretFieldAngle = wrap(robotHeading + turretRelative);
 
         double error = wrap(targetFieldAngle - turretFieldAngle);
 
-        // respeita limite mecânico
-        double clampedRelative =
-                clamp(wrap(targetFieldAngle - robotHeading));
+        double clampedRelative = clamp(wrap(targetFieldAngle - robotHeading));
 
         double targetTicks = radsToTicks(clampedRelative);
         double currentTicks = motor.getCurrentPosition();
@@ -79,10 +80,6 @@ public class Turret extends SubsystemBase {
 
         double power = pid.run();
         motor.setPower(Math.max(-1, Math.min(1, power)));
-    }
-
-    public void setTargetFieldAngle(double angle) {
-        targetFieldAngle = wrap(angle);
     }
 
     private double radsToTicks(double rad) {

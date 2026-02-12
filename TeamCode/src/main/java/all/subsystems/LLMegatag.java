@@ -30,7 +30,6 @@ public class LLMegatag extends SubsystemBase {
 
         LLResult res = ll.getLatestResult();
 
-
         Pose3D mtPose = res.getBotpose_MT2();
 
         Pose2D ftcStandart =  new Pose2D(
@@ -59,16 +58,9 @@ public class LLMegatag extends SubsystemBase {
         ll.stop();
     }
 
-    public LLResult hasTarget() {
-        LLResult res = ll.getLatestResult();
-
-        return  res;
-    }
-
     public void switchPipeline(int id) {
         ll.pipelineSwitch(id);
     }
-
 
     public boolean isPoseReliable() {
         LLResult res = ll.getLatestResult();

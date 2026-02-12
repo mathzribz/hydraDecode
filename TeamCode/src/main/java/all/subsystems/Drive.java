@@ -23,13 +23,16 @@ public class Drive extends SubsystemBase {
 
     private LLMegatag ll;
 
-    private double headingOffset = 0.0;
     private double driveSpeed = 0.85;
 
     private double currentHeadingRad = 0.0;
     private double currentHeadingDeg = 0.0;
 
     private boolean headingInitialized = false;
+
+    private double headingOffset = 0.0;
+
+    private static final double INITIAL_FIELD_OFFSET = Math.PI;
 
     public Drive(HardwareMap hwMap) {
         LMF = hwMap.get(DcMotorEx.class, "LMF");
@@ -55,11 +58,9 @@ public class Drive extends SubsystemBase {
 
 
         if (!headingInitialized) {
-            headingOffset = currentHeadingRad;
+            headingOffset = currentHeadingRad - INITIAL_FIELD_OFFSET;
             headingInitialized = true;
         }
-
-
     }
 
     public void updatePinpoint() {

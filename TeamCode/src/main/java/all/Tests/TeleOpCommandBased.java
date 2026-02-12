@@ -68,6 +68,8 @@ public class TeleOpCommandBased extends CommandOpMode {
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
             drive.relocalizeWithLimelight(ll.getPedroRobotPose());
+
+           // turret.setRelocalizationOffset(Math.toRadians(0));
         }
 
 
