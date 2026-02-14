@@ -1,6 +1,8 @@
 
 package all.Tests;
 
+import static all.Configs.Pedro.Tuning.follower;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -28,7 +30,7 @@ public class testesMotor extends LinearOpMode {
 
 
 
-            AR.setDirection(DcMotor.Direction.FORWARD);
+            AR.setDirection(DcMotor.Direction.REVERSE);
             AL.setDirection(DcMotor.Direction.FORWARD);
 
 
@@ -55,6 +57,7 @@ public class testesMotor extends LinearOpMode {
 
             telemetry.addData("power AL", AL.getPower());
             telemetry.addData("ticks Al", AL.getCurrentPosition());
+
 
 
 

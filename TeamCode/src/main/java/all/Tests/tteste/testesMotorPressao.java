@@ -1,30 +1,21 @@
 
-package all.Tests;
+package all.Tests.tteste;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 @TeleOp
-public class testeSensor extends LinearOpMode {
+public class testesMotorPressao extends LinearOpMode {
 
     Servo pulse;
     private DcMotor AR, AL, KITL, KITR;
-
-    private DistanceSensor mid, down;
-
-    private NormalizedColorSensor up;
 
     public static double posPulseOpen = 0, posPulseClose = 0.58;
     @Override
@@ -36,28 +27,22 @@ public class testeSensor extends LinearOpMode {
             AR = hardwareMap.get(DcMotor.class, "shooterR"); // porta 0
             AL = hardwareMap.get(DcMotor.class, "shooterL"); // porta 0
 
-            mid = hardwareMap.get(DistanceSensor.class, "mid");
-            down = hardwareMap.get(DistanceSensor.class, "down");
-            up = hardwareMap.get(NormalizedColorSensor.class, "up");
 
-            double distanceMid = mid.getDistance(DistanceUnit.CM);
 
-            double distanceDown = down.getDistance(DistanceUnit.CM);
-
-            double distanceUp = ((DistanceSensor) up).getDistance(DistanceUnit.CM);
+            AR.setDirection(DcMotor.Direction.FORWARD);
+            AL.setDirection(DcMotor.Direction.REVERSE);
 
 
 
+            if (gamepad1.a ) {
+                AR.setPower(1);
+                AL.setPower(1);
+            }
 
-            AR.setDirection(DcMotor.Direction.REVERSE);
-            AL.setDirection(DcMotor.Direction.FORWARD);
-
-
-
-
-            AR.setPower(gamepad1.right_stick_y );
-            AL.setPower(gamepad1.right_stick_y );
-
+            if (gamepad1.a ) {
+                AR.setPower(0);
+                AL.setPower(0);
+            }
 
             if (gamepad1.right_bumper){
                 pulse.setPosition(posPulseClose);
@@ -76,10 +61,6 @@ public class testeSensor extends LinearOpMode {
 
             telemetry.addData("power AL", AL.getPower());
             telemetry.addData("ticks Al", AL.getCurrentPosition());
-
-            telemetry.addData("distance up", distanceUp);
-            telemetry.addData("distance down", distanceDown);
-            telemetry.addData("distance mid", distanceMid);
 
 
 

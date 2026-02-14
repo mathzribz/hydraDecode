@@ -4,6 +4,7 @@ package all.subsystems;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,13 +15,16 @@ public class Intake extends SubsystemBase {
     private final MotorEx motor;
     private final Servo gate;
 
-    private final DistanceSensor up, down;
+    private final DistanceSensor mid, down;
+
+    private NormalizedColorSensor up;
+    
     private final ElapsedTime fullTimer = new ElapsedTime();
 
     private boolean countingFull = false;
     private boolean enabledTransfer = true;
 
-    public static boolean upBlocked, downBlocked;
+    public static boolean upBlocked, midBlocked, downBlocked;
 
     private double motorPower = 0;
 
@@ -28,17 +32,19 @@ public class Intake extends SubsystemBase {
         motor = new MotorEx(hw, "intake");
         gate  = hw.get(Servo.class, "gate");
 
-        up   = hw.get(DistanceSensor.class, "up");
+        mid   = hw.get(DistanceSensor.class, "mid");
         down = hw.get(DistanceSensor.class, "down");
+        up = hw.get(NormalizedColorSensor.class, "up");
 
     }
 
-    public void updateAutoLogic() {
+    public void middateAutoLogic() {
 
-         upBlocked   = up.getDistance(DistanceUnit.CM) < 8;
-         downBlocked = down.getDistance(DistanceUnit.CM) < 8;
+         midBlocked   = mid.getDistance(DistanceUnit.CM) < 6;
+         downBlocked = down.getDistance(DistanceUnit.CM) < 6;
+         upBlocked = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6;
 
-        if (upBlocked && downBlocked) {
+        if (upBlocked && midBlocked  && downBlocked) {
             if (!countingFull) {
                 fullTimer.reset();
                 countingFull = true;
@@ -92,7 +98,7 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
-        updateAutoLogic();
+        middateAutoLogic();
         motor.set(motorPower);
     }
 

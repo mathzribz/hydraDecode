@@ -90,21 +90,16 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+        pinpoint.update();
 
+            telemetry.addData("pionpoint YAW ", pinpoint.getHeading(AngleUnit.DEGREES));
+            telemetry.addData("pionpoint Y ", pinpoint.getEncoderY());
+            telemetry.addData("pionpoint X ", pinpoint.getEncoderX());
 
-            loc();
-            intake();
             shooter();
 
-            if (gamepad1.dpad_up)
-                capuz.setPosition(servo1pos);
-
-            if (gamepad1.dpad_down)
-                capuz.setPosition(0);
-
-            telemetry.addData("Drive Speed", driveSpeed);
-
             telemetry.update();
+
         }
 
     }
@@ -112,20 +107,12 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
     private void initHardware() {
 
         // MOTORS
-        RMF = hardwareMap.get(DcMotor.class, "RMF");
-        RMB = hardwareMap.get(DcMotor.class, "RMB");
-        LMF = hardwareMap.get(DcMotor.class, "LMF");
-        LMB = hardwareMap.get(DcMotor.class, "LMB");
 
-        Intake = hardwareMap.get(DcMotor.class, "intake");
 
         ShooterR = hardwareMap.get(DcMotorEx.class, "shooterR");
         ShooterL = hardwareMap.get(DcMotorEx.class, "shooterL");
 
 
-
-        capuz = hardwareMap.get(Servo.class, "capuz");
-        servo_teste = hardwareMap.get(Servo.class, "gate");
 
         // SENSORES
 
@@ -134,19 +121,9 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         vs = hardwareMap.voltageSensor.iterator().next();
 
         // DIRECTIONS
-        RMF.setDirection(DcMotorSimple.Direction.FORWARD);
-        RMB.setDirection(DcMotorSimple.Direction.FORWARD);
-        LMF.setDirection(DcMotorSimple.Direction.REVERSE);
-        LMB.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        RMF.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        RMB.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        LMF.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        LMB.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
-        Intake.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        ShooterR.setDirection(DcMotorSimple.Direction.REVERSE);
+        ShooterR.setDirection(DcMotorSimple.Direction.FORWARD);
         ShooterL.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
@@ -156,11 +133,6 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
 
 
 
-        up = hardwareMap.get(DistanceSensor.class, "up");
-        down = hardwareMap.get(DistanceSensor.class, "down");
-
-
-        limelightLL = hardwareMap.get(Limelight3A.class, "limelight");
 
     }
 
@@ -196,13 +168,7 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         RMF.setPower(powerRMF * driveSpeed);
         RMB.setPower(powerRMB * driveSpeed);
 
-        telemetry.addData("LMF power", LMF.getPower());
-        telemetry.addData("RMF power", RMF.getPower());
-        telemetry.addData("LMB power", LMB.getPower());
-        telemetry.addData("RMB power",RMB.getPower());
-        telemetry.addData("pionpoint YAW ",pinpoint.getHeading(AngleUnit.DEGREES));
-        telemetry.addData("pionpoint Y ",pinpoint.getEncoderY());
-        telemetry.addData("pionpoint scalar ",pinpoint.getYawScalar());
+
 
         if (gamepad1.left_stick_button) driveSpeed = 0.9;
 
@@ -265,10 +231,7 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
 
         Intake.setPower(intakePower);
 
-        telemetry.addData("Up (cm)", distanceUp);
-        telemetry.addData("Down (cm)", distanceDown);
-        telemetry.addData("EnabledTransfer", EnabledTransfer);
-        telemetry.addData("FullTimer", fullTimer.seconds());
+
     }
 
 
@@ -288,12 +251,12 @@ public class DECODAO_BLUE_ENGAJA extends LinearOpMode {
         if (gamepad1.right_trigger > 0.1) {
             ShooterR.setPower(finalPower);
             ShooterL.setPower(finalPower);
-            servo_teste.setPosition(0.195);
+          ;
         } else {
             ShooterR.setPower(0);
             ShooterL.setPower(0);
             pidf.reset();
-            servo_teste.setPosition(0.3);
+
         }
 
         double rpm = (currentTPS / TICKS_PER_REV) * 60.0;
