@@ -14,9 +14,9 @@ public class Shooter extends SubsystemBase {
     private final DcMotorEx shooterL, shooterR;
     private final Servo hood;
 
-    public static double kP = 0.004;
+    public static double kP = 0.025;
     public static double kD = 0.0000;
-    public static double kF = 0.0003455;
+    public static double kF = 0.000225;
 
     private final PIDFController pidf = new PIDFController(kP, 0, kD, 0);
 
@@ -33,7 +33,7 @@ public class Shooter extends SubsystemBase {
         shooterR = hwMap.get(DcMotorEx.class, "shooterR");
         hood = hwMap.get(Servo.class, "capuz");
 
-        shooterL.setDirection(DcMotorSimple.Direction.REVERSE);
+        shooterL.setDirection(DcMotorSimple.Direction.FORWARD);
         shooterR.setDirection(DcMotorSimple.Direction.REVERSE);
 
         shooterL.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -42,11 +42,11 @@ public class Shooter extends SubsystemBase {
 
 
     public void HoodHigh() {
-        hood.setPosition(0.92);
+        hood.setPosition(0.8);
     }
 
     public void HoodLow() {
-        hood.setPosition(0.75);
+        hood.setPosition(0.6);
     }
 
     public void shooterOn() {

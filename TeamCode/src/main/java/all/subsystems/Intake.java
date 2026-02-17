@@ -40,9 +40,9 @@ public class Intake extends SubsystemBase {
 
     public void middateAutoLogic() {
 
-         midBlocked   = mid.getDistance(DistanceUnit.CM) < 6;
-         downBlocked = down.getDistance(DistanceUnit.CM) < 6;
-         upBlocked = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6;
+         midBlocked   = mid.getDistance(DistanceUnit.CM) < 9;
+         downBlocked = down.getDistance(DistanceUnit.CM) < 9;
+         upBlocked = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6.5;
 
         if (upBlocked && midBlocked  && downBlocked) {
             if (!countingFull) {
@@ -89,11 +89,11 @@ public class Intake extends SubsystemBase {
     }
 
     public void gateOpen() {
-        gate.setPosition(0.195);
+        gate.setPosition(0.2);
     }
 
     public void gateClose() {
-        gate.setPosition(0.28);
+        gate.setPosition(0.31);
     }
 
     @Override
