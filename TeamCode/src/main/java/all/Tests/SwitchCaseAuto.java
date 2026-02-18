@@ -1,3 +1,4 @@
+
 package all.Tests;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
@@ -14,9 +15,11 @@ import all.Commands.Gate.GateOpen;
 import all.Commands.Intake.IntakeStop;
 import all.Commands.Intake.IntakeOn;
 import all.Commands.Intake.IntakeStop;
+import all.Commands.Intake.Transfer;
 import all.Commands.Shooter.ShooterOff;
 import all.Commands.Shooter.ShooterOn;
 import all.Configs.Pedro.Constants;
+import all.Configs.StateMachines.ShooterLogic;
 import all.subsystems.Intake;
 import all.subsystems.Shooter;
 
@@ -26,19 +29,11 @@ public class SwitchCaseAuto extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
 
-    private Shooter shooterSubsystem;
-    private Intake intakeSubsystem;
+    private ShooterLogic shooterLogic = new ShooterLogic();
 
-    private IntakeOn intakeOn;
-    private IntakeStop intakeOff;
-    private GateOpen gateOpen;
-    private GateClose gateClose;
-    private ShooterOn shooterOn;
-    private ShooterOff shooterOff;
+    private boolean shotsTriggered;
 
-    private boolean gateOpened = false;
-    private boolean intakeWorking = false;
-    private boolean shooterWorking = false;
+
 
     public enum PathState {
 
@@ -51,9 +46,10 @@ public class SwitchCaseAuto extends OpMode {
 
     PathState pathState;
 
-    private final Pose starterPose = new Pose(20, 123, 138);
-    private final Pose scorePose = new Pose(46, 98, 138);
-    private final Pose repoPose1 = new Pose(18, 87, 90);
+    private final Pose starterPose = new Pose(17.537, 119.723, Math.toRadians(142));
+    private final Pose scorePose = new Pose(38.170418006430864, 102.26366559485528, Math.toRadians(142));
+    private final Pose repoPose1 = new Pose(46.7395498392283, 82.33118971061093, Math.toRadians(180));
+
 
     PathChain drive_start_score, drive_score_repo1;
 
@@ -78,33 +74,33 @@ public class SwitchCaseAuto extends OpMode {
         switch (pathState) {
 
             case DRIVE_STARTPOSE_SCOREPOSE:
+                shooterLogic.spin();
                 follower.followPath(drive_start_score, true);
-                CommandScheduler.getInstance().schedule(gateClose);
-                if (pathTimer.getElapsedTime() > 0.1) {
-                    CommandScheduler.getInstance().schedule(intakeOn);
-                    CommandScheduler.getInstance().schedule(shooterOn);
-                }
-                if (pathTimer.getElapsedTime() > 0.2) {
-                    setPathState(PathState.START_SCORE);
-                }
+                setPathState(PathState.START_SCORE);
                 break;
 
             case START_SCORE:
-                if (!follower.isBusy() && !gateOpened) {
-                    CommandScheduler.getInstance().schedule(gateOpen);
-                    gateOpened = true;
+
+                if(!follower.isBusy()){
+                    if (!shotsTriggered){
+                        shooterLogic.launch();
+                        shotsTriggered = true;
+                    }
                 }
-                if (pathTimer.getElapsedTime() > 0.2) {
+
+                if (shotsTriggered && !shooterLogic.isBusy() && pathTimer.getElapsedTimeSeconds() > 4){
+                    shooterLogic.offAll();
+                    follower.followPath(drive_score_repo1, true);
                     setPathState(PathState.DRIVE_SCOREPOSE_REPOPOSE1);
                 }
-                break;
 
-            case DRIVE_SCOREPOSE_REPOPOSE1:
-                if (!follower.isBusy() && gateOpened) {
-                    follower.followPath(drive_score_repo1, true);
-                    CommandScheduler.getInstance().schedule(gateClose);
-                }
+
                 break;
+            case DRIVE_SCOREPOSE_REPOPOSE1:
+                if(follower.isBusy()){
+                    telemetry.addLine("done");
+
+                }
 
             default:
                 telemetry.addLine("END OF AUTO");
@@ -116,6 +112,8 @@ public class SwitchCaseAuto extends OpMode {
     public void setPathState (PathState newState) {
         pathState = newState;
         pathTimer.resetTimer();
+
+        shotsTriggered = false;
     }
 
     @Override
@@ -126,16 +124,7 @@ public class SwitchCaseAuto extends OpMode {
         opModeTimer = new Timer();
 
         follower = Constants.createFollower(hardwareMap);
-
-        intakeSubsystem = new Intake(hardwareMap);
-        shooterSubsystem = new Shooter(hardwareMap);
-
-        intakeOn = new IntakeOn(intakeSubsystem);
-        intakeOff = new IntakeStop(intakeSubsystem);
-        gateOpen = new GateOpen(intakeSubsystem);
-        gateClose = new GateClose(intakeSubsystem);
-        shooterOn = new ShooterOn(shooterSubsystem);
-        shooterOff = new ShooterOff(shooterSubsystem);
+        shooterLogic.init(hardwareMap);
 
         buildPaths();
         follower.setPose(starterPose);
@@ -149,8 +138,10 @@ public class SwitchCaseAuto extends OpMode {
     @Override
     public void loop() {
         follower.update();
+        shooterLogic.update();
+
         statePathUpdate();
-        CommandScheduler.getInstance().run();
+
     }
 
 }

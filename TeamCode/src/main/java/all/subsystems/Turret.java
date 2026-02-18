@@ -6,6 +6,7 @@ import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.control.PIDFController;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Turret extends SubsystemBase {
@@ -14,9 +15,9 @@ public class Turret extends SubsystemBase {
 
     public static double TICKS_PER_REV = 537.7;
     public static double GEAR_RATIO = 3.906976744186047;
-    public static double MAX_ANGLE = Math.toRadians(180);
+    public static double MAX_ANGLE = Math.toRadians(150);
 
-    public static double kp = 0.003, kd = 0.000, kf = 0.0;
+    public static double kp = 0.0025, kd = 0.000, kf = 0.0;
 
     private final PIDFController pid;
 
@@ -29,6 +30,7 @@ public class Turret extends SubsystemBase {
 
         motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        motor.setDirection(DcMotorSimple.Direction.FORWARD);
         motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
         pid = new PIDFController(new PIDFCoefficients(kp, 0, kd, kf));
@@ -39,8 +41,8 @@ public class Turret extends SubsystemBase {
         pid.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
     }
 
-    public void setRelocalizationOffset(double offsetRad) {
-        relocalizationAngleOffset = offsetRad;
+    public void setRelocalizationOffset(double offset) {
+        relocalizationAngleOffset = offset;
     }
 
     public void followPose(Pose fieldTarget, Pose robotPose, Double head) {
@@ -49,7 +51,7 @@ public class Turret extends SubsystemBase {
         double dy = fieldTarget.getY() - robotPose.getY();
 
         // ângulo ABSOLUTO do alvo no campo
-        targetFieldAngle = Math.atan2(dy, dx) + Math.PI;
+        targetFieldAngle = Math.atan2(dy, dx) ;
         targetFieldAngle = wrap(targetFieldAngle + relocalizationAngleOffset);
 
         updateControl(head);
@@ -58,7 +60,7 @@ public class Turret extends SubsystemBase {
     private void updateControl(double robotHeading) {
 
         double turretRelative = ticksToRads(motor.getCurrentPosition());
-        double turretFieldAngle = wrap(robotHeading + turretRelative);
+        double turretFieldAngle = wrap(robotHeading + turretRelative + relocalizationAngleOffset);
 
         double error = wrap(targetFieldAngle - turretFieldAngle);
 
@@ -79,7 +81,7 @@ public class Turret extends SubsystemBase {
         pid.updateFeedForwardInput(Math.signum(tickError));
 
         double power = pid.run();
-        motor.setPower(Math.max(-1, Math.min(1, power)));
+        motor.setPower(Math.max(-0.75, Math.min(0.75, power)));
     }
 
     private double radsToTicks(double rad) {

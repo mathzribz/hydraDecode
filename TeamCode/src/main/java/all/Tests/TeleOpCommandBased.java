@@ -3,6 +3,7 @@ package all.Tests;
 
 import static all.Configs.Pedro.Tuning.draw;
 import static all.Configs.Pedro.Tuning.drawOnlyCurrent;
+import static all.Configs.Pedro.Tuning.follower;
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
@@ -13,6 +14,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
 import all.Commands.Loc.SetDriveSpeed;
+import all.Configs.Panels.Drawing;
 import all.subsystems.Drive;
 import all.subsystems.Intake;
 
@@ -30,6 +32,7 @@ public class TeleOpCommandBased extends CommandOpMode {
 
     @Override
     public void initialize() {
+        Drawing.init();
 
         drive = new Drive(hardwareMap);
         turret = new Turret(hardwareMap);
@@ -38,10 +41,12 @@ public class TeleOpCommandBased extends CommandOpMode {
         ll = new LLMegatag(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
 
+
+
         ll.switchPipeline(0);
         ll.start();
 
-        Pose startPos = new Pose(33, 111,0 );
+        Pose startPos = new Pose(33, 111, Math.toRadians(180) );
 
         drive.setStartingPose(startPos);
 
@@ -49,23 +54,29 @@ public class TeleOpCommandBased extends CommandOpMode {
                 new DriveCommand(drive, gamepad1Ex)
         );
 
-        gamepad1Ex.getGamepadButton(GamepadKeys.Button.A)
-                .whenPressed(new SetDriveSpeed(drive, 0.65));
 
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.B)
-                .whenPressed(new SetDriveSpeed(drive, 1.0));
+                .whenPressed(new SetDriveSpeed(drive, 0.9));
 
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenPressed(new ResetFieldCentric(drive));
 
-        drawOnlyCurrent();
+
 
     }
 
     @Override
     public void run() {
-        super.run();
+
+        waitForStart();
         drive.updatePinpoint();
+        super.run();
+
+        try {
+            Drawing.drawDebug(drive.follower);
+        } catch (Exception e) {
+            telemetry.addLine("drawing failed");
+        }
 
 
             turret.followPose(BLUE_GOAL, drive.getPose(), drive.getHeadingRad());
@@ -90,10 +101,10 @@ public class TeleOpCommandBased extends CommandOpMode {
         telemetry.addData("target RPM",shooter.getTargetRPM());
         telemetry.addData("current RPM",shooter.getCurrentRPM());
         telemetry.addData("cood LL",ll.getPedroRobotPose());
-        // telemetry.addData("cood LL", ll.getPedroRobotPose());
+
 
         telemetry.update();
-        draw();
+
     }
 
     public void intakeWorking(){
@@ -123,10 +134,13 @@ public class TeleOpCommandBased extends CommandOpMode {
         }
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
-            shooter.setTargetRPM(2300);
+            shooter.setTargetRPM(1900);
         }
         if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
-            shooter.setTargetRPM(2700);
+            shooter.setTargetRPM(2300);
+        }
+        if (gamepad1Ex.getButton(GamepadKeys.Button.B)) {
+            shooter.setTargetRPM(2900);
         }
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_UP)) {

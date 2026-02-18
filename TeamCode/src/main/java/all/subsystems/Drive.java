@@ -19,7 +19,7 @@ public class Drive extends SubsystemBase {
     private final DcMotorEx LMF, LMB, RMF, RMB;
     private final GoBildaPinpointDriver pinpoint;
 
-    private final Follower follower;
+    public final Follower follower;
 
     private LLMegatag ll;
 

@@ -1,5 +1,7 @@
 package all.subsystems;
 
+import android.os.ParcelUuid;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDFController;
@@ -7,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 public class Shooter extends SubsystemBase {
@@ -14,7 +17,13 @@ public class Shooter extends SubsystemBase {
     private final DcMotorEx shooterL, shooterR;
     private final Servo hood;
 
-    public static double kP = 0.025;
+
+
+
+
+
+
+    public static double kP = 0.026;
     public static double kD = 0.0000;
     public static double kF = 0.000225;
 
@@ -22,7 +31,7 @@ public class Shooter extends SubsystemBase {
 
 
     public static double TICKS_PER_REV = 28;
-    public static double targetRPM = 1800;
+    public static double targetRPM = 2200;
 
     private boolean enabled = false;
     private double power = 0;
@@ -38,15 +47,17 @@ public class Shooter extends SubsystemBase {
 
         shooterL.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         shooterR.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
+
     }
 
 
     public void HoodHigh() {
-        hood.setPosition(0.8);
+        hood.setPosition(1);
     }
 
     public void HoodLow() {
-        hood.setPosition(0.6);
+        hood.setPosition(0.7);
     }
 
     public void shooterOn() {
@@ -97,5 +108,11 @@ public class Shooter extends SubsystemBase {
 
 
 
+
+
     }
+
+
+
+
 }
