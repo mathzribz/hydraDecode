@@ -1,6 +1,8 @@
 
 package all.Tests;
 
+import static all.Configs.Pedro.Tuning.draw;
+import static all.Configs.Pedro.Tuning.drawOnlyCurrent;
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
@@ -56,6 +58,8 @@ public class TeleOpCommandBased extends CommandOpMode {
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenPressed(new ResetFieldCentric(drive));
 
+        drawOnlyCurrent();
+
     }
 
     @Override
@@ -89,6 +93,7 @@ public class TeleOpCommandBased extends CommandOpMode {
         // telemetry.addData("cood LL", ll.getPedroRobotPose());
 
         telemetry.update();
+        draw();
     }
 
     public void intakeWorking(){
