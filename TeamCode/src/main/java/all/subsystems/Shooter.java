@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 public class Shooter extends SubsystemBase {
@@ -53,7 +52,7 @@ public class Shooter extends SubsystemBase {
 
 
     public void HoodHigh() {
-        hood.setPosition(1);
+        hood.setPosition(0.9);
     }
 
     public void HoodLow() {

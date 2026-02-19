@@ -18,11 +18,13 @@ public class Intake extends SubsystemBase {
     private final DistanceSensor mid, down;
 
     private NormalizedColorSensor up;
-    
+
     private final ElapsedTime fullTimer = new ElapsedTime();
 
     private boolean countingFull = false;
     private boolean enabledTransfer = true;
+
+    public boolean useSensors = true;
 
     public static boolean upBlocked, midBlocked, downBlocked;
 
@@ -39,31 +41,30 @@ public class Intake extends SubsystemBase {
     }
 
     public void middateAutoLogic() {
+        if (useSensors) {
 
-         midBlocked   = mid.getDistance(DistanceUnit.CM) < 9;
-         downBlocked = down.getDistance(DistanceUnit.CM) < 9;
-         upBlocked = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6.5;
+            midBlocked = mid.getDistance(DistanceUnit.CM) < 9;
+            downBlocked = down.getDistance(DistanceUnit.CM) < 9;
+            upBlocked = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6.5;
 
-        if (upBlocked && midBlocked  && downBlocked) {
-            if (!countingFull) {
+            if (upBlocked && midBlocked && downBlocked) {
+                if (!countingFull) {
+                    fullTimer.reset();
+                    countingFull = true;
+                }
+
+                if (fullTimer.seconds() >= 0.08) {
+                    enabledTransfer = false;
+                    motorPower = 0;
+                }
+
+            } else {
+                countingFull = false;
                 fullTimer.reset();
-                countingFull = true;
             }
-
-            if (fullTimer.seconds() >= 0.08) {
-                enabledTransfer = false;
-                motorPower = 0;
-            }
-
-        } else {
-            countingFull = false;
-            fullTimer.reset();
         }
     }
 
-    // ===============================
-    // CONTROLES
-    // ===============================
     public void intakeOn() {
         if (enabledTransfer) {
             motorPower = -0.9;
@@ -81,10 +82,15 @@ public class Intake extends SubsystemBase {
         motorPower = 0;
     }
 
-    public void Transfer() {
+    public void TransferTeleop() {
         enabledTransfer = true;
         countingFull = false;
         fullTimer.reset();
+        motorPower = -1.0;
+
+    }
+    public void TransferAuto() {
+
         motorPower = -1.0;
     }
 

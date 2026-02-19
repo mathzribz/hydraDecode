@@ -2,6 +2,7 @@
 package all.Tests;
 
 
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -85,7 +86,8 @@ public class SwitchCaseAuto extends OpMode {
                 break;
             case DRIVE_SCOREPOSE_REPOPOSE1:
                 if(follower.isBusy()){
-                    telemetry.addLine("done");
+                    setPathState(PathState.END);
+
 
                 }
 
@@ -123,10 +125,15 @@ public class SwitchCaseAuto extends OpMode {
 
     @Override
     public void loop() {
+        CommandScheduler.getInstance().run();
         follower.update();
         shooterLogic.update();
 
+
         statePathUpdate();
+
+        telemetry.addData(String.valueOf(shooterLogic.timer), "timer auto");
+
 
     }
 

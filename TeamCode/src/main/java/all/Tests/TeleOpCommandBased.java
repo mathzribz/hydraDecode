@@ -40,6 +40,7 @@ public class TeleOpCommandBased extends CommandOpMode {
         shooter = new Shooter(hardwareMap);
         ll = new LLMegatag(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
+        intake.useSensors = true;
 
 
 
@@ -118,7 +119,7 @@ public class TeleOpCommandBased extends CommandOpMode {
         }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
-            intake.Transfer();
+            intake.TransferTeleop();
         }
         else { intake.intakeStop();}
     }

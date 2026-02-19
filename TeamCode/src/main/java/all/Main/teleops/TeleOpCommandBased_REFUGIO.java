@@ -90,7 +90,7 @@ public class TeleOpCommandBased_REFUGIO extends CommandOpMode {
         }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
-            intake.Transfer();
+            intake.TransferTeleop();
         }
         else { intake.intakeStop();}
     }

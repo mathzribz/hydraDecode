@@ -1,6 +1,6 @@
+
 package all.Configs.StateMachines;
 
-import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -12,44 +12,43 @@ public class ShooterLogic {
     private Intake intake;
     private Shooter shooter;
 
-    private final ElapsedTime timer = new ElapsedTime();
+    public final ElapsedTime timer = new ElapsedTime();
 
-    private enum ShooterState {
+    public enum ShooterState {
         IDLE,
         PRESPIN,
         BURST_FIRE,
         STOPPING
     }
 
-    private ShooterState state = ShooterState.IDLE;
+    public ShooterState state = ShooterState.IDLE;
 
     private static final double MIN_RPM = 1900;
     private static final double MAX_SPINUP_TIME = 2.0;
-    private static final double BURST_TIME = 1.5; // tempo suficiente pra 3 bolas
+    private static final double BURST_TIME = 4; // tempo suficiente pra 3 bolas
 
     public void init(HardwareMap hw) {
         shooter = new Shooter(hw);
         intake = new Intake(hw);
 
+        intake.useSensors = false;
         shooter.shooterOff();
-        intake.gateClose();
+        intake.gateOpen();
         intake.intakeStop();
     }
-
-
     public void preSpin() {
         if (state == ShooterState.IDLE) {
             shooter.shooterOn();
-            intake.gateOpen(); // pode ficar aberto
+            shooter.setTargetRPM(2200);
+            intake.gateOpen();
             state = ShooterState.PRESPIN;
             timer.reset();
         }
     }
 
-
     public void burstFire() {
         if (state == ShooterState.PRESPIN) {
-            intake.Transfer();
+            intake.TransferAuto();
             timer.reset();
             state = ShooterState.BURST_FIRE;
         }
@@ -63,15 +62,13 @@ public class ShooterLogic {
     }
 
     public boolean readyToFire() {
-        return shooter.getCurrentRPM() >= MIN_RPM
-                || timer.seconds() > MAX_SPINUP_TIME;
+        return shooter.getCurrentRPM() >= MIN_RPM;
     }
 
     public boolean isBusy() {
         return state != ShooterState.IDLE;
     }
 
-    /* ================= UPDATE ================= */
 
     public void update() {
 
@@ -81,7 +78,6 @@ public class ShooterLogic {
                 break;
 
             case PRESPIN:
-                // apenas mantém flywheel ligada
                 break;
 
             case BURST_FIRE:
@@ -95,5 +91,6 @@ public class ShooterLogic {
                 stopAll();
                 break;
         }
+
     }
 }
