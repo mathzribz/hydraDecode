@@ -1,7 +1,7 @@
 
 package all.Tests;
 
-import com.arcrobotics.ftclib.command.CommandScheduler;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -10,18 +10,10 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import all.Commands.Gate.GateClose;
-import all.Commands.Gate.GateOpen;
-import all.Commands.Intake.IntakeStop;
-import all.Commands.Intake.IntakeOn;
-import all.Commands.Intake.IntakeStop;
-import all.Commands.Intake.Transfer;
-import all.Commands.Shooter.ShooterOff;
-import all.Commands.Shooter.ShooterOn;
+
 import all.Configs.Pedro.Constants;
 import all.Configs.StateMachines.ShooterLogic;
-import all.subsystems.Intake;
-import all.subsystems.Shooter;
+
 
 @Autonomous
 public class SwitchCaseAuto extends OpMode {
@@ -30,8 +22,6 @@ public class SwitchCaseAuto extends OpMode {
     private Timer pathTimer, opModeTimer;
 
     private ShooterLogic shooterLogic = new ShooterLogic();
-
-    private boolean shotsTriggered;
 
 
 
@@ -74,26 +64,23 @@ public class SwitchCaseAuto extends OpMode {
         switch (pathState) {
 
             case DRIVE_STARTPOSE_SCOREPOSE:
-                shooterLogic.spin();
+
+                shooterLogic.preSpin();
                 follower.followPath(drive_start_score, true);
                 setPathState(PathState.START_SCORE);
+
                 break;
 
             case START_SCORE:
 
-                if(!follower.isBusy()){
-                    if (!shotsTriggered){
-                        shooterLogic.launch();
-                        shotsTriggered = true;
-                    }
+                if (!follower.isBusy() && shooterLogic.readyToFire()) {
+                    shooterLogic.burstFire();
                 }
 
-                if (shotsTriggered && !shooterLogic.isBusy() && pathTimer.getElapsedTimeSeconds() > 4){
-                    shooterLogic.offAll();
-                    follower.followPath(drive_score_repo1, true);
+                if (!shooterLogic.isBusy()) {
                     setPathState(PathState.DRIVE_SCOREPOSE_REPOPOSE1);
+                    follower.followPath(drive_score_repo1, true);
                 }
-
 
                 break;
             case DRIVE_SCOREPOSE_REPOPOSE1:
@@ -113,7 +100,6 @@ public class SwitchCaseAuto extends OpMode {
         pathState = newState;
         pathTimer.resetTimer();
 
-        shotsTriggered = false;
     }
 
     @Override
