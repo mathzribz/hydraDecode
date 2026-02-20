@@ -31,6 +31,7 @@ public class SwitchCaseAuto extends OpMode {
         DRIVE_STARTPOSE_SCOREPOSE,
         START_SCORE,
         DRIVE_SCOREPOSE_REPOPOSE1,
+        INTAKE,
         END
 
     }
@@ -39,10 +40,11 @@ public class SwitchCaseAuto extends OpMode {
 
     private final Pose starterPose = new Pose(17.537, 119.723, Math.toRadians(142));
     private final Pose scorePose = new Pose(38.170418006430864, 102.26366559485528, Math.toRadians(142));
-    private final Pose repoPose1 = new Pose(46.7395498392283, 82.33118971061093, Math.toRadians(180));
+    private final Pose repoPose1 = new Pose(46.7395498392283, 84.53118971061093, Math.toRadians(180));
+    private final Pose intake1 = new Pose(16.376205787781345, 84.10289389067523, Math.toRadians(180));
 
 
-    PathChain drive_start_score, drive_score_repo1;
+    PathChain drive_start_score, drive_score_repo1, intake;
 
     public void buildPaths() {
 
@@ -57,6 +59,10 @@ public class SwitchCaseAuto extends OpMode {
                 .addPath(new BezierLine(scorePose, repoPose1))
                 .setLinearHeadingInterpolation(scorePose.getHeading(), repoPose1.getHeading())
                 .build();
+        intake = follower.pathBuilder()
+                .addPath(new BezierLine(repoPose1, intake1))
+                .setLinearHeadingInterpolation(repoPose1.getHeading(), intake1.getHeading())
+                .build();
 
     }
 
@@ -67,14 +73,17 @@ public class SwitchCaseAuto extends OpMode {
             case DRIVE_STARTPOSE_SCOREPOSE:
 
                 shooterLogic.preSpin();
-                follower.followPath(drive_start_score, true);
-                setPathState(PathState.START_SCORE);
+                if (opModeTimer.getElapsedTimeSeconds() > 0.25) {
+                    follower.followPath(drive_start_score, true);
+                    setPathState(PathState.START_SCORE);
+                }
+                pathTimer.resetTimer();
 
                 break;
 
             case START_SCORE:
 
-                if (!follower.isBusy() && shooterLogic.readyToFire()) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2){
                     shooterLogic.burstFire();
                 }
 
@@ -85,8 +94,8 @@ public class SwitchCaseAuto extends OpMode {
 
                 break;
             case DRIVE_SCOREPOSE_REPOPOSE1:
-                if(follower.isBusy()){
-                    setPathState(PathState.END);
+                if(!follower.isBusy()){
+                    setPathState(PathState.INTAKE);
 
 
                 }

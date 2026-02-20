@@ -15,7 +15,7 @@ public class Turret extends SubsystemBase {
 
     public static double TICKS_PER_REV = 537.7;
     public static double GEAR_RATIO = 3.906976744186047;
-    public static double MAX_ANGLE = Math.toRadians(150);
+    public static double MAX_ANGLE = Math.toRadians(90);
 
     public static double kp = 0.0025, kd = 0.000, kf = 0.0;
 

@@ -25,7 +25,7 @@ public class ShooterLogic {
 
     private static final double MIN_RPM = 1900;
     private static final double MAX_SPINUP_TIME = 2.0;
-    private static final double BURST_TIME = 4; // tempo suficiente pra 3 bolas
+    private static final double BURST_TIME = 2; // tempo suficiente pra 3 bolas
 
     public void init(HardwareMap hw) {
         shooter = new Shooter(hw);
@@ -39,8 +39,8 @@ public class ShooterLogic {
     public void preSpin() {
         if (state == ShooterState.IDLE) {
             shooter.shooterOn();
-            shooter.setTargetRPM(2200);
-            intake.gateOpen();
+            shooter.setTargetRPM(2050);
+            shooter.HoodLow();
             state = ShooterState.PRESPIN;
             timer.reset();
         }
@@ -54,10 +54,18 @@ public class ShooterLogic {
         }
     }
 
+    public void intakes() {
+
+            intake.intakeOn();
+
+
+
+    }
+
     public void stopAll() {
         shooter.shooterOff();
         intake.intakeStop();
-        intake.gateClose();
+
         state = ShooterState.IDLE;
     }
 

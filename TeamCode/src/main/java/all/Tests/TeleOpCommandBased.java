@@ -138,7 +138,7 @@ public class TeleOpCommandBased extends CommandOpMode {
             shooter.setTargetRPM(1900);
         }
         if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
-            shooter.setTargetRPM(2300);
+            shooter.setTargetRPM(2200);
         }
         if (gamepad1Ex.getButton(GamepadKeys.Button.B)) {
             shooter.setTargetRPM(2900);

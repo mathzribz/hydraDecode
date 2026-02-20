@@ -22,9 +22,9 @@ public class Shooter extends SubsystemBase {
 
 
 
-    public static double kP = 0.026;
+    public static double kP = 0.005;
     public static double kD = 0.0000;
-    public static double kF = 0.000225;
+    public static double kF = 0.00022;
 
     private final PIDFController pidf = new PIDFController(kP, 0, kD, 0);
 
@@ -52,11 +52,11 @@ public class Shooter extends SubsystemBase {
 
 
     public void HoodHigh() {
-        hood.setPosition(0.9);
+        hood.setPosition(0.75);
     }
 
     public void HoodLow() {
-        hood.setPosition(0.7);
+        hood.setPosition(0.6);
     }
 
     public void shooterOn() {
