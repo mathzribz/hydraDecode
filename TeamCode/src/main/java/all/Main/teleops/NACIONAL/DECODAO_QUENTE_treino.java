@@ -55,8 +55,8 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
         );
 
 
-        gamepad1Ex.getGamepadButton(GamepadKeys.Button.B)
-                .whenPressed(new SetDriveSpeed(drive, 0.9));
+        gamepad1Ex.getGamepadButton(GamepadKeys.Button.A)
+                .whenPressed(new SetDriveSpeed(drive, 0.95));
 
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenPressed(new ResetFieldCentric(drive));
@@ -131,9 +131,7 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
             shooter.shooterOff();
         }
 
-        if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
-            shooter.setTargetRPM(1900);
-        }
+
         if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
             shooter.setTargetRPM(2200);
         }
