@@ -50,6 +50,7 @@ public class blue_facas extends OpMode {
     private final Pose starterPose = new Pose(17.537,119.723,Math.toRadians(142));
     private final Pose scorePose   = new Pose(38.17,102.26,Math.toRadians(142));
 
+    private final Pose repo1 = new Pose(35.37,84.10,Math.toRadians(180));
     private final Pose intake1 = new Pose(16.37,84.10,Math.toRadians(180));
     private final Pose intake2 = new Pose(16.66,59.66,Math.toRadians(180));
     private final Pose intake3 = new Pose(15.07,36.47,Math.toRadians(180));
@@ -57,7 +58,7 @@ public class blue_facas extends OpMode {
 
     // ===== PATHS =====
     PathChain start_score;
-    PathChain to_intake1, back1;
+    PathChain to_intake1,repo1d, back1;
     PathChain to_intake2, back2;
     PathChain to_gate;
     PathChain to_intake3, back3;
@@ -68,8 +69,11 @@ public class blue_facas extends OpMode {
                 .addPath(new BezierLine(starterPose, scorePose))
                 .build();
 
-        to_intake1 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, intake1))
+        repo1d = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, repo1))
+                .build();
+  to_intake1 = follower.pathBuilder()
+                .addPath(new BezierLine(repo1, intake1))
                 .build();
 
         back1 = follower.pathBuilder()
@@ -104,30 +108,33 @@ public class blue_facas extends OpMode {
             case DRIVE_STARTPOSE_SCOREPOSE:
 
                 shooterLogic.preSpin();
-
-                if (opModeTimer.getElapsedTimeSeconds() > 0.2) {
+                if (opModeTimer.getElapsedTimeSeconds() > 0.25) {
                     follower.followPath(start_score, true);
                     setPathState(PathState.START_SCORE);
                 }
+                pathTimer.resetTimer();
+
                 break;
 
             case START_SCORE:
 
-                if (!follower.isBusy() && shooterLogic.readyToFire()) {
-                    shooterLogic.openGate();
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2){
                     shooterLogic.burstFire();
                 }
 
                 if (!shooterLogic.isBusy()) {
-                    follower.followPath(to_intake1, true);
-                    setPathState(PathState.DRIVE_TO_INTAKE1);
+                    setPathState(PathState.START_SCORE);
+                    follower.followPath(repo1d, true);
                 }
+
                 break;
 
             // ================= CICLO 1 =================
 
             case DRIVE_TO_INTAKE1:
                 if (!follower.isBusy()) {
+
+                    follower.followPath(to_intake1, true);
                     shooterLogic.startIntakeWithSensors();
                     setPathState(PathState.COLLECT1);
                 }

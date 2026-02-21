@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import all.subsystems.Intake;
 import all.subsystems.Shooter;
 import all.subsystems.Turret;
+import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
 
 public class AutoLogic {
 
@@ -32,11 +33,11 @@ public class AutoLogic {
     public void init(HardwareMap hw) {
         shooter = new Shooter(hw);
         intake = new Intake(hw);
-        turret = new Turret(hw);
+
 
         intake.useSensors = false;
         intake.gateOpen();
-        turret.holdAtAngleDeg(0);
+
     }
     public void preSpin() {
         if (state == ShooterState.IDLE) {
@@ -119,6 +120,7 @@ public class AutoLogic {
                 stopAll();
                 break;
         }
+
 
     }
 }

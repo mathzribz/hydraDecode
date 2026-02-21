@@ -40,10 +40,10 @@ public class DECODAO_TESTE extends LinearOpMode {
     private double headingOffset = 0.0;
     private static final double DEAD_ZONE = 0.25;
 
-    public static double kP = 0.025;
+    public static double kP = 0.005;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kF = 0.000225;
+    public static double kF = 0.00022;
 
     public static double TICKS_PER_REV = 28;
     public static double targetRPM = 1200;
@@ -285,7 +285,7 @@ public class DECODAO_TESTE extends LinearOpMode {
         if (gamepad1.right_trigger > 0.1) {
             ShooterR.setPower(finalPower);
             ShooterL.setPower(finalPower);
-            servo_teste.setPosition(servo1pos);
+            servo_teste.setPosition(0.17);
         } else {
             ShooterR.setPower(0);
             ShooterL.setPower(0);

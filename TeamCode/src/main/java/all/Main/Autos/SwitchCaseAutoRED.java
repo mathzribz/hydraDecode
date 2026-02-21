@@ -10,25 +10,19 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
-
 
 import all.Configs.Auto.AutoLogic;
 import all.Configs.Auto.PoseStorage;
 import all.Configs.Pedro.Constants;
-import all.Configs.Auto.AutoLogic;
-import all.subsystems.Turret;
 
 
 @Autonomous
-public class SwitchCaseAuto extends OpMode {
+public class SwitchCaseAutoRED extends OpMode {
 
     private Follower follower;
     private Timer pathTimer, opModeTimer;
 
     private AutoLogic shooterLogic = new AutoLogic();
-
-    private Turret turret;
 
 
 
@@ -44,9 +38,18 @@ public class SwitchCaseAuto extends OpMode {
 
     PathState pathState;
 
-    private final Pose starterPose = new Pose(17.537, 119.723, Math.toRadians(142));
-    private final Pose scorePose = new Pose(38.170418006430864, 102.26366559485528, Math.toRadians(142));
-    private final Pose repoPose1 = new Pose(46, 65, Math.toRadians(180));
+    private final Pose starterPose = new Pose(
+            126.463,
+            119.723,
+            Math.toRadians(38)
+    );
+
+    private final Pose scorePose = new Pose(
+            105.83,
+            102.26366559485528,
+            Math.toRadians(38)
+    );
+    private final Pose repoPose1 = new Pose(106, 74, Math.toRadians(180));
 
 
     PathChain drive_start_score, drive_score_repo1, intake;

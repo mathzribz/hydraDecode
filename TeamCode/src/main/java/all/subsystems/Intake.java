@@ -53,7 +53,7 @@ public class Intake extends SubsystemBase {
                     countingFull = true;
                 }
 
-                if (fullTimer.seconds() >= 0.09) {
+                if (fullTimer.seconds() >= 0.07) {
                     enabledTransfer = false;
                     motorPower = 0;
                 }
@@ -98,7 +98,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void gateClose() {
-        gate.setPosition(0.33);
+        gate.setPosition(0.335);
     }
 
     @Override

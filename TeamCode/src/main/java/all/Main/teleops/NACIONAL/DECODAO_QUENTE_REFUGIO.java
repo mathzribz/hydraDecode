@@ -126,7 +126,7 @@ public class DECODAO_QUENTE_REFUGIO extends CommandOpMode {
 
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
-            shooter.setTargetRPM(2200);
+            shooter.setTargetRPM(2300);
         }
         if (gamepad1Ex.getButton(GamepadKeys.Button.B)) {
             shooter.setTargetRPM(2400);

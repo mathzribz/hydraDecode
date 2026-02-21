@@ -45,7 +45,7 @@ public class DECODAO_QUENTE_BLUE extends CommandOpMode {
         ll.switchPipeline(0);
         ll.start();
 
-        Pose startPos = new Pose(33, 111, Math.toRadians(180) );
+        Pose startPos = new Pose(46, 74, Math.toRadians(180) );
 
         drive.setStartingPose(PoseStorage.currentPose);
 
