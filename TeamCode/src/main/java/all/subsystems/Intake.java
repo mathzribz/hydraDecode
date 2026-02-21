@@ -53,7 +53,7 @@ public class Intake extends SubsystemBase {
                     countingFull = true;
                 }
 
-                if (fullTimer.seconds() >= 0.08) {
+                if (fullTimer.seconds() >= 0.09) {
                     enabledTransfer = false;
                     motorPower = 0;
                 }
