@@ -1,16 +1,18 @@
 
-package all.Configs.StateMachines;
+package all.Configs.Auto;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import all.subsystems.Intake;
 import all.subsystems.Shooter;
+import all.subsystems.Turret;
 
-public class ShooterLogic {
+public class AutoLogic {
 
     private Intake intake;
     private Shooter shooter;
+    private Turret turret;
 
     public final ElapsedTime timer = new ElapsedTime();
 
@@ -30,11 +32,11 @@ public class ShooterLogic {
     public void init(HardwareMap hw) {
         shooter = new Shooter(hw);
         intake = new Intake(hw);
+        turret = new Turret(hw);
 
         intake.useSensors = false;
-        shooter.shooterOff();
         intake.gateOpen();
-        intake.intakeStop();
+        turret.holdAtAngleDeg(0);
     }
     public void preSpin() {
         if (state == ShooterState.IDLE) {
@@ -48,19 +50,14 @@ public class ShooterLogic {
 
     public void burstFire() {
         if (state == ShooterState.PRESPIN) {
+            intake.useSensors = false;
             intake.TransferAuto();
             timer.reset();
             state = ShooterState.BURST_FIRE;
         }
     }
 
-    public void intakes() {
 
-            intake.intakeOn();
-
-
-
-    }
 
     public void stopAll() {
         shooter.shooterOff();
@@ -75,6 +72,29 @@ public class ShooterLogic {
 
     public boolean isBusy() {
         return state != ShooterState.IDLE;
+    }
+
+
+    public void startIntakeWithSensors() {
+        intake.useSensors = true;
+        intake.gateClose();
+        intake.intakeOn();
+    }
+
+    public void stopIntake() {
+        intake.intakeStop();
+    }
+
+    public void openGate() {
+        intake.gateOpen();
+    }
+
+    public void closeGate() {
+        intake.gateClose();
+    }
+
+    public boolean intakeFull() {
+        return !intake.isTransferEnabled();
     }
 
 

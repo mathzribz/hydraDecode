@@ -25,6 +25,8 @@ public class Turret extends SubsystemBase {
 
     private double relocalizationAngleOffset = 0.0;
 
+    private boolean holdMode = false;
+    private double holdAngle = 0.0;
     public Turret(HardwareMap hw) {
         motor = hw.get(DcMotorEx.class, "turret");
 
@@ -39,6 +41,10 @@ public class Turret extends SubsystemBase {
     @Override
     public void periodic() {
         pid.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
+
+        if (holdMode) {
+            updateHoldControl();
+        }
     }
 
     public void setRelocalizationOffset(double offset) {
@@ -84,6 +90,8 @@ public class Turret extends SubsystemBase {
         motor.setPower(Math.max(-0.75, Math.min(0.75, power)));
     }
 
+
+
     private double radsToTicks(double rad) {
         return (rad / (2 * Math.PI)) * TICKS_PER_REV * GEAR_RATIO;
     }
@@ -100,5 +108,35 @@ public class Turret extends SubsystemBase {
         while (angle > Math.PI) angle -= 2 * Math.PI;
         while (angle < -Math.PI) angle += 2 * Math.PI;
         return angle;
+    }
+
+
+    public void holdAtAngle(double angleRad) {
+        holdMode = true;
+        holdAngle = clamp(wrap(angleRad));
+    }
+
+    public void holdAtAngleDeg(double angleDeg) {
+        holdAtAngle(Math.toRadians(angleDeg));
+    }
+
+    private void updateHoldControl() {
+
+        double currentTicks = motor.getCurrentPosition();
+        double targetTicks = radsToTicks(holdAngle);
+
+        double tickError = targetTicks - currentTicks;
+
+        if (Math.abs(tickError) < 5) {
+            motor.setPower(0);
+            pid.reset();
+            return;
+        }
+
+        pid.updateError(tickError);
+        pid.updateFeedForwardInput(Math.signum(tickError));
+
+        double power = pid.run();
+        motor.setPower(Math.max(-0.75, Math.min(0.75, power)));
     }
 }

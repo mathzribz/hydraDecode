@@ -1,5 +1,5 @@
 
-package all.Tests;
+package all.Main.Autos;
 
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
@@ -12,8 +12,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 
+import all.Configs.Auto.AutoLogic;
+import all.Configs.Auto.PoseStorage;
 import all.Configs.Pedro.Constants;
-import all.Configs.StateMachines.ShooterLogic;
+import all.Configs.Auto.AutoLogic;
 
 
 @Autonomous
@@ -22,7 +24,7 @@ public class SwitchCaseAuto extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
 
-    private ShooterLogic shooterLogic = new ShooterLogic();
+    private AutoLogic shooterLogic = new AutoLogic();
 
 
 
@@ -137,6 +139,7 @@ public class SwitchCaseAuto extends OpMode {
         CommandScheduler.getInstance().run();
         follower.update();
         shooterLogic.update();
+        PoseStorage.currentPose = follower.getPose();
 
 
         statePathUpdate();

@@ -90,7 +90,6 @@ public class Intake extends SubsystemBase {
 
     }
     public void TransferAuto() {
-
         motorPower = -1.0;
     }
 

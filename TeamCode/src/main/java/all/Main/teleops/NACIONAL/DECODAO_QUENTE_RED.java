@@ -1,28 +1,28 @@
 
-package all.Tests;
+package all.Main.teleops.NACIONAL;
 
-import static all.Configs.Pedro.Tuning.draw;
-import static all.Configs.Pedro.Tuning.drawOnlyCurrent;
-import static all.Configs.Pedro.Tuning.follower;
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
+import static all.Configs.Turret.FieldConstants.RED_GOAL;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
 import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
 import all.Commands.Loc.SetDriveSpeed;
+import all.Configs.Auto.PoseStorage;
 import all.Configs.Panels.Drawing;
 import all.subsystems.Drive;
 import all.subsystems.Intake;
-
 import all.subsystems.LLMegatag;
 import all.subsystems.Shooter;
 import all.subsystems.Turret;
+
 @TeleOp
-public class TeleOpCommandBased extends CommandOpMode {
+public class DECODAO_QUENTE_RED extends CommandOpMode {
     private Drive drive;
     private Turret turret;
     private Intake intake;
@@ -49,7 +49,7 @@ public class TeleOpCommandBased extends CommandOpMode {
 
         Pose startPos = new Pose(33, 111, Math.toRadians(180) );
 
-        drive.setStartingPose(startPos);
+        drive.setStartingPose(PoseStorage.currentPose);
 
         drive.setDefaultCommand(
                 new DriveCommand(drive, gamepad1Ex)
@@ -80,7 +80,7 @@ public class TeleOpCommandBased extends CommandOpMode {
         }
 
 
-            turret.followPose(BLUE_GOAL, drive.getPose(), drive.getHeadingRad());
+            turret.followPose(RED_GOAL, drive.getPose(), drive.getHeadingRad());
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
             drive.relocalizeWithLimelight(ll.getPedroRobotPose());
@@ -141,7 +141,7 @@ public class TeleOpCommandBased extends CommandOpMode {
             shooter.setTargetRPM(2200);
         }
         if (gamepad1Ex.getButton(GamepadKeys.Button.B)) {
-            shooter.setTargetRPM(2900);
+            shooter.setTargetRPM(2400);
         }
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_UP)) {
