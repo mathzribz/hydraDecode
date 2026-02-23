@@ -1,7 +1,10 @@
 package all.Main.Autos;
 
+import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
+
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -21,6 +24,7 @@ public class blue_facas extends OpMode {
     private Timer pathTimer, opModeTimer;
 
     private AutoLogic shooterLogic = new AutoLogic();
+    private Turret turret;
 
     public enum PathState {
 
@@ -57,47 +61,106 @@ public class blue_facas extends OpMode {
     private final Pose gate    = new Pose(16.21,69.37,Math.toRadians(-90));
 
     // ===== PATHS =====
-    PathChain start_score;
-    PathChain to_intake1,repo1d, back1;
-    PathChain to_intake2, back2;
-    PathChain to_gate;
-    PathChain to_intake3, back3;
+    public PathChain Path1;
+    public PathChain Path2;
+    public PathChain Path3;
+    public PathChain Path4;
+    public PathChain Path5;
+    public PathChain Path6;
+    public PathChain Path7;
+    public PathChain Path8;
+    public PathChain Path9;
 
-    public void buildPaths() {
+    public void Paths() {
+        Path1 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(33.118, 135.312),
 
-        start_score = follower.pathBuilder()
-                .addPath(new BezierLine(starterPose, scorePose))
+                                new Pose(51.613, 93.419)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(-90))
+
                 .build();
 
-        repo1d = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, repo1))
-                .build();
-  to_intake1 = follower.pathBuilder()
-                .addPath(new BezierLine(repo1, intake1))
+        Path2 = follower.pathBuilder().addPath(
+                        new BezierCurve(
+                                new Pose(51.613, 93.419),
+                                new Pose(70.091, 57.317),
+                                new Pose(55.156, 58.661),
+                                new Pose(18.226, 60.505)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(-90), Math.toRadians(180))
+
                 .build();
 
-        back1 = follower.pathBuilder()
-                .addPath(new BezierLine(intake1, scorePose))
+        Path3 = follower.pathBuilder().addPath(
+                        new BezierCurve(
+                                new Pose(18.226, 60.505),
+                                new Pose(56.629, 85.177),
+                                new Pose(51.742, 93.398)
+                        )
+                ).setTangentHeadingInterpolation()
+                .setReversed()
                 .build();
 
-        to_intake2 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, intake2))
+        Path4 = follower.pathBuilder().addPath(
+                        new BezierCurve(
+                                new Pose(51.742, 93.398),
+                                new Pose(57.366, 49.419),
+                                new Pose(10.538, 59.032)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(-90), Math.toRadians(140))
+
                 .build();
 
-        back2 = follower.pathBuilder()
-                .addPath(new BezierLine(intake2, scorePose))
+        Path5 = follower.pathBuilder().addPath(
+                        new BezierCurve(
+                                new Pose(10.538, 59.032),
+                                new Pose(37.070, 68.269),
+                                new Pose(51.989, 93.742)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(140))
+                .setReversed()
                 .build();
 
-        to_gate = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, gate))
+        Path6 = follower.pathBuilder().addPath(
+                        new BezierCurve(
+                                new Pose(51.989, 93.742),
+                                new Pose(57.366, 49.419),
+                                new Pose(10.538, 59.032)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(140))
+
                 .build();
 
-        to_intake3 = follower.pathBuilder()
-                .addPath(new BezierLine(gate, intake3))
+        Path7 = follower.pathBuilder().addPath(
+                        new BezierCurve(
+                                new Pose(10.538, 59.032),
+                                new Pose(37.070, 68.269),
+                                new Pose(51.989, 93.742)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(140))
+
                 .build();
 
-        back3 = follower.pathBuilder()
-                .addPath(new BezierLine(intake3, scorePose))
+        Path8 = follower.pathBuilder().addPath(
+                        new BezierCurve(
+                                new Pose(51.989, 93.742),
+                                new Pose(57.161, 83.828),
+                                new Pose(16.548, 83.978)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(180))
+
+                .build();
+
+        Path9 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(16.548, 83.978),
+
+                                new Pose(52.086, 93.624)
+                        )
+                ).setTangentHeadingInterpolation()
+                .setReversed()
                 .build();
     }
 
@@ -109,7 +172,7 @@ public class blue_facas extends OpMode {
 
                 shooterLogic.preSpin();
                 if (opModeTimer.getElapsedTimeSeconds() > 0.25) {
-                    follower.followPath(start_score, true);
+                    follower.followPath(Path1, true);
                     setPathState(PathState.START_SCORE);
                 }
                 pathTimer.resetTimer();
@@ -120,12 +183,10 @@ public class blue_facas extends OpMode {
 
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2){
                     shooterLogic.burstFire();
+                    setPathState(PathState.START_SCORE);
                 }
 
-                if (!shooterLogic.isBusy()) {
-                    setPathState(PathState.START_SCORE);
-                    follower.followPath(repo1d, true);
-                }
+
 
                 break;
 
@@ -134,7 +195,7 @@ public class blue_facas extends OpMode {
             case DRIVE_TO_INTAKE1:
                 if (!follower.isBusy()) {
 
-                    follower.followPath(to_intake1, true);
+                    follower.followPath(Path2, true);
                     shooterLogic.startIntakeWithSensors();
                     setPathState(PathState.COLLECT1);
                 }
@@ -143,7 +204,7 @@ public class blue_facas extends OpMode {
             case COLLECT1:
                 if (shooterLogic.intakeFull()) {
                     shooterLogic.stopIntake();
-                    follower.followPath(back1, true);
+                    follower.followPath(Path3, true);
                     setPathState(PathState.SHOOT1);
                 }
                 break;
@@ -152,11 +213,11 @@ public class blue_facas extends OpMode {
                 if (!follower.isBusy() && shooterLogic.readyToFire()) {
                     shooterLogic.openGate();
                     shooterLogic.burstFire();
-                }
-                if (!shooterLogic.isBusy()) {
-                    follower.followPath(to_intake2, true);
                     setPathState(PathState.DRIVE_TO_INTAKE2);
                 }
+
+
+
 //                break;
 //
 //            // ================= CICLO 2 =================
@@ -242,9 +303,10 @@ public class blue_facas extends OpMode {
 
         follower = Constants.createFollower(hardwareMap);
         shooterLogic.init(hardwareMap);
+        turret = new Turret(hardwareMap);
 
-        buildPaths();
-        follower.setPose(starterPose);
+        Paths();
+        follower.setStartingPose(new Pose(33.118279569892465, 135.31182795698925, Math.toRadians(180)));
 
         pathState = PathState.DRIVE_STARTPOSE_SCOREPOSE;
 
@@ -252,6 +314,7 @@ public class blue_facas extends OpMode {
 
     @Override
     public void loop() {
+        turret.followPose(BLUE_GOAL,follower.getPose(),follower.getHeading());
 
         CommandScheduler.getInstance().run();
         follower.update();

@@ -24,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 @Disabled
-public class DECODAO_REGIONAL extends LinearOpMode {
+public class REGIONAL_teleop extends LinearOpMode {
 
     private DcMotor RMF, RMB, LMF, LMB;
     private DcMotor Intake, Transfer;

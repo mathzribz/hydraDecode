@@ -23,7 +23,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 @TeleOp
-public class DECODAO_TESTE extends LinearOpMode {
+public class Test_teleop extends LinearOpMode {
 
     private DcMotor RMF, RMB, LMF, LMB;
     private DcMotor Intake;

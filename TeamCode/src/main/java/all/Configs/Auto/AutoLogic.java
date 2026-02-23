@@ -13,7 +13,7 @@ public class AutoLogic {
 
     private Intake intake;
     private Shooter shooter;
-    private Turret turret;
+
 
     public final ElapsedTime timer = new ElapsedTime();
 
@@ -100,6 +100,7 @@ public class AutoLogic {
 
 
     public void update() {
+
 
         switch (state) {
 

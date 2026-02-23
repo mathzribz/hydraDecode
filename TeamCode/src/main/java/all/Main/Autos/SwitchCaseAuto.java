@@ -26,7 +26,7 @@ public class SwitchCaseAuto extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
 
-    private AutoLogic shooterLogic = new AutoLogic();
+    private AutoLogic autologic = new AutoLogic();
 
     private Turret turret;
 
@@ -74,7 +74,7 @@ public class SwitchCaseAuto extends OpMode {
 
             case DRIVE_STARTPOSE_SCOREPOSE:
 
-                shooterLogic.preSpin();
+                autologic.preSpin();
                 if (opModeTimer.getElapsedTimeSeconds() > 0.25) {
                     follower.followPath(drive_start_score, true);
                     setPathState(PathState.START_SCORE);
@@ -86,10 +86,10 @@ public class SwitchCaseAuto extends OpMode {
             case START_SCORE:
 
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2){
-                    shooterLogic.burstFire();
+                    autologic.burstFire();
                 }
 
-                if (!shooterLogic.isBusy()) {
+                if (!autologic.isBusy()) {
                     setPathState(PathState.DRIVE_SCOREPOSE_REPOPOSE1);
                     follower.followPath(drive_score_repo1, true);
                 }
@@ -123,7 +123,7 @@ public class SwitchCaseAuto extends OpMode {
         opModeTimer = new Timer();
 
         follower = Constants.createFollower(hardwareMap);
-        shooterLogic.init(hardwareMap);
+        autologic.init(hardwareMap);
 
         buildPaths();
         follower.setPose(starterPose);
@@ -138,13 +138,13 @@ public class SwitchCaseAuto extends OpMode {
     public void loop() {
         CommandScheduler.getInstance().run();
         follower.update();
-        shooterLogic.update();
+        autologic.update();
         PoseStorage.currentPose = follower.getPose();
 
 
         statePathUpdate();
 
-        telemetry.addData(String.valueOf(shooterLogic.timer), "timer auto");
+        telemetry.addData(String.valueOf(autologic.timer), "timer auto");
 
 
     }

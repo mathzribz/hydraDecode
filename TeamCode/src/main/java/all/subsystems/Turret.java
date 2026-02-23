@@ -1,3 +1,4 @@
+
 package all.subsystems;
 
 
@@ -42,9 +43,7 @@ public class Turret extends SubsystemBase {
     public void periodic() {
         pid.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
 
-        if (holdMode) {
-            updateHoldControl();
-        }
+
     }
 
     public void setRelocalizationOffset(double offset) {
@@ -111,32 +110,7 @@ public class Turret extends SubsystemBase {
     }
 
 
-    public void holdAtAngle(double angleRad) {
-        holdMode = true;
-        holdAngle = clamp(wrap(angleRad));
-    }
 
-    public void holdAtAngleDeg(double angleDeg) {
-        holdAtAngle(Math.toRadians(angleDeg));
-    }
 
-    private void updateHoldControl() {
 
-        double currentTicks = motor.getCurrentPosition();
-        double targetTicks = radsToTicks(holdAngle);
-
-        double tickError = targetTicks - currentTicks;
-
-        if (Math.abs(tickError) < 5) {
-            motor.setPower(0);
-            pid.reset();
-            return;
-        }
-
-        pid.updateError(tickError);
-        pid.updateFeedForwardInput(Math.signum(tickError));
-
-        double power = pid.run();
-        motor.setPower(Math.max(-0.75, Math.min(0.75, power)));
-    }
 }
