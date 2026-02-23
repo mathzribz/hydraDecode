@@ -1,3 +1,4 @@
+
 package all.Main.Autos;
 
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
@@ -23,7 +24,7 @@ public class blue_facas extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
 
-    private AutoLogic shooterLogic = new AutoLogic();
+    private AutoLogic autologic = new AutoLogic();
     private Turret turret;
 
     public enum PathState {
@@ -63,6 +64,7 @@ public class blue_facas extends OpMode {
     // ===== PATHS =====
     public PathChain Path1;
     public PathChain Path2;
+    public PathChain Pathd;
     public PathChain Path3;
     public PathChain Path4;
     public PathChain Path5;
@@ -78,29 +80,29 @@ public class blue_facas extends OpMode {
 
                                 new Pose(51.613, 93.419)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(-90))
+                ).setLinearHeadingInterpolation(Math.toRadians(-90), Math.toRadians(-90))
 
                 .build();
 
         Path2 = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(51.613, 93.419),
-                                new Pose(70.091, 57.317),
-                                new Pose(55.156, 58.661),
-                                new Pose(18.226, 60.505)
+                                new Pose(75.879, 58.938),
+                                new Pose(46.822, 59.587),
+                                new Pose(17.531, 58.811)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(-90), Math.toRadians(180))
+                ).setConstantHeadingInterpolation(Math.toRadians(180))
 
                 .build();
+
 
         Path3 = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(18.226, 60.505),
                                 new Pose(56.629, 85.177),
-                                new Pose(51.742, 93.398)
+                                new Pose(51.613, 93.419)
                         )
-                ).setTangentHeadingInterpolation()
-                .setReversed()
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
 
         Path4 = follower.pathBuilder().addPath(
@@ -109,7 +111,7 @@ public class blue_facas extends OpMode {
                                 new Pose(57.366, 49.419),
                                 new Pose(10.538, 59.032)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(-90), Math.toRadians(140))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(140))
 
                 .build();
 
@@ -165,14 +167,16 @@ public class blue_facas extends OpMode {
     }
 
     public void statePathUpdate() {
+        turret.followPose(BLUE_GOAL,follower.getPose(),follower.getHeading());
+        autologic.preSpin();
 
         switch (pathState) {
 
             case DRIVE_STARTPOSE_SCOREPOSE:
 
-                shooterLogic.preSpin();
+
                 if (opModeTimer.getElapsedTimeSeconds() > 0.25) {
-                    follower.followPath(Path1, true);
+                    follower.followPath(Path1,1, true);
                     setPathState(PathState.START_SCORE);
                 }
                 pathTimer.resetTimer();
@@ -182,9 +186,11 @@ public class blue_facas extends OpMode {
             case START_SCORE:
 
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2){
-                    shooterLogic.burstFire();
-                    setPathState(PathState.START_SCORE);
+                    autologic.burstFire();
+                    setPathState(PathState.DRIVE_TO_INTAKE1);
+
                 }
+
 
 
 
@@ -193,28 +199,29 @@ public class blue_facas extends OpMode {
             // ================= CICLO 1 =================
 
             case DRIVE_TO_INTAKE1:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
 
-                    follower.followPath(Path2, true);
-                    shooterLogic.startIntakeWithSensors();
+                    follower.followPath(Path2, 0.9,true);
+                    autologic.startIntakeWithSensors();
                     setPathState(PathState.COLLECT1);
                 }
                 break;
 
             case COLLECT1:
-                if (shooterLogic.intakeFull()) {
-                    shooterLogic.stopIntake();
-                    follower.followPath(Path3, true);
+                if (!follower.isBusy()) {
+                    follower.followPath(Path3,1, true);
                     setPathState(PathState.SHOOT1);
                 }
                 break;
 
             case SHOOT1:
-                if (!follower.isBusy() && shooterLogic.readyToFire()) {
-                    shooterLogic.openGate();
-                    shooterLogic.burstFire();
-                    setPathState(PathState.DRIVE_TO_INTAKE2);
+                if (!follower.isBusy() && autologic.readyToFire()) {
+                    autologic.openGate();
+                    autologic.burstFire();
+                    setPathState(PathState.END);
                 }
+
+
 
 
 
@@ -224,25 +231,25 @@ public class blue_facas extends OpMode {
 //
 //            case DRIVE_TO_INTAKE2:
 //                if (!follower.isBusy()) {
-//                    shooterLogic.startIntakeWithSensors();
+//                    autologic.startIntakeWithSensors();
 //                    setPathState(PathState.COLLECT2);
 //                }
 //                break;
 //
 //            case COLLECT2:
-//                if (shooterLogic.intakeFull()) {
-//                    shooterLogic.stopIntake();
+//                if (autologic.intakeFull()) {
+//                    autologic.stopIntake();
 //                    follower.followPath(back2, true);
 //                    setPathState(PathState.SHOOT2);
 //                }
 //                break;
 //
 //            case SHOOT2:
-//                if (!follower.isBusy() && shooterLogic.readyToFire()) {
-//                    shooterLogic.openGate();
-//                    shooterLogic.burstFire();
+//                if (!follower.isBusy() && autologic.readyToFire()) {
+//                    autologic.openGate();
+//                    autologic.burstFire();
 //                }
-//                if (!shooterLogic.isBusy()) {
+//                if (!autologic.isBusy()) {
 //                    follower.followPath(to_gate, true);
 //                    setPathState(PathState.DRIVE_TO_GATE);
 //                }
@@ -261,31 +268,29 @@ public class blue_facas extends OpMode {
 //
 //            case DRIVE_TO_INTAKE3:
 //                if (!follower.isBusy()) {
-//                    shooterLogic.startIntakeWithSensors();
+//                    autologic.startIntakeWithSensors();
 //                    setPathState(PathState.COLLECT3);
 //                }
 //                break;
 //
 //            case COLLECT3:
-//                if (shooterLogic.intakeFull()) {
-//                    shooterLogic.stopIntake();
+//                if (autologic.intakeFull()) {
+//                    autologic.stopIntake();
 //                    follower.followPath(back3, true);
 //                    setPathState(PathState.SHOOT3);
 //                }
 //                break;
 //
 //            case SHOOT3:
-//                if (!follower.isBusy() && shooterLogic.readyToFire()) {
-//                    shooterLogic.openGate();
-//                    shooterLogic.burstFire();
+//                if (!follower.isBusy() && autologic.readyToFire()) {
+//                    autologic.openGate();
+//                    autologic.burstFire();
 //                }
-                if (!shooterLogic.isBusy()) {
-                    setPathState(PathState.END);
-                }
+
                 break;
 
             case END:
-                shooterLogic.stopAll();
+              CommandScheduler.getInstance().cancelAll();
                 break;
         }
     }
@@ -302,11 +307,11 @@ public class blue_facas extends OpMode {
         opModeTimer = new Timer();
 
         follower = Constants.createFollower(hardwareMap);
-        shooterLogic.init(hardwareMap);
+        autologic.init(hardwareMap);
         turret = new Turret(hardwareMap);
 
         Paths();
-        follower.setStartingPose(new Pose(33.118279569892465, 135.31182795698925, Math.toRadians(180)));
+        follower.setStartingPose(new Pose(33.118279569892465, 135.31182795698925, Math.toRadians(-90)));
 
         pathState = PathState.DRIVE_STARTPOSE_SCOREPOSE;
 
@@ -314,14 +319,17 @@ public class blue_facas extends OpMode {
 
     @Override
     public void loop() {
-        turret.followPose(BLUE_GOAL,follower.getPose(),follower.getHeading());
+
 
         CommandScheduler.getInstance().run();
         follower.update();
-        shooterLogic.update();
+        autologic.update();
         statePathUpdate();
 
+
+
         PoseStorage.currentPose = follower.getPose();
+        PoseStorage.turretAngle = turret.getCurrentFieldAngle(follower.getHeading());
 
         telemetry.addData("State", pathState);
     }

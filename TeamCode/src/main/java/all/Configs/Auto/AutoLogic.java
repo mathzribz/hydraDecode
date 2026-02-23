@@ -6,8 +6,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import all.subsystems.Intake;
 import all.subsystems.Shooter;
-import all.subsystems.Turret;
-import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
 
 public class AutoLogic {
 
@@ -40,13 +38,12 @@ public class AutoLogic {
 
     }
     public void preSpin() {
-        if (state == ShooterState.IDLE) {
+        state = ShooterState.PRESPIN;
             shooter.shooterOn();
-            shooter.setTargetRPM(2050);
+            shooter.setTargetRPM(2250);
             shooter.HoodLow();
-            state = ShooterState.PRESPIN;
-            timer.reset();
-        }
+
+
     }
 
     public void burstFire() {
@@ -54,7 +51,9 @@ public class AutoLogic {
             intake.useSensors = false;
             intake.TransferAuto();
             timer.reset();
-            state = ShooterState.BURST_FIRE;
+            if (timer.seconds() >= BURST_TIME) {
+                intake.intakeStop();
+            }
         }
     }
 
@@ -118,7 +117,6 @@ public class AutoLogic {
                 break;
 
             case STOPPING:
-                stopAll();
                 break;
         }
 

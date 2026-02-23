@@ -33,7 +33,7 @@ public class LLMegatag extends SubsystemBase {
         Pose3D mtPose = res.getBotpose_MT2();
 
         Pose2D ftcStandart =  new Pose2D(
-                DistanceUnit.METER,
+                DistanceUnit.INCH,
                 -mtPose.getPosition().x,
                 mtPose.getPosition().y,
                 AngleUnit.RADIANS,

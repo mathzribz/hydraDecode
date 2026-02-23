@@ -3,6 +3,7 @@ package all.Main.teleops.NACIONAL;
 
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -19,7 +20,7 @@ import all.subsystems.Intake;
 import all.subsystems.LLMegatag;
 import all.subsystems.Shooter;
 import all.subsystems.Turret;
-
+@Config
 @TeleOp
 public class DECODAO_QUENTE_treino extends CommandOpMode {
     private Drive drive;
@@ -28,6 +29,8 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
     private Shooter shooter;
     private LLMegatag ll;
     private GamepadEx gamepad1Ex;
+
+    public static double offsetRadians = 1;
 
     @Override
     public void initialize() {
@@ -79,18 +82,20 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
 
             turret.followPose(BLUE_GOAL, drive.getPose(), drive.getHeadingRad());
 
-        if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
-            drive.relocalizeWithLimelight(ll.getPedroRobotPose());
+        double offssetReal = offsetRadians * turret.ticksToRads(turret.getTicksBruto());
 
-           // turret.setRelocalizationOffset(Math.toRadians(0));
-        }
+//        if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
+//            drive.relocalizeWithLimelight(ll.getPedroRobotPose() );
+//
+//            turret.setRelocalizationOffset(Math.toRadians(offssetReal));
+//        }
 
 
         intakeWorking();
         shooterWorking();
 
 
-        telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
+
         telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
         telemetry.addData("Up (cm)", Intake.upBlocked);
         telemetry.addData("Down (cm)", Intake.downBlocked);
@@ -99,6 +104,9 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
         telemetry.addData("target RPM",shooter.getTargetRPM());
         telemetry.addData("current RPM",shooter.getCurrentRPM());
         telemetry.addData("cood LL",ll.getPedroRobotPose());
+        telemetry.addData("ticks radian",turret.ticksToRads(turret.getTicksBruto()));
+        telemetry.addData("offsetReal",offssetReal);
+
 
 
         telemetry.update();
@@ -133,10 +141,10 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
 
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
-            shooter.setTargetRPM(2200);
+            shooter.setTargetRPM(2300);
         }
         if (gamepad1Ex.getButton(GamepadKeys.Button.B)) {
-            shooter.setTargetRPM(2400);
+            shooter.setTargetRPM(3000);
         }
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_UP)) {

@@ -16,7 +16,7 @@ public class Turret extends SubsystemBase {
 
     public static double TICKS_PER_REV = 537.7;
     public static double GEAR_RATIO = 3.906976744186047;
-    public static double MAX_ANGLE = Math.toRadians(90);
+    public static double MAX_ANGLE = Math.toRadians(180);
 
     public static double kp = 0.0025, kd = 0.000, kf = 0.0;
 
@@ -26,8 +26,6 @@ public class Turret extends SubsystemBase {
 
     private double relocalizationAngleOffset = 0.0;
 
-    private boolean holdMode = false;
-    private double holdAngle = 0.0;
     public Turret(HardwareMap hw) {
         motor = hw.get(DcMotorEx.class, "turret");
 
@@ -95,7 +93,7 @@ public class Turret extends SubsystemBase {
         return (rad / (2 * Math.PI)) * TICKS_PER_REV * GEAR_RATIO;
     }
 
-    private double ticksToRads(double ticks) {
+    public double ticksToRads(double ticks) {
         return (ticks / (TICKS_PER_REV * GEAR_RATIO)) * (2 * Math.PI);
     }
 
@@ -109,8 +107,31 @@ public class Turret extends SubsystemBase {
         return angle;
     }
 
+    public void syncToCurrentPosition(double robotHeading) {
 
+        // posição real da turret em relação ao robô
+        double turretRelative = ticksToRads(motor.getCurrentPosition());
 
+        // ângulo absoluto no campo
+        double turretFieldAngle = wrap(robotHeading + turretRelative + relocalizationAngleOffset);
 
+        // sincroniza o alvo com a posição atual
+        targetFieldAngle = turretFieldAngle;
+
+        pid.reset();
+        motor.setPower(0);
+    }
+
+    public double getCurrentFieldAngle(double robotHeading) {
+        double turretRelative = ticksToRads(motor.getCurrentPosition());
+        return wrap(robotHeading + turretRelative + relocalizationAngleOffset);
+    }
+
+    public double getTicksBruto(){
+        return motor.getCurrentPosition();
+    }
+    public void setTargetFieldAngle(double angle) {
+        targetFieldAngle = wrap(angle);
+    }
 
 }

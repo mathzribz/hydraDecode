@@ -27,12 +27,12 @@ public class Constants {
 
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.008,0,0.0001,0.6,0.0005))
 
-            .centripetalScaling(0.008)
+            .centripetalScaling(0.0007)
             ;
 
     public static MecanumConstants driveConstants = new MecanumConstants()
 
-            .maxPower(0.9)
+            .maxPower(0.95)
             .rightFrontMotorName("RMF")
             .rightRearMotorName("RMB")
             .leftRearMotorName("LMB")
@@ -50,7 +50,7 @@ public class Constants {
 
             .forwardPodY(-72.5/25.4)
             .strafePodX(-87/25.4)
-            .distanceUnit(DistanceUnit.MM)
+            .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)

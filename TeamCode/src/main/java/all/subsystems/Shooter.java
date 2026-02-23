@@ -1,3 +1,4 @@
+
 package all.subsystems;
 
 import android.os.ParcelUuid;
@@ -5,6 +6,7 @@ import android.os.ParcelUuid;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.pedropathing.math.MathFunctions;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -16,15 +18,9 @@ public class Shooter extends SubsystemBase {
     private final DcMotorEx shooterL, shooterR;
     private final Servo hood;
 
-
-
-
-
-
-
-    public static double kP = 0.005;
+    public static double kP = 0.0168;
     public static double kD = 0.0000;
-    public static double kF = 0.00022;
+    public static double kF = 0.00023;
 
     private final PIDFController pidf = new PIDFController(kP, 0, kD, 0);
 
@@ -50,13 +46,12 @@ public class Shooter extends SubsystemBase {
 
     }
 
-
     public void HoodHigh() {
-        hood.setPosition(0.75);
+        hood.setPosition(0.8);
     }
 
     public void HoodLow() {
-        hood.setPosition(0.6);
+        hood.setPosition(0.5);
     }
 
     public void shooterOn() {
@@ -108,6 +103,8 @@ public class Shooter extends SubsystemBase {
             shooterR.setPower(0);
             pidf.reset();
         }
+
+
 
 
 

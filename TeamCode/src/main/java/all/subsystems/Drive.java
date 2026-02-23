@@ -128,13 +128,19 @@ public class Drive extends SubsystemBase {
 
         follower.setPose(
                 new Pose(
-                        odo.getX() + 0.6 * dx,
-                        odo.getY() + 0.6 * dy,
+                        odo.getX() * dx,
+                        odo.getY()  * dy,
                         odo.getHeading()
                 )
         );
     }
 
+
+    public double getDistanceInInches(Pose fixedPoint, Pose robotPose) {
+        double dx = fixedPoint.getX() - robotPose.getX();
+        double dy = fixedPoint.getY() - robotPose.getY();
+        return Math.hypot(dx, dy); // sqrt(dxdx + dydy)
+    }
 
 
 }
