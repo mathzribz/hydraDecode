@@ -29,7 +29,7 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
     private Shooter shooter;
     private LLMegatag ll;
     private GamepadEx gamepad1Ex;
-    private double shooterRPM;
+    private double shooterRPM = 2300;
 
 
 
