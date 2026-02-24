@@ -29,8 +29,9 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
     private Shooter shooter;
     private LLMegatag ll;
     private GamepadEx gamepad1Ex;
+    private double shooterRPM;
 
-    public static double offsetRadians = 1;
+
 
     @Override
     public void initialize() {
@@ -64,6 +65,7 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenPressed(new ResetFieldCentric(drive));
 
+
     }
 
     @Override
@@ -79,23 +81,18 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
             telemetry.addLine("drawing failed");
         }
 
+        turret.followPose(BLUE_GOAL, drive.getPose(), drive.getHeadingRad());
 
-            turret.followPose(BLUE_GOAL, drive.getPose(), drive.getHeadingRad());
+        if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
+            turret.applyVisionCorrection(ll.getTx());
 
-        double offssetReal = offsetRadians * turret.ticksToRads(turret.getTicksBruto());
-
-//        if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
-//            drive.relocalizeWithLimelight(ll.getPedroRobotPose() );
-//
-//            turret.setRelocalizationOffset(Math.toRadians(offssetReal));
-//        }
-
+        }
 
         intakeWorking();
         shooterWorking();
 
 
-
+        telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
         telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
         telemetry.addData("Up (cm)", Intake.upBlocked);
         telemetry.addData("Down (cm)", Intake.downBlocked);
@@ -104,10 +101,6 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
         telemetry.addData("target RPM",shooter.getTargetRPM());
         telemetry.addData("current RPM",shooter.getCurrentRPM());
         telemetry.addData("cood LL",ll.getPedroRobotPose());
-        telemetry.addData("ticks radian",turret.ticksToRads(turret.getTicksBruto()));
-        telemetry.addData("offsetReal",offssetReal);
-
-
 
         telemetry.update();
 
@@ -119,32 +112,36 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
             intake.intakeOn();
         }
 
-        else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
+        else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) ) {
             intake.intakeOut();
         }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
             intake.TransferTeleop();
         }
+        else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
+            intake.TransferSensorT();
+        }
         else { intake.intakeStop();}
     }
 
     public void shooterWorking() {
+        shooter.shooterOn();
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
             intake.gateOpen();
-            shooter.shooterOn();
+            shooter.setTargetRPM(shooterRPM);
         } else {
             intake.gateClose();
-            shooter.shooterOff();
+            shooter.setTargetRPM(1000);
+
         }
 
-
+        if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
+            shooterRPM = 2300;
+        }
         if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
-            shooter.setTargetRPM(2300);
-        }
-        if (gamepad1Ex.getButton(GamepadKeys.Button.B)) {
-            shooter.setTargetRPM(3000);
+            shooterRPM = 3000;
         }
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_UP)) {

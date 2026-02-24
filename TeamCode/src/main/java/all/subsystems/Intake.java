@@ -23,12 +23,20 @@ public class Intake extends SubsystemBase {
 
     private boolean countingFull = false;
     private boolean enabledTransfer = true;
+    private boolean transferSensorModeActive = false;
 
     public boolean useSensors = true;
 
     public static boolean upBlocked, midBlocked, downBlocked;
 
     private double motorPower = 0;
+
+    private boolean lastUpBlocked = false;
+    private boolean launchCooldownActive = false;
+
+    private final ElapsedTime launchTimer = new ElapsedTime();
+
+    public static double MIN_LAUNCH_INTERVAL = 0.4;
 
     public Intake(HardwareMap hw) {
         motor = new MotorEx(hw, "intake");
@@ -65,7 +73,43 @@ public class Intake extends SubsystemBase {
         }
     }
 
+    public void transferSensorTriggered() {
+    if (transferSensorModeActive) {
+        // Detecta borda de descida (bola saiu)
+        if (lastUpBlocked && !upBlocked) {
+
+            launchCooldownActive = true;
+            launchTimer.reset();
+        }
+
+        // Atualiza estado anterior
+        lastUpBlocked = upBlocked;
+
+        // Se estiver em cooldown, verifica tempo mínimo
+        if (launchCooldownActive) {
+
+            if (launchTimer.seconds() >= MIN_LAUNCH_INTERVAL) {
+                launchCooldownActive = false;
+            } else {
+                motorPower = 0; // bloqueia transferência
+                return;
+            }
+        }
+
+        // Se não estiver em cooldown, permite transferir
+        if (enabledTransfer) {
+            motorPower = -1.0;
+        }
+    }
+    }
+
     public void intakeOn() {
+        if (enabledTransfer) {
+            motorPower = -1;
+        }
+    }
+
+    public void intakeOnAuto() {
         if (enabledTransfer) {
             motorPower = -1;
         }
@@ -93,6 +137,16 @@ public class Intake extends SubsystemBase {
         motorPower = -1.0;
     }
 
+    public void TransferSensorT() {
+        transferSensorModeActive = true;
+        enabledTransfer = true;
+    }
+
+    public void TransferSensorTAuto() {
+        transferSensorModeActive = true;
+        enabledTransfer = true;
+    }
+
     public void gateOpen() {
         gate.setPosition(0.16);
     }
@@ -104,6 +158,7 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
         middateAutoLogic();
+        transferSensorTriggered();
         motor.set(motorPower);
     }
 

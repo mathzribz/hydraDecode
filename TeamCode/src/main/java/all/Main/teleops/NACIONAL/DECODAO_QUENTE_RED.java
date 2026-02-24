@@ -7,9 +7,7 @@ import static all.Configs.Turret.FieldConstants.RED_GOAL;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
 import all.Commands.Loc.SetDriveSpeed;
@@ -17,10 +15,10 @@ import all.Configs.Auto.PoseStorage;
 import all.Configs.Panels.Drawing;
 import all.subsystems.Drive;
 import all.subsystems.Intake;
+
 import all.subsystems.LLMegatag;
 import all.subsystems.Shooter;
 import all.subsystems.Turret;
-
 @TeleOp
 public class DECODAO_QUENTE_RED extends CommandOpMode {
     private Drive drive;
@@ -29,6 +27,7 @@ public class DECODAO_QUENTE_RED extends CommandOpMode {
     private Shooter shooter;
     private LLMegatag ll;
     private GamepadEx gamepad1Ex;
+    private double shooterRPM;
 
     @Override
     public void initialize() {
@@ -42,12 +41,9 @@ public class DECODAO_QUENTE_RED extends CommandOpMode {
         gamepad1Ex = new GamepadEx(gamepad1);
         intake.useSensors = true;
 
-
-
         ll.switchPipeline(0);
         ll.start();
 
-        Pose startPos = new Pose(33, 111, Math.toRadians(180) );
 
         drive.setStartingPose(PoseStorage.currentPose);
 
@@ -61,7 +57,6 @@ public class DECODAO_QUENTE_RED extends CommandOpMode {
 
         gamepad1Ex.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenPressed(new ResetFieldCentric(drive));
-
 
 
     }
@@ -79,15 +74,12 @@ public class DECODAO_QUENTE_RED extends CommandOpMode {
             telemetry.addLine("drawing failed");
         }
 
-
-            turret.followPose(RED_GOAL, drive.getPose(), drive.getHeadingRad());
+        turret.followPose(RED_GOAL, drive.getPose(), drive.getHeadingRad());
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
-            drive.relocalizeWithLimelight(ll.getPedroRobotPose());
+            turret.applyVisionCorrection(ll.getTx());
 
-           // turret.setRelocalizationOffset(Math.toRadians(0));
         }
-
 
         intakeWorking();
         shooterWorking();
@@ -103,7 +95,6 @@ public class DECODAO_QUENTE_RED extends CommandOpMode {
         telemetry.addData("current RPM",shooter.getCurrentRPM());
         telemetry.addData("cood LL",ll.getPedroRobotPose());
 
-
         telemetry.update();
 
     }
@@ -114,32 +105,36 @@ public class DECODAO_QUENTE_RED extends CommandOpMode {
             intake.intakeOn();
         }
 
-        else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
+        else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) ) {
             intake.intakeOut();
         }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
             intake.TransferTeleop();
         }
+        else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
+            intake.TransferSensorT();
+        }
         else { intake.intakeStop();}
     }
 
     public void shooterWorking() {
+        shooter.shooterOn();
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
             intake.gateOpen();
-            shooter.shooterOn();
+            shooter.setTargetRPM(shooterRPM);
         } else {
             intake.gateClose();
-            shooter.shooterOff();
+            shooter.setTargetRPM(1000);
+
         }
 
-
+        if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
+            shooterRPM = 2300;
+        }
         if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
-            shooter.setTargetRPM(2200);
-        }
-        if (gamepad1Ex.getButton(GamepadKeys.Button.B)) {
-            shooter.setTargetRPM(2400);
+            shooterRPM = 3000;
         }
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_UP)) {

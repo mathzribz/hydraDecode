@@ -22,6 +22,8 @@ public class LLMegatag extends SubsystemBase {
 
     private final Limelight3A ll;
 
+    private double relocalizateAngleOffset;
+
     public LLMegatag(HardwareMap hw) {
         ll = hw.get(Limelight3A.class, "limelight");
     }
@@ -62,6 +64,10 @@ public class LLMegatag extends SubsystemBase {
         ll.pipelineSwitch(id);
     }
 
+    public void setRelocalizateAngleOffset(double relocalizateAngleOffset) {
+        this.relocalizateAngleOffset = relocalizateAngleOffset;
+    }
+
     public boolean isPoseReliable() {
         LLResult res = ll.getLatestResult();
         if (res == null || !res.isValid()) return false;
@@ -70,6 +76,16 @@ public class LLMegatag extends SubsystemBase {
     }
 
 
+    public void recalibrateWithVision(double txDegrees) {
 
+
+
+        double correction = Math.toRadians(txDegrees);
+
+        relocalizateAngleOffset += correction;
+    }
+    public double getTx(){
+        return ll.getLatestResult().getTx();
+    }
 
 }

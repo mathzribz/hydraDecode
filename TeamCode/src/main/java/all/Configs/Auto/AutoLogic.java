@@ -27,6 +27,7 @@ public class AutoLogic {
     private static final double MIN_RPM = 1900;
     private static final double MAX_SPINUP_TIME = 2.0;
     private static final double BURST_TIME = 2; // tempo suficiente pra 3 bolas
+    private static final double BURST_TIME_FAR = 3; // tempo suficiente pra 3 bolas
 
     public void init(HardwareMap hw) {
         shooter = new Shooter(hw);
@@ -39,7 +40,7 @@ public class AutoLogic {
     }
     public void preSpin() {
         state = ShooterState.PRESPIN;
-            shooter.shooterOn();
+            shooter.shooterOnAuto();
             shooter.setTargetRPM(2250);
             shooter.HoodLow();
 
@@ -57,7 +58,16 @@ public class AutoLogic {
         }
     }
 
-
+    public void burstFireFar() {
+        if (state == ShooterState.PRESPIN) {
+            intake.useSensors = false;
+            intake.TransferSensorTAuto();
+            timer.reset();
+            if (timer.seconds() >= BURST_TIME_FAR) {
+                intake.intakeStop();
+            }
+        }
+    }
 
     public void stopAll() {
         shooter.shooterOff();
@@ -77,8 +87,8 @@ public class AutoLogic {
 
     public void startIntakeWithSensors() {
         intake.useSensors = true;
-        intake.gateClose();
-        intake.intakeOn();
+        closeGate();
+        intake.intakeOnAuto();
     }
 
     public void stopIntake() {

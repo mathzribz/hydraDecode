@@ -57,10 +57,11 @@ public class Shooter extends SubsystemBase {
     public void shooterOn() {
         enabled = true;
     }
-    public void shooterAll() {
+
+    public void shooterOnAuto() {
         enabled = true;
-        targetRPM = 1200;
     }
+
 
     public void shooterOff() {
         enabled = false;

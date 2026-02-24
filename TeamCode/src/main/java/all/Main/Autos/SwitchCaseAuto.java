@@ -10,13 +10,11 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
 
 
 import all.Configs.Auto.AutoLogic;
 import all.Configs.Auto.PoseStorage;
 import all.Configs.Pedro.Constants;
-import all.Configs.Auto.AutoLogic;
 import all.subsystems.Turret;
 
 
