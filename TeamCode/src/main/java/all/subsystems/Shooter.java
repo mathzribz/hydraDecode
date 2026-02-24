@@ -18,9 +18,9 @@ public class Shooter extends SubsystemBase {
     private final DcMotorEx shooterL, shooterR;
     private final Servo hood;
 
-    public static double kP = 0.0168;
+    public static double kP = 0.0168    ;
     public static double kD = 0.0000;
-    public static double kF = 0.00023;
+    public static double kF = 0.00024;
 
     private final PIDFController pidf = new PIDFController(kP, 0, kD, 0);
 
@@ -47,11 +47,15 @@ public class Shooter extends SubsystemBase {
     }
 
     public void HoodHigh() {
-        hood.setPosition(0.8);
+        hood.setPosition(0.6);
     }
 
     public void HoodLow() {
-        hood.setPosition(0.5);
+        hood.setPosition(0.45);
+    }
+    public double HoodPos(double pos) {
+        hood.setPosition(pos);
+        return pos;
     }
 
     public void shooterOn() {

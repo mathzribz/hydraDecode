@@ -112,7 +112,7 @@ public class DECODAO_QUENTE_BLUE extends CommandOpMode {
             intake.TransferTeleop();
         }
         else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
-            intake.TransferSensorT();
+
         }
         else { intake.intakeStop();}
     }

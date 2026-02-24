@@ -17,7 +17,7 @@ public class Turret extends SubsystemBase {
 
     public static double TICKS_PER_REV = 537.7;
     public static double GEAR_RATIO = 3.906976744186047;
-    public static double MAX_ANGLE = Math.toRadians(180);
+    public static double MAX_ANGLE = Math.toRadians(160);
 
     public static double kp = 0.0025, kd = 0.000, kf = 0.0;
 
@@ -54,7 +54,7 @@ public class Turret extends SubsystemBase {
 
         // ângulo ABSOLUTO do alvo no campo
         targetFieldAngle = Math.atan2(dy, dx) ;
-        targetFieldAngle = wrap(targetFieldAngle + relocalizationAngleOffset);
+
 
         updateControl(head);
     }
@@ -66,7 +66,7 @@ public class Turret extends SubsystemBase {
 
         double error = wrap(targetFieldAngle - turretFieldAngle);
 
-        double clampedRelative = clamp(wrap(targetFieldAngle - robotHeading));
+        double clampedRelative = clamp(wrap(targetFieldAngle - robotHeading + relocalizationAngleOffset));
 
         double targetTicks = radsToTicks(clampedRelative);
         double currentTicks = motor.getCurrentPosition();
@@ -107,9 +107,15 @@ public class Turret extends SubsystemBase {
 
     public void applyVisionCorrection(double txDegrees) {
 
+        if (Math.abs(txDegrees) < 0.5){
+            relocalizationAngleOffset = 0;
+            return;
+        }
         double correctionRad = Math.toRadians(txDegrees);
 
-        relocalizationAngleOffset += correctionRad * 0.2;
+        relocalizationAngleOffset =- correctionRad;
+
+        relocalizationAngleOffset = wrap(relocalizationAngleOffset);
     }
 
 }

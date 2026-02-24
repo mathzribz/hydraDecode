@@ -329,7 +329,6 @@ public class blue_facas extends OpMode {
 
 
         PoseStorage.currentPose = follower.getPose();
-        PoseStorage.turretAngle = turret.getCurrentFieldAngle(follower.getHeading());
 
         telemetry.addData("State", pathState);
     }

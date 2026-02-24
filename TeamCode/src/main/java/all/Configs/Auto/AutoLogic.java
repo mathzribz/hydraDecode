@@ -61,7 +61,7 @@ public class AutoLogic {
     public void burstFireFar() {
         if (state == ShooterState.PRESPIN) {
             intake.useSensors = false;
-            intake.TransferSensorTAuto();
+            intake.transferSensorTriggered();
             timer.reset();
             if (timer.seconds() >= BURST_TIME_FAR) {
                 intake.intakeStop();

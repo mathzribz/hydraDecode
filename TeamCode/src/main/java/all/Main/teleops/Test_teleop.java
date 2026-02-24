@@ -1,10 +1,13 @@
 
 package all.Main.teleops;
 
+import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -21,10 +24,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import all.subsystems.Drive;
+
 @Config
 @TeleOp
 public class Test_teleop extends LinearOpMode {
 
+
+    private Drive drive;
     private DcMotor RMF, RMB, LMF, LMB;
     private DcMotor Intake;
     private DcMotorEx ShooterR, ShooterL;
@@ -40,10 +47,10 @@ public class Test_teleop extends LinearOpMode {
     private double headingOffset = 0.0;
     private static final double DEAD_ZONE = 0.25;
 
-    public static double kP = 0.005;
+    public static double kP = 0.0168;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kF = 0.00022;
+    public static double kF = 0.00024;
 
     public static double TICKS_PER_REV = 28;
     public static double targetRPM = 1200;
@@ -77,6 +84,10 @@ public class Test_teleop extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+        Pose startPos = new Pose(33, 111, Math.toRadians(180) );
+
+        drive.setStartingPose(startPos);
+
 
         FtcDashboard dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
@@ -87,19 +98,25 @@ public class Test_teleop extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+            drive.updatePinpoint();
 
 
             loc();
-            intake();
+          //  intake();
             shooter();
 
-            if (gamepad1.dpad_up)
+
+
+
                 capuz.setPosition(servo1pos);
 
-            if (gamepad1.dpad_down)
-                capuz.setPosition(0);
 
             telemetry.addData("Drive Speed", driveSpeed);
+            telemetry.addData("distance", drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
+            telemetry.addData("ticks per second", ShooterL.getVelocity());
+            telemetry.addData("pose", drive.getPose());
+
+
 
             telemetry.update();
         }
@@ -107,6 +124,7 @@ public class Test_teleop extends LinearOpMode {
     }
 
     private void initHardware() {
+        drive = new Drive(hardwareMap);
 
         // MOTORS
         RMF = hardwareMap.get(DcMotor.class, "RMF");
@@ -169,23 +187,17 @@ public class Test_teleop extends LinearOpMode {
     // FIELD CENTRIC
     public void loc() {
 
-        double currentHeadingRad = pinpoint.getHeading(AngleUnit.RADIANS);
-        double botHeading = currentHeadingRad - headingOffset;
 
         double x  = applyDeadZone(gamepad1.left_stick_x);   // x
         double y  = applyDeadZone(-gamepad1.left_stick_y);   // FORWARD/BACKWARD
         double rx = applyDeadZone(-gamepad1.right_stick_x);   // ROTATION
 
 
-        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-
-        double powerLMF = (rotY + rotX + rx) / denominator;
-        double powerLMB = (rotY - rotX + rx) / denominator;
-        double powerRMF = (rotY - rotX - rx) / denominator;
-        double powerRMB = (rotY + rotX - rx) / denominator;
+        double powerLMF = (y + x + rx) ;
+        double powerLMB = (y - x + rx) ;
+        double powerRMF = (y - x - rx) ;
+        double powerRMB = (y + x - rx) ;
 
 
         LMF.setPower(powerLMF * driveSpeed);
@@ -193,22 +205,12 @@ public class Test_teleop extends LinearOpMode {
         RMF.setPower(powerRMF * driveSpeed);
         RMB.setPower(powerRMB * driveSpeed);
 
-        telemetry.addData("LMF power", LMF.getPower());
-        telemetry.addData("RMF power", RMF.getPower());
-        telemetry.addData("LMB power", LMB.getPower());
-        telemetry.addData("RMB power",RMB.getPower());
-        telemetry.addData("pionpoint YAW ",pinpoint.getHeading(AngleUnit.DEGREES));
-        telemetry.addData("pionpoint Y ",pinpoint.getEncoderY());
-        telemetry.addData("pionpoint scalar ",pinpoint.getYawScalar());
 
         if (gamepad1.left_stick_button) driveSpeed = 0.9;
 
         if (gamepad1.right_stick_button) driveSpeed = 0.6;
 
-        if (gamepad1.dpad_right){
-            headingOffset = currentHeadingRad;
 
-        }
     }
 
     public void intake() {
@@ -262,10 +264,7 @@ public class Test_teleop extends LinearOpMode {
 
         Intake.setPower(intakePower);
 
-        telemetry.addData("Up (cm)", distanceUp);
-        telemetry.addData("Down (cm)", distanceDown);
-        telemetry.addData("EnabledTransfer", EnabledTransfer);
-        telemetry.addData("FullTimer", fullTimer.seconds());
+
     }
 
 
@@ -290,16 +289,29 @@ public class Test_teleop extends LinearOpMode {
             ShooterR.setPower(0);
             ShooterL.setPower(0);
             pidf.reset();
-            servo_teste.setPosition(servoPos);
+            servo_teste.setPosition(0.17);
         }
+
+        if (gamepad1.a){
+
+            Intake.setPower(1);
+
+        }
+
+        if (gamepad1.b){
+
+            Intake.setPower(0);
+
+
+        }
+
 
         double rpm = (currentTPS / TICKS_PER_REV) * 60.0;
 
-        telemetry.addData("RPM", rpm);
+
         telemetry.addData("Target RPM", targetRPM);
-        telemetry.addData("PID", pid);
-        telemetry.addData("FF", ff);
-        telemetry.addData("Final Power", finalPower);
+        telemetry.addData("RPM MOTOR", currentTPS);
+
     }
 
 

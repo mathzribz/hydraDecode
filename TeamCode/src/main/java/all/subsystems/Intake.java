@@ -1,4 +1,3 @@
-
 package all.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
@@ -16,135 +15,105 @@ public class Intake extends SubsystemBase {
     private final Servo gate;
 
     private final DistanceSensor mid, down;
-
-    private NormalizedColorSensor up;
+    private final NormalizedColorSensor up;
 
     private final ElapsedTime fullTimer = new ElapsedTime();
+    private final ElapsedTime launchTimer = new ElapsedTime();
+
+    public static double MIN_LAUNCH_INTERVAL = 0.4;
 
     private boolean countingFull = false;
-    private boolean enabledTransfer = true;
-    private boolean transferSensorModeActive = false;
-
-    public boolean useSensors = true;
+    private boolean launchCooldownActive = false;
+    private boolean lastUpBlocked = false;
 
     public static boolean upBlocked, midBlocked, downBlocked;
 
     private double motorPower = 0;
 
-    private boolean lastUpBlocked = false;
-    private boolean launchCooldownActive = false;
+    private enum Mode {
+        OFF,
+        INTAKE,
+        OUTTAKE,
+        TRANSFER,
+        TRANSFER_SENSOR
+    }
 
-    private final ElapsedTime launchTimer = new ElapsedTime();
-
-    public static double MIN_LAUNCH_INTERVAL = 0.4;
+    private Mode mode = Mode.OFF;
 
     public Intake(HardwareMap hw) {
         motor = new MotorEx(hw, "intake");
         gate  = hw.get(Servo.class, "gate");
 
         mid   = hw.get(DistanceSensor.class, "mid");
-        down = hw.get(DistanceSensor.class, "down");
-        up = hw.get(NormalizedColorSensor.class, "up");
-
+        down  = hw.get(DistanceSensor.class, "down");
+        up    = hw.get(NormalizedColorSensor.class, "up");
     }
 
-    public void middateAutoLogic() {
-        if (useSensors) {
+    private void updateSensors() {
+        midBlocked  = mid.getDistance(DistanceUnit.CM) < 9;
+        downBlocked = down.getDistance(DistanceUnit.CM) < 9;
+        upBlocked   = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6.5;
+    }
 
-            midBlocked = mid.getDistance(DistanceUnit.CM) < 9;
-            downBlocked = down.getDistance(DistanceUnit.CM) < 9;
-            upBlocked = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6.5;
-
-            if (upBlocked && midBlocked && downBlocked) {
-                if (!countingFull) {
-                    fullTimer.reset();
-                    countingFull = true;
-                }
-
-                if (fullTimer.seconds() >= 0.5) {
-                    enabledTransfer = false;
-                    motorPower = 0;
-                }
-
-            } else {
-                countingFull = false;
+    private void runFullDetection() {
+        if (upBlocked && midBlocked && downBlocked) {
+            if (!countingFull) {
                 fullTimer.reset();
+                countingFull = true;
             }
+
+            if (fullTimer.seconds() >= 0.5) {
+                motorPower = 0;
+                return;
+            }
+
+        } else {
+            countingFull = false;
+            fullTimer.reset();
         }
     }
 
-    public void transferSensorTriggered() {
-    if (transferSensorModeActive) {
-        // Detecta borda de descida (bola saiu)
-        if (lastUpBlocked && !upBlocked) {
+    private void runSensorTransferLogic() {
 
+        if (lastUpBlocked && !upBlocked) {
             launchCooldownActive = true;
             launchTimer.reset();
         }
 
-        // Atualiza estado anterior
         lastUpBlocked = upBlocked;
 
-        // Se estiver em cooldown, verifica tempo mínimo
         if (launchCooldownActive) {
-
-            if (launchTimer.seconds() >= MIN_LAUNCH_INTERVAL) {
-                launchCooldownActive = false;
-            } else {
-                motorPower = 0; // bloqueia transferência
+            if (launchTimer.seconds() < MIN_LAUNCH_INTERVAL) {
+                motorPower = 0;
                 return;
             }
+            launchCooldownActive = false;
         }
 
-        // Se não estiver em cooldown, permite transferir
-        if (enabledTransfer) {
-            motorPower = -1.0;
-        }
-    }
+        motorPower = -1.0;
     }
 
     public void intakeOn() {
-        if (enabledTransfer) {
-            motorPower = -1;
-        }
-    }
-
-    public void intakeOnAuto() {
-        if (enabledTransfer) {
-            motorPower = -1;
-        }
+        mode = Mode.INTAKE;
     }
 
     public void intakeOut() {
-        enabledTransfer = true;
-        countingFull = false;
-        fullTimer.reset();
-        motorPower = 0.75;
-    }
-
-    public void intakeStop() {
-        motorPower = 0;
+        mode = Mode.OUTTAKE;
     }
 
     public void TransferTeleop() {
-        enabledTransfer = true;
-        countingFull = false;
-        fullTimer.reset();
-        motorPower = -1.0;
-
+        mode = Mode.TRANSFER;
     }
     public void TransferAuto() {
-        motorPower = -1.0;
+        mode = Mode.TRANSFER;
     }
 
-    public void TransferSensorT() {
-        transferSensorModeActive = true;
-        enabledTransfer = true;
+    public void transferSensor() {
+        mode = Mode.TRANSFER_SENSOR;
     }
 
-    public void TransferSensorTAuto() {
-        transferSensorModeActive = true;
-        enabledTransfer = true;
+    public void stop() {
+        mode = Mode.OFF;
     }
 
     public void gateOpen() {
@@ -157,16 +126,35 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
-        middateAutoLogic();
-        transferSensorTriggered();
+
+        updateSensors();
+
+        switch (mode) {
+
+            case OFF:
+                motorPower = 0;
+                break;
+
+            case INTAKE:
+                runFullDetection();
+                if (!countingFull) {
+                    motorPower = -1.0;
+                }
+                break;
+
+            case OUTTAKE:
+                motorPower = 0.75;
+                break;
+
+            case TRANSFER:
+                motorPower = -1.0;
+                break;
+
+            case TRANSFER_SENSOR:
+                runSensorTransferLogic();
+                break;
+        }
+
         motor.set(motorPower);
-    }
-
-    public boolean isTransferEnabled() {
-        return enabledTransfer;
-    }
-
-    public double getFullTime() {
-        return fullTimer.seconds();
     }
 }
