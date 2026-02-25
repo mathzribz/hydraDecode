@@ -75,7 +75,7 @@ public class DECODAO_RED extends CommandOpMode {
         turret.followPose(RED_GOAL, drive.getPose(), drive.getHeadingRad());
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
-            turret.applyVisionCorrection(ll.getTx());
+//            turret.applyVisionCorrection(ll.getTx());
 
         }
 

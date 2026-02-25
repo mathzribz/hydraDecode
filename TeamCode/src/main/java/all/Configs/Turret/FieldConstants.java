@@ -8,6 +8,6 @@ public class FieldConstants {
 
 
     public static final Pose RED_GOAL  = new Pose(138, 138);
-    public static final Pose BLUE_GOAL = RED_GOAL.mirror();
+    public static final Pose BLUE_GOAL = new Pose(6, 138);
 
 }

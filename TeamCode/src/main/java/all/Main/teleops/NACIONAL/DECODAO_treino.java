@@ -11,11 +11,14 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
 import all.Commands.Loc.SetDriveSpeed;
 import all.Configs.Panels.Drawing;
+import all.Configs.Teleop.TeleopLogic;
+import all.subsystems.BlinkinLED;
 import all.subsystems.Drive;
 import all.subsystems.Intake;
 import all.subsystems.LLMegatag;
@@ -29,9 +32,14 @@ public class DECODAO_treino extends CommandOpMode {
     private Intake intake;
     private Shooter shooter;
     private LLMegatag ll;
+    private BlinkinLED blink;
     private GamepadEx gamepad1Ex;
     public static double shooterRPM = 2300;
     public static double pos = 0.2;
+    public static double offset = 5;
+    private final TeleopLogic teleopLogic = new TeleopLogic();
+
+    public ElapsedTime elapsedtime = new ElapsedTime();
 
 
 
@@ -45,10 +53,11 @@ public class DECODAO_treino extends CommandOpMode {
         shooter = new Shooter(hardwareMap);
         ll = new LLMegatag(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
+//        teleopLogic.init(hardwareMap);
+        blink = new BlinkinLED(hardwareMap);
+        elapsedtime.reset();
 
 
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
 
 
@@ -76,9 +85,11 @@ public class DECODAO_treino extends CommandOpMode {
     @Override
     public void run() {
 
+
         waitForStart();
         drive.updatePinpoint();
         super.run();
+
 
         try {
             Drawing.drawDebug(drive.follower);
@@ -88,16 +99,15 @@ public class DECODAO_treino extends CommandOpMode {
 
         turret.followPose(BLUE_GOAL, drive.getPose(), drive.getHeadingRad());
 
-        if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
-            turret.applyVisionCorrection(ll.getTx());
+        if (gamepad1Ex.getButton(GamepadKeys.Button.Y) && ll.isPoseReliable()) {
+            turret.applyVisionCorrection(ll.getTx(), offset);
 
         }
-        else {
-            turret.setRelocalizationOffset(0.0);
-        }
+
 
         intakeWorking();
         shooterWorking();
+        led();
 
 
         telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
@@ -108,8 +118,9 @@ public class DECODAO_treino extends CommandOpMode {
         telemetry.addData("cood pedro",drive.getPose());
         telemetry.addData("target RPM",shooter.getTargetRPM());
         telemetry.addData("current RPM",shooter.getCurrentRPM());
-        telemetry.addData("cood LL",ll.getPedroRobotPose());
-        telemetry.addData("distance",drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
+        telemetry.addData("cood LL",ll.isPoseReliable());
+        telemetry.addData("Loop Times", elapsedtime.milliseconds());
+        elapsedtime.reset();
 
         telemetry.update();
 
@@ -126,10 +137,10 @@ public class DECODAO_treino extends CommandOpMode {
         }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
-            intake.transferSensor();
+            intake.transferTeleop();
         }
         else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
-
+            intake.transferSensor();
         }
         else { intake.intakeStop();}
     }
@@ -142,14 +153,14 @@ public class DECODAO_treino extends CommandOpMode {
             shooter.setTargetRPM(shooterRPM);
         } else {
             intake.gateClose();
-            shooter.setTargetRPM(1000);
+            shooter.setTargetRPM(0);
 
         }
 
-        if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
+        if (gamepad1Ex.getButton(GamepadKeys.Button.A)) {
             shooterRPM = 2300;
         }
-        if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
+        if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
             shooterRPM = 3000;
         }
 
@@ -159,8 +170,26 @@ public class DECODAO_treino extends CommandOpMode {
         if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_DOWN)) {
             shooter.HoodLow();
         }
+    }
 
 
+    public void led(){
+        double targetRPMUp = shooter.getTargetRPM() + 100;
+        double targetRPMDown = shooter.getTargetRPM() - 100;
+
+//        if (targetRPMDown < shooter.getCurrentRPM() && targetRPMUp > shooter.getCurrentRPM() ){
+//            targetAprox = true;
+//        }else{targetAprox = false;}
+
+        if (Intake.allblocked) {
+            blink.red();
+        }
+//    else if (targetAprox){
+//        blink.orange();
+//    }
+        else {
+            blink.black();
+        }
 
     }
 

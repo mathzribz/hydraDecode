@@ -1,12 +1,9 @@
 package all.Configs.Teleop;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
 import static all.Configs.Turret.FieldConstants.RED_GOAL;
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.geometry.Pose;
@@ -15,8 +12,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.List;
 
-import all.Commands.Loc.DriveCommand;
-import all.Commands.Loc.ResetFieldCentric;
 import all.Configs.Auto.PoseStorage;
 import all.Configs.Panels.Drawing;
 import all.subsystems.BlinkinLED;
@@ -49,24 +44,23 @@ public class TeleopLogic {
         shooter = new Shooter(hw);
         ll = new LLMegatag(hw);
         blink = new BlinkinLED(hw);
-        gamepad1Ex = new GamepadEx(gamepad1);
-
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
-
-        drive.setDefaultCommand(
-                new DriveCommand(drive, gamepad1Ex)
-        );
 
 
-        gamepad1Ex.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-                .whenPressed(new ResetFieldCentric(drive));
 
-        allHubs = hardwareMap.getAll(LynxModule.class);
 
-        for (LynxModule hub : allHubs) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        }
+//        drive.setDefaultCommand(
+//                new DriveCommand(drive, gamepad1Ex)
+//        );
+//
+//
+//        gamepad1Ex.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+//                .whenPressed(new ResetFieldCentric(drive));
+
+//        allHubs = hardwareMap.getAll(LynxModule.class);
+//
+//        for (LynxModule hub : allHubs) {
+//            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+//        }
     }
 
 
@@ -85,8 +79,7 @@ public class TeleopLogic {
 
     public void update() {
         drive.updatePinpoint();
-        shooterWorking();
-        intakeWorking();
+
         led();
         telemetryUpdate();
 
@@ -112,7 +105,7 @@ public class TeleopLogic {
 
 
 // TURRET
-    public String turretWorking(String alliance){
+    public void turretWorking(String alliance, GamepadEx g){
 
         if (alliance.equals("BLUE")) {
             turret.followPose(BLUE_GOAL, drive.getPose(), drive.getHeadingRad());
@@ -122,22 +115,21 @@ public class TeleopLogic {
             turret.followPose(RED_GOAL, drive.getPose(), drive.getHeadingRad());
         }
 
-            if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
-                turret.applyVisionCorrection(ll.getTx());
+            if (g.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
+//                turret.applyVisionCorrection(ll.getTx());
 
             } else {
                 turret.setRelocalizationOffset(0.0);
             }
 
-            return alliance;
     }
 
 // SHOOTER
-public void shooterWorking() {
+public void shooterWorking(GamepadEx g) {
 
     shooter.shooterOn();
 
-    if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
+    if (g.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
         intake.gateOpen();
         shooter.setTargetRPM(shooterRPM);
     } else {
@@ -146,31 +138,31 @@ public void shooterWorking() {
 
     }
 
-    if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
+    if (g.getButton(GamepadKeys.Button.X)) {
         shooterRPM = 2300;
     }
-    if (gamepad1Ex.getButton(GamepadKeys.Button.Y)) {
+    if (g.getButton(GamepadKeys.Button.Y)) {
         shooterRPM = 3000;
     }
 
-    if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_UP)) {
+    if (g.getButton(GamepadKeys.Button.DPAD_UP)) {
         shooter.HoodHigh();
     }
-    if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_DOWN)) {
+    if (g.getButton(GamepadKeys.Button.DPAD_DOWN)) {
         shooter.HoodLow();
     }
 }
 
 // INTAKE
-public void intakeWorking() {
+public void intakeWorking(GamepadEx g) {
 
-    if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.1) {
+    if (g.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.1) {
         intake.intakeOn();
-    } else if (gamepad1Ex.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+    } else if (g.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
         intake.intakeOut();
-    } else if (gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
+    } else if (g.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
         intake.transferSensor();
-    } else if (gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
+    } else if (g.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
         intake.transferTeleop();
     } else {
         intake.intakeStop();
@@ -202,12 +194,12 @@ public void led(){
          targetAprox = true;
      }else{targetAprox = false;}
 
-    if (intake.countingFull && !targetAprox){
+    if (Intake.allblocked && !targetAprox){
         blink.red();
     }
-    else if (targetAprox){
-        blink.orange();
-    }
+//    else if (targetAprox){
+//        blink.orange();
+//    }
     else {
         blink.black();
     }

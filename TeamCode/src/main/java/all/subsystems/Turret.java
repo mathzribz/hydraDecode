@@ -19,7 +19,7 @@ public class Turret extends SubsystemBase {
     public static double GEAR_RATIO = 3.906976744186047;
     public static double MAX_ANGLE = Math.toRadians(160);
 
-    public static double kp = 0.003, kd = 0.000, kf = 0.0;
+    public static double kp = 0.0025, kd = 0.000, kf = 0.0;
 
     private final PIDFController pid;
 
@@ -83,7 +83,7 @@ public class Turret extends SubsystemBase {
         pid.updateFeedForwardInput(Math.signum(tickError));
 
         double power = pid.run();
-        motor.setPower(Math.max(-1, Math.min(1, power)));
+        motor.setPower(Math.max(-0.75, Math.min(0.75, power)));
     }
 
 
@@ -105,17 +105,19 @@ public class Turret extends SubsystemBase {
         return angle;
     }
 
-    public void applyVisionCorrection(double txDegrees) {
+    public void applyVisionCorrection(double txDegrees, double offset) {
 
         if (Math.abs(txDegrees) < 0.5){
             relocalizationAngleOffset = 0;
             return;
         }
-        double correctionRad = Math.toRadians(txDegrees);
+
+        double correctedTx = txDegrees - offset;
+        double correctionRad = Math.toRadians(correctedTx);
 
         relocalizationAngleOffset =- correctionRad;
 
-        relocalizationAngleOffset = wrap(relocalizationAngleOffset);
+        relocalizationAngleOffset = wrap(relocalizationAngleOffset) ;
     }
 
 }

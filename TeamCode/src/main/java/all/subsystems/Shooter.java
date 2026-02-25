@@ -18,9 +18,9 @@ public class Shooter extends SubsystemBase {
     private final DcMotorEx shooterL, shooterR;
     private final Servo hood;
 
-    public static double kP = 0.0168    ;
+    public static double kP = 0.015    ;
     public static double kD = 0.0000;
-    public static double kF = 0.00024;
+    public static double kF = 0.000215;
 
     private final PIDFController pidf = new PIDFController(kP, 0, kD, 0);
 
@@ -84,6 +84,21 @@ public class Shooter extends SubsystemBase {
 
     public double getCurrentRPM() {
         return (shooterL.getVelocity() / TICKS_PER_REV) * 60.0;
+    }
+
+    public static double flywheelSpeed (double goalDistance) {
+        return MathFunctions.clamp(0.0000146828 * Math.pow(goalDistance, 4) -
+                0.00561643 * Math.pow(goalDistance, 3) +
+                0.73465 * Math.pow(goalDistance, 2) -
+                27.49451 * goalDistance +
+                2149.83295, 800, 3200 );
+    }
+
+    public static double hoodAngle (double goalDistance) {
+        return MathFunctions.clamp((5.93422 * Math.pow(10, -7)) * Math.pow(goalDistance, 3) -
+                0.000221425 * Math.pow(goalDistance, 2) +
+                0.0282625 * goalDistance -
+                0.428675, 0.2, 0.85);
     }
 
     @Override

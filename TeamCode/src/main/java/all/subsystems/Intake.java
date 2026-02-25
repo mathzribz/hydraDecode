@@ -20,13 +20,14 @@ public class Intake extends SubsystemBase {
     private final ElapsedTime fullTimer = new ElapsedTime();
     private final ElapsedTime launchTimer = new ElapsedTime();
 
-    public static double MIN_LAUNCH_INTERVAL = 0.4;
+    public static double MIN_LAUNCH_INTERVAL = 0.3;
 
     public boolean countingFull = false;
     private boolean launchCooldownActive = false;
     private boolean lastUpBlocked = false;
 
-    public static boolean upBlocked, midBlocked, downBlocked;
+    public static boolean upBlocked, midBlocked, downBlocked, useSensor;
+    public static boolean allblocked = false;
 
     private double motorPower = 0;
 
@@ -53,6 +54,7 @@ public class Intake extends SubsystemBase {
         midBlocked  = mid.getDistance(DistanceUnit.CM) < 9;
         downBlocked = down.getDistance(DistanceUnit.CM) < 9;
         upBlocked   = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6.5;
+
     }
 
     private void runFullDetection() {
@@ -60,6 +62,7 @@ public class Intake extends SubsystemBase {
             if (!countingFull) {
                 fullTimer.reset();
                 countingFull = true;
+                allblocked = true;
             }
 
             if (fullTimer.seconds() >= 0.5) {
@@ -74,23 +77,25 @@ public class Intake extends SubsystemBase {
     }
 
     private void runSensorTransferLogic() {
+        if(useSensor) {
 
-        if (lastUpBlocked && !upBlocked) {
-            launchCooldownActive = true;
-            launchTimer.reset();
-        }
-
-        lastUpBlocked = upBlocked;
-
-        if (launchCooldownActive) {
-            if (launchTimer.seconds() < MIN_LAUNCH_INTERVAL) {
-                motorPower = 0;
-                return;
+            if (lastUpBlocked && !upBlocked) {
+                launchCooldownActive = true;
+                launchTimer.reset();
             }
-            launchCooldownActive = false;
-        }
 
-        motorPower = -1.0;
+            lastUpBlocked = upBlocked;
+
+            if (launchCooldownActive) {
+                if (launchTimer.seconds() < MIN_LAUNCH_INTERVAL) {
+                    motorPower = 0;
+                    return;
+                }
+                launchCooldownActive = false;
+            }
+
+            motorPower = -1.0;
+        }
     }
 
     public void intakeOn() {
@@ -131,6 +136,7 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
 
+
         updateSensors();
 
         switch (mode) {
@@ -140,6 +146,7 @@ public class Intake extends SubsystemBase {
                 break;
 
             case INTAKE:
+                useSensor = true;
                 runFullDetection();
                 if (!countingFull) {
                     motorPower = -1.0;
@@ -151,14 +158,24 @@ public class Intake extends SubsystemBase {
                 break;
 
             case TRANSFER:
+                useSensor = false;
                 motorPower = -1.0;
+                allblocked = false;
                 break;
 
             case TRANSFER_SENSOR:
+                useSensor = true;
                 runSensorTransferLogic();
+                allblocked = false;
                 break;
         }
 
         motor.set(motorPower);
     }
+
+    public double getMotor() {
+        return motor.getVelocity();
+    }
+
+
 }

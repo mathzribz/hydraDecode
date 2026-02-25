@@ -127,10 +127,10 @@ public class DECODAO_POSES extends CommandOpMode {
         }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
-            intake.transferSensor();
+            intake.transferTeleop();
         }
         else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
-
+            intake.transferSensor();
         }
         else { intake.intakeStop();}
     }
@@ -143,7 +143,7 @@ public class DECODAO_POSES extends CommandOpMode {
             shooter.setTargetRPM(shooterRPM);
         } else {
             intake.gateClose();
-            shooter.setTargetRPM(1000);
+            shooter.setTargetRPM(00);
 
         }
 

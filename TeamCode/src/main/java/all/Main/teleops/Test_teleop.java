@@ -274,19 +274,17 @@ public class Test_teleop extends LinearOpMode {
             servo_teste.setPosition(0.33);
         }
 
-
-
         double rpm = (currentTPS / TICKS_PER_REV) * 60.0;
 
-
+        telemetry.addData("RPM", rpm);
         telemetry.addData("Target RPM", targetRPM);
-        telemetry.addData("RPM MOTOR", currentTPS);
-
+        telemetry.addData("PID", pid);
+        telemetry.addData("FF", ff);
+        telemetry.addData("Final Power", finalPower);
     }
 
 
     private double clamp(double v, double min, double max) {
         return Math.max(min, Math.min(max, v));
     }
-
-}
+    }
