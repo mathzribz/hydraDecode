@@ -61,6 +61,8 @@ public class DECODAO_treino extends CommandOpMode {
 
 
 
+
+
         ll.switchPipeline(0);
         ll.start();
 
@@ -150,26 +152,16 @@ public class DECODAO_treino extends CommandOpMode {
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
             intake.gateOpen();
-            shooter.setTargetRPM(shooterRPM);
         } else {
             intake.gateClose();
-            shooter.setTargetRPM(0);
+
+
 
         }
 
-        if (gamepad1Ex.getButton(GamepadKeys.Button.A)) {
-            shooterRPM = 2300;
-        }
-        if (gamepad1Ex.getButton(GamepadKeys.Button.X)) {
-            shooterRPM = 3000;
-        }
+        shooter.putHood(drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
+        shooter.putRpm(drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
 
-        if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_UP)) {
-            shooter.HoodPos(pos);
-        }
-        if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_DOWN)) {
-            shooter.HoodLow();
-        }
     }
 
 

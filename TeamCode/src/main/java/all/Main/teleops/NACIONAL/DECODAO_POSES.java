@@ -127,7 +127,7 @@ public class DECODAO_POSES extends CommandOpMode {
         }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
-            intake.transferTeleop();
+            intake.transferSensor();
         }
         else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
             intake.transferSensor();

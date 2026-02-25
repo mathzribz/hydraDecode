@@ -130,7 +130,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void gateClose() {
-        gate.setPosition(0.33);
+        gate.setPosition(0.335);
     }
 
     @Override

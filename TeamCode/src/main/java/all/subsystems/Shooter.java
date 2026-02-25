@@ -101,8 +101,17 @@ public class Shooter extends SubsystemBase {
                 0.428675, 0.2, 0.85);
     }
 
+
+    public void putHood ( double dd){
+        hood.setPosition(hoodAngle(dd));
+    }
+    public void putRpm ( double dd){
+        setTargetRPM(flywheelSpeed(dd));
+    }
+
     @Override
     public void periodic() {
+
 
         pidf.setPIDF(kP, 0, kD, kF);
 
