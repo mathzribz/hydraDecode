@@ -22,7 +22,7 @@ public class Intake extends SubsystemBase {
 
     public static double MIN_LAUNCH_INTERVAL = 0.4;
 
-    private boolean countingFull = false;
+    public boolean countingFull = false;
     private boolean launchCooldownActive = false;
     private boolean lastUpBlocked = false;
 
@@ -97,22 +97,26 @@ public class Intake extends SubsystemBase {
         mode = Mode.INTAKE;
     }
 
+    public void intakeOnAuto() {
+        mode = Mode.INTAKE;
+    }
+
     public void intakeOut() {
         mode = Mode.OUTTAKE;
     }
 
-    public void TransferTeleop() {
+    public void transferTeleop() {
         mode = Mode.TRANSFER;
     }
-    public void TransferAuto() {
+    public void transferAuto() {
         mode = Mode.TRANSFER;
     }
 
-    public void transferSensor() {
-        mode = Mode.TRANSFER_SENSOR;
-    }
+    public void transferSensor() {mode = Mode.TRANSFER_SENSOR;}
 
-    public void stop() {
+    public void transferSensorAuto() {mode = Mode.TRANSFER_SENSOR;}
+
+    public void intakeStop() {
         mode = Mode.OFF;
     }
 
@@ -121,7 +125,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void gateClose() {
-        gate.setPosition(0.325);
+        gate.setPosition(0.33);
     }
 
     @Override

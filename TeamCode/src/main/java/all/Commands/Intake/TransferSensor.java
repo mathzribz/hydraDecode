@@ -5,18 +5,18 @@ import com.arcrobotics.ftclib.command.CommandBase;
 
 import all.subsystems.Intake;
 
-public class TransferAuto extends CommandBase {
+public class TransferSensor extends CommandBase {
 
     private final Intake intakeTransfer;
 
-    public TransferAuto(Intake subsystem) {
+    public TransferSensor(Intake subsystem) {
         intakeTransfer = subsystem;
         addRequirements(intakeTransfer);
     }
 
     @Override
     public void initialize() {
-        intakeTransfer.transferAuto();
+        intakeTransfer.transferSensor();
 
 
     }

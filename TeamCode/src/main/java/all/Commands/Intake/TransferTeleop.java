@@ -16,7 +16,7 @@ public class TransferTeleop extends CommandBase {
 
     @Override
     public void initialize() {
-        intakeTransfer.TransferTeleop();
+        intakeTransfer.transferTeleop();
 
 
     }

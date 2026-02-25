@@ -34,7 +34,7 @@ public class AutoLogic {
         intake = new Intake(hw);
 
 
-        intake.useSensors = false;
+
         intake.gateOpen();
 
     }
@@ -49,8 +49,7 @@ public class AutoLogic {
 
     public void burstFire() {
         if (state == ShooterState.PRESPIN) {
-            intake.useSensors = false;
-            intake.TransferAuto();
+            intake.transferAuto();
             timer.reset();
             if (timer.seconds() >= BURST_TIME) {
                 intake.intakeStop();
@@ -60,8 +59,7 @@ public class AutoLogic {
 
     public void burstFireFar() {
         if (state == ShooterState.PRESPIN) {
-            intake.useSensors = false;
-            intake.transferSensorTriggered();
+            intake.transferSensor();
             timer.reset();
             if (timer.seconds() >= BURST_TIME_FAR) {
                 intake.intakeStop();
@@ -86,7 +84,7 @@ public class AutoLogic {
 
 
     public void startIntakeWithSensors() {
-        intake.useSensors = true;
+
         closeGate();
         intake.intakeOnAuto();
     }
@@ -101,10 +99,6 @@ public class AutoLogic {
 
     public void closeGate() {
         intake.gateClose();
-    }
-
-    public boolean intakeFull() {
-        return !intake.isTransferEnabled();
     }
 
 

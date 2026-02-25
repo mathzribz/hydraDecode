@@ -2,7 +2,6 @@
 package all.Main.teleops.NACIONAL;
 
 import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
-import static all.Configs.Turret.FieldConstants.RED_GOAL;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -20,14 +19,14 @@ import all.subsystems.LLMegatag;
 import all.subsystems.Shooter;
 import all.subsystems.Turret;
 @TeleOp
-public class DECODAO_QUENTE_RED extends CommandOpMode {
+public class DECODAO_BLUE extends CommandOpMode {
     private Drive drive;
     private Turret turret;
     private Intake intake;
     private Shooter shooter;
     private LLMegatag ll;
     private GamepadEx gamepad1Ex;
-    private double shooterRPM = 2300 ;
+    private double shooterRPM = 2300;
 
     @Override
     public void initialize() {
@@ -39,7 +38,7 @@ public class DECODAO_QUENTE_RED extends CommandOpMode {
         shooter = new Shooter(hardwareMap);
         ll = new LLMegatag(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
-        intake.useSensors = true;
+
 
         ll.switchPipeline(0);
         ll.start();
@@ -74,7 +73,7 @@ public class DECODAO_QUENTE_RED extends CommandOpMode {
             telemetry.addLine("drawing failed");
         }
 
-        turret.followPose(RED_GOAL, drive.getPose(), drive.getHeadingRad());
+            turret.followPose(BLUE_GOAL, drive.getPose(), drive.getHeadingRad());
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
             turret.applyVisionCorrection(ll.getTx());
@@ -110,7 +109,7 @@ public class DECODAO_QUENTE_RED extends CommandOpMode {
         }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
-            intake.TransferTeleop();
+            intake.transferSensor();
         }
         else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
 

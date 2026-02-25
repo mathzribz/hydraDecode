@@ -60,18 +60,7 @@ public class Test_teleop extends LinearOpMode {
     public static double servoPos = 0.3;
 
 
-    // =============== LIMELIGHT TRACKER VARIÁVEIS ===============
-    public static double LL_Kp = 0.075;
-    public static double LL_Ki = 0.0;
-    public static double LL_Kd = 0.004;
 
-    private double llIntegral = 0;
-    private double llLastError = 0;
-
-
-    private Limelight3A limelightLL;
-
-    double shooterS;
 
     boolean EnabledTransfer = true;
     ElapsedTime fullTimer = new ElapsedTime();
@@ -84,9 +73,7 @@ public class Test_teleop extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        Pose startPos = new Pose(33, 111, Math.toRadians(180) );
 
-        drive.setStartingPose(startPos);
 
 
         FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -102,7 +89,7 @@ public class Test_teleop extends LinearOpMode {
 
 
             loc();
-          //  intake();
+            intake();
             shooter();
 
 
@@ -112,9 +99,7 @@ public class Test_teleop extends LinearOpMode {
 
 
             telemetry.addData("Drive Speed", driveSpeed);
-            telemetry.addData("distance", drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
-            telemetry.addData("ticks per second", ShooterL.getVelocity());
-            telemetry.addData("pose", drive.getPose());
+
 
 
 
@@ -173,9 +158,6 @@ public class Test_teleop extends LinearOpMode {
 
         up = hardwareMap.get(DistanceSensor.class, "up");
         down = hardwareMap.get(DistanceSensor.class, "down");
-
-
-        limelightLL = hardwareMap.get(Limelight3A.class, "limelight");
 
     }
 
@@ -289,21 +271,9 @@ public class Test_teleop extends LinearOpMode {
             ShooterR.setPower(0);
             ShooterL.setPower(0);
             pidf.reset();
-            servo_teste.setPosition(0.17);
+            servo_teste.setPosition(0.33);
         }
 
-        if (gamepad1.a){
-
-            Intake.setPower(1);
-
-        }
-
-        if (gamepad1.b){
-
-            Intake.setPower(0);
-
-
-        }
 
 
         double rpm = (currentTPS / TICKS_PER_REV) * 60.0;

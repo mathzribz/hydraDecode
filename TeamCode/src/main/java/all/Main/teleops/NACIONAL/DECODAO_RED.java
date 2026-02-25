@@ -1,17 +1,12 @@
 
 package all.Main.teleops.NACIONAL;
 
-import static all.Configs.Turret.FieldConstants.BLUE_GOAL;
+import static all.Configs.Turret.FieldConstants.RED_GOAL;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import all.Commands.Loc.DriveCommand;
 import all.Commands.Loc.ResetFieldCentric;
 import all.Commands.Loc.SetDriveSpeed;
@@ -19,22 +14,19 @@ import all.Configs.Auto.PoseStorage;
 import all.Configs.Panels.Drawing;
 import all.subsystems.Drive;
 import all.subsystems.Intake;
+
 import all.subsystems.LLMegatag;
 import all.subsystems.Shooter;
 import all.subsystems.Turret;
-@Config
 @TeleOp
-public class DECODAO_QUENTE_treino extends CommandOpMode {
+public class DECODAO_RED extends CommandOpMode {
     private Drive drive;
     private Turret turret;
     private Intake intake;
     private Shooter shooter;
     private LLMegatag ll;
     private GamepadEx gamepad1Ex;
-    public static double shooterRPM = 2300;
-    public static double pos = 0.2;
-
-
+    private double shooterRPM = 2300 ;
 
     @Override
     public void initialize() {
@@ -46,19 +38,12 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
         shooter = new Shooter(hardwareMap);
         ll = new LLMegatag(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
-        intake.useSensors = true;
-
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
-
-
 
         ll.switchPipeline(0);
         ll.start();
 
-        Pose startPos = new Pose(33, 111, Math.toRadians(180) );
 
-        drive.setStartingPose(startPos);
+        drive.setStartingPose(PoseStorage.currentPose);
 
         drive.setDefaultCommand(
                 new DriveCommand(drive, gamepad1Ex)
@@ -87,15 +72,12 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
             telemetry.addLine("drawing failed");
         }
 
-//        turret.followPose(BLUE_GOAL, drive.getPose(), drive.getHeadingRad());
-//
-//        if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
-//            turret.applyVisionCorrection(ll.getTx());
-//
-//        }
-//        else {
-//            turret.setRelocalizationOffset(0.0);
-//        }
+        turret.followPose(RED_GOAL, drive.getPose(), drive.getHeadingRad());
+
+        if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
+            turret.applyVisionCorrection(ll.getTx());
+
+        }
 
         intakeWorking();
         shooterWorking();
@@ -110,7 +92,6 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
         telemetry.addData("target RPM",shooter.getTargetRPM());
         telemetry.addData("current RPM",shooter.getCurrentRPM());
         telemetry.addData("cood LL",ll.getPedroRobotPose());
-        telemetry.addData("distance",drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
 
         telemetry.update();
 
@@ -127,7 +108,7 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
         }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
-            intake.TransferTeleop();
+            intake.transferTeleop();
         }
         else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
 
@@ -143,7 +124,7 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
             shooter.setTargetRPM(shooterRPM);
         } else {
             intake.gateClose();
-            shooter.setTargetRPM(0);
+            shooter.setTargetRPM(1000);
 
         }
 
@@ -155,7 +136,7 @@ public class DECODAO_QUENTE_treino extends CommandOpMode {
         }
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_UP)) {
-            shooter.HoodPos(pos);
+            shooter.HoodHigh();
         }
         if (gamepad1Ex.getButton(GamepadKeys.Button.DPAD_DOWN)) {
             shooter.HoodLow();
