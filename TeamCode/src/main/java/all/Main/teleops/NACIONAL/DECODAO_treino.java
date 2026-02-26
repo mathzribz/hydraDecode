@@ -34,14 +34,8 @@ public class DECODAO_treino extends CommandOpMode {
     private LLMegatag ll;
     private BlinkinLED blink;
     private GamepadEx gamepad1Ex;
-    public static double shooterRPM = 2300;
-    public static double pos = 0.2;
     public static double offset = 5;
-    private final TeleopLogic teleopLogic = new TeleopLogic();
-
     public ElapsedTime elapsedtime = new ElapsedTime();
-
-
 
     @Override
     public void initialize() {
@@ -53,14 +47,8 @@ public class DECODAO_treino extends CommandOpMode {
         shooter = new Shooter(hardwareMap);
         ll = new LLMegatag(hardwareMap);
         gamepad1Ex = new GamepadEx(gamepad1);
-//        teleopLogic.init(hardwareMap);
         blink = new BlinkinLED(hardwareMap);
         elapsedtime.reset();
-
-
-
-
-
 
 
         ll.switchPipeline(0);
@@ -83,7 +71,6 @@ public class DECODAO_treino extends CommandOpMode {
 
 
     }
-
     @Override
     public void run() {
 
@@ -106,13 +93,10 @@ public class DECODAO_treino extends CommandOpMode {
 
         }
 
-
         intakeWorking();
         shooterWorking();
         led();
 
-
-        telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
         telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
         telemetry.addData("Up (cm)", Intake.upBlocked);
         telemetry.addData("Down (cm)", Intake.downBlocked);
@@ -150,35 +134,35 @@ public class DECODAO_treino extends CommandOpMode {
     public void shooterWorking() {
         shooter.shooterOn();
 
+
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
+            shooter.putRpm(drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
             intake.gateOpen();
         } else {
             intake.gateClose();
-
-
+            shooter.setTargetRPM(500);
 
         }
 
         shooter.putHood(drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
-        shooter.putRpm(drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
+
 
     }
 
 
     public void led(){
-        double targetRPMUp = shooter.getTargetRPM() + 100;
-        double targetRPMDown = shooter.getTargetRPM() - 100;
+        double tolerance = 50.0;
+        double atSpeed = Math.abs(shooter.getTargetRPM() - shooter.getCurrentRPM());
 
-//        if (targetRPMDown < shooter.getCurrentRPM() && targetRPMUp > shooter.getCurrentRPM() ){
-//            targetAprox = true;
-//        }else{targetAprox = false;}
 
         if (Intake.allblocked) {
             blink.red();
         }
-//    else if (targetAprox){
-//        blink.orange();
-//    }
+
+        else if (atSpeed < tolerance) {
+            blink.violet();
+
+        }
         else {
             blink.black();
         }
