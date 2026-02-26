@@ -54,7 +54,7 @@ public class DECODAO_treino extends CommandOpMode {
         ll.switchPipeline(0);
         ll.start();
 
-        Pose startPos = new Pose(64.10289389067523, 8.23151125401929, Math.toRadians(180) );
+        Pose startPos = new Pose(33, 111, Math.toRadians(180) );
 
         drive.setStartingPose(startPos);
 

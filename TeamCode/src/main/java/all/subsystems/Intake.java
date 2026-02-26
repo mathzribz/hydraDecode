@@ -1,3 +1,4 @@
+
 package all.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
@@ -20,7 +21,7 @@ public class Intake extends SubsystemBase {
     private final ElapsedTime fullTimer = new ElapsedTime();
     private final ElapsedTime launchTimer = new ElapsedTime();
 
-    public static double MIN_LAUNCH_INTERVAL = 1;
+    public static double MIN_LAUNCH_INTERVAL = 0.75;
 
     public boolean countingFull = false;
     private boolean launchCooldownActive = false;
@@ -60,20 +61,19 @@ public class Intake extends SubsystemBase {
     private void runFullDetection() {
         if (upBlocked && midBlocked && downBlocked) {
             if (!countingFull) {
-                fullTimer.reset();
                 countingFull = true;
-
-                if (fullTimer.seconds() >= 0.2) {
-                    allblocked = true;
-                    motorPower = 0;
-                    return;
-                }
+                fullTimer.reset();
             }
+            allblocked = true;
 
-
-
+            // Desliga motor após MIN FULL TIME
+            if (fullTimer.seconds() >= 0.2) {
+                motorPower = 0;
+                return;
+            }
         } else {
             countingFull = false;
+            allblocked = false;
             fullTimer.reset();
         }
     }
@@ -96,7 +96,7 @@ public class Intake extends SubsystemBase {
                 launchCooldownActive = false;
             }
 
-            motorPower = -0.75;
+            motorPower = -0.86;
         }
     }
 
@@ -149,9 +149,12 @@ public class Intake extends SubsystemBase {
 
             case INTAKE:
                 useSensor = true;
-                runFullDetection();
-                if (!countingFull) {
-                    motorPower = -1.0;
+                runFullDetection();  // define motorPower = 0 se estiver cheio
+                if (countingFull ) {
+                    motorPower = 0;
+                }
+                else {
+                    motorPower = -0.8;
                 }
                 break;
 
