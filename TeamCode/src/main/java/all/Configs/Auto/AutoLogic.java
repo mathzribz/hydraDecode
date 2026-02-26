@@ -41,14 +41,15 @@ public class AutoLogic {
     public void preSpin() {
         state = ShooterState.PRESPIN;
             shooter.shooterOnAuto();
-            shooter.setTargetRPM(2250);
-            shooter.HoodLow();
+            shooter.setTargetRPM(2300);
+            shooter.HoodHigh();
 
 
     }
 
     public void burstFire() {
         if (state == ShooterState.PRESPIN) {
+            openGate();
             intake.transferAuto();
             timer.reset();
             if (timer.seconds() >= BURST_TIME) {

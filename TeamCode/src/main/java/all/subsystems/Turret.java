@@ -19,7 +19,7 @@ public class Turret extends SubsystemBase {
     public static double GEAR_RATIO = 3.906976744186047;
     public static double MAX_ANGLE = Math.toRadians(160);
 
-    public static double kp = 0.0025, kd = 0.000, kf = 0.0;
+    public static double kp = 0.003, kd = 0.0001, kf = 0.0;
 
     private final PIDFController pid;
 
@@ -32,7 +32,8 @@ public class Turret extends SubsystemBase {
 
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        motor.setPower(0);
 
         pid = new PIDFController(new PIDFCoefficients(kp, 0, kd, kf));
     }

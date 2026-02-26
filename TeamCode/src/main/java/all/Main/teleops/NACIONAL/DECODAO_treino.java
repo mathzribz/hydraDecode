@@ -54,7 +54,7 @@ public class DECODAO_treino extends CommandOpMode {
         ll.switchPipeline(0);
         ll.start();
 
-        Pose startPos = new Pose(33, 111, Math.toRadians(180) );
+        Pose startPos = new Pose(64.10289389067523, 8.23151125401929, Math.toRadians(180) );
 
         drive.setStartingPose(startPos);
 
@@ -132,15 +132,16 @@ public class DECODAO_treino extends CommandOpMode {
     }
 
     public void shooterWorking() {
-        shooter.shooterOn();
+
 
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
             shooter.putRpm(drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
+            shooter.shooterOn();
             intake.gateOpen();
         } else {
             intake.gateClose();
-            shooter.setTargetRPM(500);
+            shooter.shooterOff();
 
         }
 

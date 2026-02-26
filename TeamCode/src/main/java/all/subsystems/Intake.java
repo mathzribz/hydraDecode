@@ -20,7 +20,7 @@ public class Intake extends SubsystemBase {
     private final ElapsedTime fullTimer = new ElapsedTime();
     private final ElapsedTime launchTimer = new ElapsedTime();
 
-    public static double MIN_LAUNCH_INTERVAL = 0.3;
+    public static double MIN_LAUNCH_INTERVAL = 1;
 
     public boolean countingFull = false;
     private boolean launchCooldownActive = false;
@@ -62,13 +62,15 @@ public class Intake extends SubsystemBase {
             if (!countingFull) {
                 fullTimer.reset();
                 countingFull = true;
-                allblocked = true;
+
+                if (fullTimer.seconds() >= 0.2) {
+                    allblocked = true;
+                    motorPower = 0;
+                    return;
+                }
             }
 
-            if (fullTimer.seconds() >= 0.5) {
-                motorPower = 0;
-                return;
-            }
+
 
         } else {
             countingFull = false;
@@ -94,7 +96,7 @@ public class Intake extends SubsystemBase {
                 launchCooldownActive = false;
             }
 
-            motorPower = -1.0;
+            motorPower = -0.75;
         }
     }
 
