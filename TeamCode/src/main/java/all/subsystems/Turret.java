@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.control.PIDFController;
 import com.pedropathing.geometry.Pose;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -23,16 +24,17 @@ public class Turret extends SubsystemBase {
 
     private final PIDFController pid;
 
-    private double targetFieldAngle = 0.0;
-
     private double relocalizationAngleOffset = 0.0;
+
+
+    private double targetRad = 0.0;
 
     public Turret(HardwareMap hw) {
         motor = hw.get(DcMotorEx.class, "turret");
 
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         motor.setPower(0);
 
         pid = new PIDFController(new PIDFCoefficients(kp, 0, kd, kf));
@@ -48,45 +50,46 @@ public class Turret extends SubsystemBase {
         relocalizationAngleOffset = offset;
     }
 
-    public void followPose(Pose fieldTarget, Pose robotPose, Double head) {
-
+    public void followPose(Pose fieldTarget, Pose robotPose, double robotHeading) {
         double dx = fieldTarget.getX() - robotPose.getX();
         double dy = fieldTarget.getY() - robotPose.getY();
-
-        // ângulo ABSOLUTO do alvo no campo
-        targetFieldAngle = Math.atan2(dy, dx) ;
-
-
-        updateControl(head);
+        targetRad = Math.atan2(dy, dx);
+        updateTurret(robotHeading);
     }
 
-    private void updateControl(double robotHeading) {
+    private void updateTurret(double robotHeading) {
+        // Turret atual em radianos
+        double currentRad = ticksToRads(motor.getCurrentPosition());
 
-        double turretRelative = ticksToRads(motor.getCurrentPosition());
-        double turretFieldAngle = wrap(robotHeading + turretRelative);
+        // Ângulo em campo da turret
+        double turretField = wrap(robotHeading + currentRad);
 
-        double error = wrap(targetFieldAngle - turretFieldAngle);
+        // Erro alvo
+        double error = wrap(targetRad - turretField);
 
-        double clampedRelative = clamp(wrap(targetFieldAngle - robotHeading + relocalizationAngleOffset));
+        // Lógica de Ângulo desejado relativo ao robô
+        double offsetRad = 0.0;
+        double desiredRelative = wrap(error + offsetRad);
+        desiredRelative = clamp(desiredRelative);
 
-        double targetTicks = radsToTicks(clampedRelative);
+        // Converte para radianos alvo
+        double targetTicks = radsToTicks(desiredRelative);
         double currentTicks = motor.getCurrentPosition();
 
         double tickError = targetTicks - currentTicks;
 
-        if (Math.abs(tickError) < 5) {
+        if (Math.abs(tickError) < 4) {
             motor.setPower(0);
             pid.reset();
             return;
         }
 
         pid.updateError(tickError);
-        pid.updateFeedForwardInput(Math.signum(tickError));
+        pid.updateFeedForwardInput(0); // sem feedforward por agora
 
         double power = pid.run();
-        motor.setPower(Math.max(-0.75, Math.min(0.75, power)));
+        motor.setPower(Math.max(-0.7, Math.min(0.7, power)));
     }
-
 
     private double radsToTicks(double rad) {
         return (rad / (2 * Math.PI)) * TICKS_PER_REV * GEAR_RATIO;

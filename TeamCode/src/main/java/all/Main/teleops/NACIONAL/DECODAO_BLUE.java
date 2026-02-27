@@ -132,38 +132,37 @@ public class DECODAO_BLUE extends CommandOpMode {
     }
 
     public void shooterWorking() {
-        shooter.shooterOn();
 
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
-            shooter.putRpm(drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
+            shooter.putRpm(drive.getDistanceInInches(BLUE_GOAL, drive.getPose()));
+            shooter.shooterOn();
             intake.gateOpen();
         } else {
             intake.gateClose();
-            shooter.setTargetRPM(500);
+            shooter.shooterOff();
 
         }
 
-        shooter.putHood(drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
+        shooter.putHood(drive.getDistanceInInches(BLUE_GOAL, drive.getPose()));
 
 
     }
 
 
-    public void led(){
+    public void led() {
         double tolerance = 50.0;
         double atSpeed = Math.abs(shooter.getTargetRPM() - shooter.getCurrentRPM());
 
+        boolean rpmled = atSpeed < tolerance;
 
-        if (Intake.allblocked) {
+
+        if (Intake.allblocked && !rpmled) {
             blink.red();
-        }
-
-        else if (atSpeed < tolerance) {
+        } else if (rpmled) {
             blink.violet();
 
-        }
-        else {
+        } else {
             blink.black();
         }
 

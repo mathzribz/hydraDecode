@@ -155,12 +155,14 @@ public class DECODAO_treino extends CommandOpMode {
         double tolerance = 50.0;
         double atSpeed = Math.abs(shooter.getTargetRPM() - shooter.getCurrentRPM());
 
+        boolean rpmled = atSpeed < tolerance;
 
-        if (Intake.allblocked) {
+
+        if (Intake.allblocked && !rpmled ) {
             blink.red();
         }
 
-        else if (atSpeed < tolerance) {
+        else if (rpmled) {
             blink.violet();
 
         }

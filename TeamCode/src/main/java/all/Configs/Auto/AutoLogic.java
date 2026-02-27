@@ -42,7 +42,23 @@ public class AutoLogic {
         state = ShooterState.PRESPIN;
             shooter.shooterOnAuto();
             shooter.setTargetRPM(2300);
-            shooter.HoodHigh();
+            shooter.HoodLow();
+
+
+    }
+    public void stopShooter() {
+        state = ShooterState.STOPPING;
+            shooter.shooterOnAuto();
+            shooter.setTargetRPM(0);
+
+
+    }
+
+    public void preSpinFar() {
+        state = ShooterState.PRESPIN;
+        shooter.shooterOnAuto();
+        shooter.setTargetRPM(3000);
+        shooter.HoodLow();
 
 
     }

@@ -72,6 +72,7 @@ public class DECODAO_RED extends CommandOpMode {
 
 
     }
+
     @Override
     public void run() {
 
@@ -87,7 +88,7 @@ public class DECODAO_RED extends CommandOpMode {
             telemetry.addLine("drawing failed");
         }
 
-    turret.followPose(RED_GOAL, drive.getPose(), drive.getHeadingRad());
+        turret.followPose(RED_GOAL, drive.getPose(), drive.getHeadingRad());
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.Y) && ll.isPoseReliable()) {
             turret.applyVisionCorrection(ll.getTx(), offset);
@@ -102,10 +103,10 @@ public class DECODAO_RED extends CommandOpMode {
         telemetry.addData("Up (cm)", Intake.upBlocked);
         telemetry.addData("Down (cm)", Intake.downBlocked);
         telemetry.addData("Mid (cm)", Intake.midBlocked);
-        telemetry.addData("cood pedro",drive.getPose());
-        telemetry.addData("target RPM",shooter.getTargetRPM());
-        telemetry.addData("current RPM",shooter.getCurrentRPM());
-        telemetry.addData("cood LL",ll.isPoseReliable());
+        telemetry.addData("cood pedro", drive.getPose());
+        telemetry.addData("target RPM", shooter.getTargetRPM());
+        telemetry.addData("current RPM", shooter.getCurrentRPM());
+        telemetry.addData("cood LL", ll.isPoseReliable());
         telemetry.addData("Loop Times", elapsedtime.milliseconds());
         elapsedtime.reset();
 
@@ -113,61 +114,55 @@ public class DECODAO_RED extends CommandOpMode {
 
     }
 
-    public void intakeWorking(){
+    public void intakeWorking() {
 
-        if(gamepad1Ex.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.1) {
+        if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.1) {
             intake.intakeOn();
-        }
-
-        else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) ) {
+        } else if (gamepad1Ex.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
             intake.intakeOut();
-        }
-
-        else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
+        } else if (gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
             intake.transferTeleop();
-        }
-        else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
+        } else if (gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
             intake.transferSensor();
+        } else {
+            intake.intakeStop();
         }
-        else { intake.intakeStop();}
     }
 
     public void shooterWorking() {
-        shooter.shooterOn();
 
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
-            shooter.putRpm(drive.getDistanceInInches(RED_GOAL,drive.getPose()));
+            shooter.putRpm(drive.getDistanceInInches(BLUE_GOAL, drive.getPose()));
+            shooter.shooterOn();
             intake.gateOpen();
         } else {
             intake.gateClose();
-            shooter.setTargetRPM(500);
+            shooter.shooterOff();
 
         }
 
-        shooter.putHood(drive.getDistanceInInches(RED_GOAL,drive.getPose()));
+        shooter.putHood(drive.getDistanceInInches(BLUE_GOAL, drive.getPose()));
 
 
     }
 
 
-    public void led(){
+    public void led() {
         double tolerance = 50.0;
         double atSpeed = Math.abs(shooter.getTargetRPM() - shooter.getCurrentRPM());
 
+        boolean rpmled = atSpeed < tolerance;
 
-        if (Intake.allblocked) {
+
+        if (Intake.allblocked && !rpmled) {
             blink.red();
-        }
-
-        else if (atSpeed < tolerance) {
+        } else if (rpmled) {
             blink.violet();
 
-        }
-        else {
+        } else {
             blink.black();
         }
 
     }
-
 }
