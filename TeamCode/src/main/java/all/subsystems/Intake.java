@@ -1,13 +1,13 @@
-
 package all.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Intake extends SubsystemBase {
@@ -15,28 +15,24 @@ public class Intake extends SubsystemBase {
     private final MotorEx motor;
     private final Servo gate;
 
-    private final DistanceSensor mid, down;
+    // ===== SENSOR UP =====
     private final NormalizedColorSensor up;
-
-    private final ElapsedTime fullTimer = new ElapsedTime();
-    private final ElapsedTime launchTimer = new ElapsedTime();
-
-    public static double MIN_LAUNCH_INTERVAL = 0.75;
-
-    public boolean countingFull = false;
-    private boolean launchCooldownActive = false;
+    private boolean upBlocked = false;
     private boolean lastUpBlocked = false;
 
-    public static boolean upBlocked, midBlocked, downBlocked, useSensor;
-    public static boolean allblocked = false;
+    private final ElapsedTime launchTimer = new ElapsedTime();
+    public static double MIN_LAUNCH_INTERVAL = 0.7;
+    private boolean launchCooldownActive = false;
 
     private double motorPower = 0;
 
+    // ===== MODOS =====
     private enum Mode {
         OFF,
         INTAKE,
         OUTTAKE,
         TRANSFER,
+        TRANSFERFAR,
         TRANSFER_SENSOR
     }
 
@@ -45,101 +41,74 @@ public class Intake extends SubsystemBase {
     public Intake(HardwareMap hw) {
         motor = new MotorEx(hw, "intake");
         gate  = hw.get(Servo.class, "gate");
-
-        mid   = hw.get(DistanceSensor.class, "mid");
-        down  = hw.get(DistanceSensor.class, "down");
         up    = hw.get(NormalizedColorSensor.class, "up");
+
+        motor.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
     }
 
-    private void updateSensors() {
-        midBlocked  = mid.getDistance(DistanceUnit.CM) < 9;
-        downBlocked = down.getDistance(DistanceUnit.CM) < 9;
-        upBlocked   = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6.5;
+    // ==============================
+    // ===== SENSOR UPDATE ==========
+    // ==============================
 
-    }
-
-    private void runFullDetection() {
-        if (upBlocked && midBlocked && downBlocked) {
-            if (!countingFull) {
-                countingFull = true;
-                fullTimer.reset();
-            }
-            allblocked = true;
-
-            // Desliga motor após MIN FULL TIME
-            if (fullTimer.seconds() >= 0.2) {
-                motorPower = 0;
-                return;
-            }
-        } else {
-            countingFull = false;
-            allblocked = false;
-            fullTimer.reset();
-        }
+    private void updateUpSensor() {
+        upBlocked = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6.5;
     }
 
     private void runSensorTransferLogic() {
-        if(useSensor) {
 
-            if (lastUpBlocked && !upBlocked) {
-                launchCooldownActive = true;
-                launchTimer.reset();
-            }
-
-            lastUpBlocked = upBlocked;
-
-            if (launchCooldownActive) {
-                if (launchTimer.seconds() < MIN_LAUNCH_INTERVAL) {
-                    motorPower = 0;
-                    return;
-                }
-                launchCooldownActive = false;
-            }
-
-            motorPower = -0.86;
+        // Detecta borda de saída do pixel
+        if (lastUpBlocked && !upBlocked) {
+            launchCooldownActive = true;
+            launchTimer.reset();
         }
+
+        lastUpBlocked = upBlocked;
+
+        if (launchCooldownActive) {
+            if (launchTimer.seconds() < MIN_LAUNCH_INTERVAL) {
+                motorPower = 0;
+                return;
+            }
+            launchCooldownActive = false;
+        }
+
+        motorPower = -0.86;
     }
 
-    public void intakeOn() {
-        mode = Mode.INTAKE;
-    }
+    // ==============================
+    // ===== COMANDOS TELEOP ========
+    // ==============================
 
-    public void intakeOnAuto() {
-        mode = Mode.INTAKE;
-    }
+    public void intakeOn() { mode = Mode.INTAKE; }
+    public void intakeStop() { mode = Mode.OFF; }
+    public void intakeOut() { mode = Mode.OUTTAKE; }
+    public void transferTeleop() { mode = Mode.TRANSFER; }
+    public void transferFarTeleop() { mode = Mode.TRANSFERFAR; }
+    public void transferSensor() { mode = Mode.TRANSFER_SENSOR; }
 
-    public void intakeOut() {
-        mode = Mode.OUTTAKE;
-    }
+    // ==============================
+    // ===== COMANDOS AUTO ==========
+    // ==============================
 
-    public void transferTeleop() {
-        mode = Mode.TRANSFER;
-    }
-    public void transferAuto() {
-        mode = Mode.TRANSFER;
-    }
+    public void intakeOnAuto() { mode = Mode.INTAKE; }
+    public void transferAuto() { mode = Mode.TRANSFER; }
+    public void transferSensorAuto() { mode = Mode.TRANSFER_SENSOR; }
 
-    public void transferSensor() {mode = Mode.TRANSFER_SENSOR;}
+    // ==============================
+    // ===== GATE ===================
+    // ==============================
 
-    public void transferSensorAuto() {mode = Mode.TRANSFER_SENSOR;}
+    public void gateOpen() { gate.setPosition(0.16); }
+    public void gateClose() { gate.setPosition(0.31); }
 
-    public void intakeStop() {
-        mode = Mode.OFF;
-    }
-
-    public void gateOpen() {
-        gate.setPosition(0.16);
-    }
-
-    public void gateClose() {
-        gate.setPosition(0.335);
-    }
+    // ==============================
+    // ===== PERIODIC ===============
+    // ==============================
 
     @Override
     public void periodic() {
 
-
-        updateSensors();
+        updateUpSensor();
 
         switch (mode) {
 
@@ -148,14 +117,7 @@ public class Intake extends SubsystemBase {
                 break;
 
             case INTAKE:
-                useSensor = true;
-                runFullDetection();  // define motorPower = 0 se estiver cheio
-                if (countingFull ) {
-                    motorPower = 0;
-                }
-                else {
-                    motorPower = -0.8;
-                }
+                motorPower = -0.92;
                 break;
 
             case OUTTAKE:
@@ -163,24 +125,38 @@ public class Intake extends SubsystemBase {
                 break;
 
             case TRANSFER:
-                useSensor = false;
                 motorPower = -1.0;
-                allblocked = false;
+                break;
+
+            case TRANSFERFAR:
+                motorPower = -0.4;
                 break;
 
             case TRANSFER_SENSOR:
-                useSensor = true;
                 runSensorTransferLogic();
-                allblocked = false;
                 break;
         }
 
         motor.set(motorPower);
     }
 
-    public double getMotor() {
+    // ==============================
+    // ===== CURRENT MONITOR =========
+    // ==============================
+
+    public double getCurrentAmps() {
+        return motor.motorEx.getCurrent(CurrentUnit.AMPS);
+    }
+
+    public double getMotorVelocity() {
         return motor.getVelocity();
     }
 
+    public double getMotorPower() {
+        return motorPower;
+    }
 
+    public boolean isUpBlocked() {
+        return upBlocked;
+    }
 }

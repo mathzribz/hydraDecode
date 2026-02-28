@@ -103,9 +103,6 @@ public class DECODAO_POSES extends CommandOpMode {
 
         telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
         telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
-        telemetry.addData("Up (cm)", Intake.upBlocked);
-        telemetry.addData("Down (cm)", Intake.downBlocked);
-        telemetry.addData("Mid (cm)", Intake.midBlocked);
         telemetry.addData("cood pedro",drive.getPose());
         telemetry.addData("target RPM",shooter.getTargetRPM());
         telemetry.addData("current RPM",shooter.getCurrentRPM());
@@ -127,10 +124,10 @@ public class DECODAO_POSES extends CommandOpMode {
         }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
-            intake.transferSensor();
+            intake.transferTeleop();
         }
         else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
-            intake.transferSensor();
+
         }
         else { intake.intakeStop();}
     }

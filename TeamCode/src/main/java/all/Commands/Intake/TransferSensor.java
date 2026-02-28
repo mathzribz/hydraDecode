@@ -16,7 +16,7 @@ public class TransferSensor extends CommandBase {
 
     @Override
     public void initialize() {
-        intakeTransfer.transferSensor();
+//        intakeTransfer.transferSensor();
 
 
     }

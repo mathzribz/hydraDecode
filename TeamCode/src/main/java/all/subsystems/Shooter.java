@@ -47,11 +47,11 @@ public class Shooter extends SubsystemBase {
     }
 
     public void HoodHigh() {
-        hood.setPosition(0.85);
+        hood.setPosition(0.95);
     }
 
     public void HoodLow() {
-        hood.setPosition(0.68);
+        hood.setPosition(0.85);
     }
     public double HoodPos(double pos) {
         hood.setPosition(pos);
@@ -91,14 +91,14 @@ public class Shooter extends SubsystemBase {
                 0.00561643 * Math.pow(goalDistance, 3) +
                 0.73465 * Math.pow(goalDistance, 2) -
                 27.49451 * goalDistance +
-                2149.83295, 800, 3200 );
+                2149.83295 + 40 , 800, 3060 );
     }
 
     public static double hoodAngle (double goalDistance) {
         return MathFunctions.clamp((5.93422 * Math.pow(10, -7)) * Math.pow(goalDistance, 3) -
                 0.000221425 * Math.pow(goalDistance, 2) +
                 0.0282625 * goalDistance -
-                0.428675, 0.2, 0.85);
+                0.428675, 0.0, 0.95);
     }
 
 

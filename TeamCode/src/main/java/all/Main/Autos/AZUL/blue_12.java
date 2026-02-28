@@ -1,7 +1,7 @@
 
 package all.Main.Autos.AZUL;
 
-import static all.Configs.Turret.FieldConstants.BLUE_GOAL_Auto;
+
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.pedropathing.follower.Follower;
@@ -12,6 +12,7 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import all.Configs.Auto.PoseStorage;
 import all.Configs.Pedro.Constants;
@@ -26,6 +27,8 @@ public class blue_12 extends OpMode {
 
     private AutoLogic autologic = new AutoLogic();
     private Turret turret;
+
+    public ElapsedTime elapsedtime = new ElapsedTime();
 
     public enum PathState {
 
@@ -46,7 +49,8 @@ public class blue_12 extends OpMode {
         COLLECT3,
         SHOOT3,
 
-        END
+        END,
+        PARk
     }
 
     PathState pathState;
@@ -79,7 +83,7 @@ public class blue_12 extends OpMode {
                                 new Pose(51, 93),
                                 new Pose(71.017, 56.623),
                                 new Pose(56.952, 59.498),
-                                new Pose(17.531, 58.811)
+                                new Pose(16.531, 58.811)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
@@ -89,9 +93,9 @@ public class blue_12 extends OpMode {
 
         PathD = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(17.531, 58.811),
-                                new Pose(20.400, 63.325),
-                                new Pose(15.161, 72.054)
+                                new Pose(16.531, 58.811),
+                                new Pose(43.699, 66.714),
+                                new Pose(17.161, 69.054)
                         )
                 ).setConstantHeadingInterpolation(Math.toRadians(180))
 
@@ -99,7 +103,7 @@ public class blue_12 extends OpMode {
 
         Path3 = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(15.161, 72.054),
+                                new Pose(16.531, 72.054),
                                 new Pose(56.629, 68.55925806451614),
                                 new Pose(51, 93)
                         )
@@ -110,7 +114,7 @@ public class blue_12 extends OpMode {
                         new BezierCurve(
                                 new Pose(51, 93),
                                 new Pose(88.206, 26.392),
-                                new Pose(14.242, 35.418)
+                                new Pose(13.242, 35.418)
                         )
                 ).setConstantHeadingInterpolation(Math.toRadians(180))
 
@@ -118,7 +122,7 @@ public class blue_12 extends OpMode {
 
         Path5 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(14.242, 35.418),
+                                new Pose(13.242, 35.418),
 
                                 new Pose(51, 93)
                         )
@@ -129,7 +133,7 @@ public class blue_12 extends OpMode {
                         new BezierCurve(
                                 new Pose(51, 93),
                                 new Pose(57.676, 80.508),
-                                new Pose(12.695, 84.505)
+                                new Pose(15.695, 84.505)
                         )
                 ).setConstantHeadingInterpolation(Math.toRadians(180))
 
@@ -137,7 +141,7 @@ public class blue_12 extends OpMode {
 
         Path7 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(13.695, 84.505),
+                                new Pose(15.695, 84.505),
 
                                 new Pose(51, 93)
                         )
@@ -158,25 +162,25 @@ public class blue_12 extends OpMode {
     }
 
     public void statePathUpdate() {
-        turret.followPose(BLUE_GOAL_Auto,follower.getPose(),follower.getHeading());
 
         switch (pathState) {
 
             case DRIVE_STARTPOSE_SCOREPOSE:
-                autologic.preSpin();
+
+                    autologic.preSpin();
 
 
-                    follower.followPath(Path1,0.9, true);
+                    follower.followPath(Path1, 0.9, true);
                     setPathState(PathState.START_SCORE);
 
-                pathTimer.resetTimer();
 
                 break;
 
             case START_SCORE:
 
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.2){
+                if (!follower.isBusy() ){
                     autologic.burstFire();
+                    pathTimer.resetTimer();
                     setPathState(PathState.DRIVE_TO_INTAKE1);
 
                 }
@@ -185,34 +189,39 @@ public class blue_12 extends OpMode {
             // ================= CICLO 1 =================
 
             case DRIVE_TO_INTAKE1:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.8) {
                     autologic.stopShooter();
                     follower.followPath(Path2, 0.9,true);
-                    autologic.startIntakeWithSensors();
+                    autologic.startIntake();
+                    pathTimer.resetTimer();
                     setPathState(PathState.COLLECT1);
                 }
                 break;
 
             case COLLECT1:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() &&  pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    autologic.stopIntake();
                     follower.followPath(PathD,0.9, true);
+                    pathTimer.resetTimer();
                     setPathState(PathState.DRIVE_TO_GATE);
-                    autologic.preSpin();
+
                 }
                 break;
 
             case DRIVE_TO_GATE:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.5) {
+                    autologic.preSpin();
 
                     follower.followPath(Path3,0.9, true);
                     setPathState(PathState.SHOOT1);
                 }
-                pathTimer.resetTimer();
+
                 break;
 
             case SHOOT1:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2){
+                if (!follower.isBusy() ){
                     autologic.burstFire();
+                    pathTimer.resetTimer();
                     setPathState(PathState.DRIVE_TO_INTAKE2);
 
                 }
@@ -222,27 +231,33 @@ public class blue_12 extends OpMode {
             // ================= CICLO 2 =================
 
             case DRIVE_TO_INTAKE2:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                if (!follower.isBusy() &&  pathTimer.getElapsedTimeSeconds() > 1.8 ) {
                     autologic.stopShooter();
                     follower.followPath(Path4,0.9,true);
-                    autologic.startIntakeWithSensors();
+                    autologic.startIntake();
+                    pathTimer.resetTimer();
+
                     setPathState(PathState.COLLECT2);
                 }
                 break;
 
             case COLLECT2:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() &&  pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    autologic.stopIntake();
+
 
                     follower.followPath(Path5,0.9, true);
                     setPathState(PathState.SHOOT2);
-                    autologic.preSpin();
+
+                        autologic.preSpin();
+
                 }
-                pathTimer.resetTimer();
                 break;
 
             case SHOOT2:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2){
+                if (!follower.isBusy() ){
                     autologic.burstFire();
+                    pathTimer.resetTimer();
                     setPathState(PathState.DRIVE_TO_INTAKE3);
 
                 }
@@ -250,39 +265,45 @@ public class blue_12 extends OpMode {
 
 
             case DRIVE_TO_INTAKE3:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.8) {
                     autologic.stopShooter();
                     follower.followPath(Path6,0.9,true);
-                    autologic.startIntakeWithSensors();
+                    autologic.startIntake();
+                    pathTimer.resetTimer();
                     setPathState(PathState.COLLECT3);
                 }
                 break;
 
             case COLLECT3:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() &&  pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    autologic.stopIntake();
 
                     follower.followPath(Path7,0.9, true);
-                    setPathState(PathState.SHOOT3);
                     autologic.preSpin();
+                    pathTimer.resetTimer();
+                    setPathState(PathState.SHOOT3);
                 }
-                pathTimer.resetTimer();
                 break;
 
             case SHOOT3:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2){
+                if (!follower.isBusy() ){
                     autologic.burstFire();
                     setPathState(PathState.END);
+                    pathTimer.resetTimer();
 
                 }
-                pathTimer.resetTimer();
 
                 break;
 
             case END:
-                if ( pathTimer.getElapsedTimeSeconds() > 3) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.8) {
                     follower.followPath(Path8,0.9, true);
-                    autologic.stopAll();
+                setPathState(PathState.PARk);
+
                 }
+                break;
+            case PARk:
+                autologic.stopAll();
                 break;
         }
     }
@@ -295,17 +316,20 @@ public class blue_12 extends OpMode {
     @Override
     public void init() {
 
+
         pathTimer = new Timer();
         opModeTimer = new Timer();
 
         follower = Constants.createFollower(hardwareMap);
         autologic.init(hardwareMap);
         turret = new Turret(hardwareMap);
+        elapsedtime.reset();
 
         Paths();
         follower.setStartingPose(new Pose(33.118279569892465, 135.31182795698925, Math.toRadians(180)));
 
         pathState = PathState.DRIVE_STARTPOSE_SCOREPOSE;
+
 
     }
 
@@ -315,6 +339,8 @@ public class blue_12 extends OpMode {
 
         CommandScheduler.getInstance().run();
         follower.update();
+        turret.holdRobotRelative(Math.toRadians(-40), follower.getHeading());
+        turret.periodic();
         autologic.update();
         statePathUpdate();
 
@@ -323,5 +349,8 @@ public class blue_12 extends OpMode {
         PoseStorage.currentPose = follower.getPose();
 
         telemetry.addData("State", pathState);
+        telemetry.addData("tickError", turret.getTickError());
+        telemetry.addData("Loop Times", elapsedtime.milliseconds());
+        elapsedtime.reset();
     }
 }

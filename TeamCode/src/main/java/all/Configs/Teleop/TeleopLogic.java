@@ -118,11 +118,8 @@ public class TeleopLogic {
             if (g.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 && ll.isPoseReliable()) {
 //                turret.applyVisionCorrection(ll.getTx());
 
-            } else {
-                turret.setRelocalizationOffset(0.0);
-            }
 
-    }
+            }}
 
 // SHOOTER
 public void shooterWorking(GamepadEx g) {
@@ -161,7 +158,7 @@ public void intakeWorking(GamepadEx g) {
     } else if (g.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
         intake.intakeOut();
     } else if (g.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
-        intake.transferSensor();
+//        intake.transferSensor();
     } else if (g.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
         intake.transferTeleop();
     } else {
@@ -176,9 +173,9 @@ public void intakeWorking(GamepadEx g) {
 public void telemetryUpdate(){
     telemetry.addData("Heading (deg)", "%.2f", drive.getHeadingDeg());
     telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
-    telemetry.addData("Up (cm)", Intake.upBlocked);
-    telemetry.addData("Down (cm)", Intake.downBlocked);
-    telemetry.addData("Mid (cm)", Intake.midBlocked);
+//    telemetry.addData("Up (cm)", Intake.upBlocked);
+//    telemetry.addData("Down (cm)", Intake.downBlocked);
+//    telemetry.addData("Mid (cm)", Intake.midBlocked);
     telemetry.addData("cood pedro",drive.getPose());
     telemetry.addData("target RPM",shooter.getTargetRPM());
     telemetry.addData("current RPM",shooter.getCurrentRPM());
@@ -194,15 +191,15 @@ public void led(){
          targetAprox = true;
      }else{targetAprox = false;}
 
-    if (Intake.allblocked && !targetAprox){
-        blink.red();
-    }
+//    if (Intake.allblocked && !targetAprox){
+//        blink.red();
+//    }
 //    else if (targetAprox){
 //        blink.orange();
 //    }
-    else {
-        blink.black();
-    }
+//    else {
+//        blink.black();
+//    }
 
 }
 

@@ -47,10 +47,10 @@ public class Test_teleop extends LinearOpMode {
     private double headingOffset = 0.0;
     private static final double DEAD_ZONE = 0.25;
 
-    public static double kP = 0.0168;
     public static double kI = 0.0;
-    public static double kD = 0.0;
-    public static double kF = 0.00024;
+    public static double kP = 0.015    ;
+    public static double kD = 0.0000;
+    public static double kF = 0.000215;
 
     public static double TICKS_PER_REV = 28;
     public static double targetRPM = 1200;
@@ -95,7 +95,7 @@ public class Test_teleop extends LinearOpMode {
 
 
 
-                capuz.setPosition(servo1pos);
+//                capuz.setPosition(servo1pos);
 
 
             telemetry.addData("Drive Speed", driveSpeed);
@@ -266,12 +266,12 @@ public class Test_teleop extends LinearOpMode {
         if (gamepad1.right_trigger > 0.1) {
             ShooterR.setPower(finalPower);
             ShooterL.setPower(finalPower);
-            servo_teste.setPosition(0.17);
+            servo_teste.setPosition(servoPos);
         } else {
             ShooterR.setPower(0);
             ShooterL.setPower(0);
             pidf.reset();
-            servo_teste.setPosition(0.33);
+            servo_teste.setPosition(servo1pos);
         }
 
         double rpm = (currentTPS / TICKS_PER_REV) * 60.0;
