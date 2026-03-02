@@ -73,21 +73,16 @@ public class Turret extends SubsystemBase {
         motor.setPower(Math.max(-1, Math.min(1, power)));
     }
 
-    // =====================================================
-    // 🔥 MÉTODO NOVO — SINCRONIZA TARGET COM ÂNGULO ATUAL
-    // =====================================================
 
     public void syncTargetToCurrent(double robotHeading) {
 
         double currentRad = ticksToRads(motor.getCurrentPosition());
 
-        // converte posição atual da turret para ângulo absoluto de campo
         targetRad = wrap(currentRad + robotHeading - relocalizationAngleOffset);
 
         pid.reset(); // evita impulso acumulado
     }
 
-    // =====================================================
 
     private double radsToTicks(double rad) {
         return (rad / (2 * Math.PI)) * TICKS_PER_REV * GEAR_RATIO;
