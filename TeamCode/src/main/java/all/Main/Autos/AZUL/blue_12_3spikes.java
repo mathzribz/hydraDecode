@@ -20,7 +20,7 @@ import all.Configs.Auto.AutoLogic;
 import all.subsystems.Turret;
 
 @Autonomous
-public class blue_12 extends OpMode {
+public class blue_12_3spikes extends OpMode {
 
     private Follower follower;
     private Timer pathTimer, opModeTimer;
@@ -43,7 +43,7 @@ public class blue_12 extends OpMode {
         COLLECT2,
         SHOOT2,
 
-        DRIVE_TO_GATE,
+        DRIVE_TO_gate,
 
         DRIVE_TO_INTAKE3,
         COLLECT3,
@@ -56,19 +56,19 @@ public class blue_12 extends OpMode {
     PathState pathState;
 
     // ===== PATHS =====
-    public PathChain Path1;
-    public PathChain Path2;
-    public PathChain PathD;
-    public PathChain Path3;
-    public PathChain Path4;
-    public PathChain Path5;
-    public PathChain Path6;
-    public PathChain Path7;
-    public PathChain Path8;
+    public PathChain shoot1;
+    public PathChain intake1;
+    public PathChain gate;
+    public PathChain shoot2;
+    public PathChain intake2;
+    public PathChain shoot3;
+    public PathChain intake3;
+    public PathChain shoot4;
+    public PathChain leave;
 
 
     public void Paths() {
-        Path1 = follower.pathBuilder().addPath(
+        shoot1 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(33.118, 135.312),
 
@@ -78,7 +78,7 @@ public class blue_12 extends OpMode {
 
                 .build();
 
-        Path2 = follower.pathBuilder().addPath(
+        intake1 = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(51, 93),
                                 new Pose(71.017, 56.623),
@@ -91,7 +91,7 @@ public class blue_12 extends OpMode {
 
 
 
-        PathD = follower.pathBuilder().addPath(
+        gate = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(16.531, 58.811),
                                 new Pose(43.699, 66.714),
@@ -101,16 +101,16 @@ public class blue_12 extends OpMode {
 
                 .build();
 
-        Path3 = follower.pathBuilder().addPath(
+        shoot2 = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(16.531, 72.054),
+                                new Pose(17.161, 69.054),
                                 new Pose(56.629, 68.55925806451614),
                                 new Pose(51, 93)
                         )
                 ).setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
-        Path4 = follower.pathBuilder().addPath(
+        intake2 = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(51, 93),
                                 new Pose(88.206, 26.392),
@@ -120,7 +120,7 @@ public class blue_12 extends OpMode {
 
                 .build();
 
-        Path5 = follower.pathBuilder().addPath(
+        shoot3 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(13.242, 35.418),
 
@@ -129,7 +129,7 @@ public class blue_12 extends OpMode {
                 ).setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
-        Path6 = follower.pathBuilder().addPath(
+        intake3 = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(51, 93),
                                 new Pose(57.676, 80.508),
@@ -139,7 +139,7 @@ public class blue_12 extends OpMode {
 
                 .build();
 
-        Path7 = follower.pathBuilder().addPath(
+        shoot4 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(15.695, 84.505),
 
@@ -149,7 +149,7 @@ public class blue_12 extends OpMode {
 
                 .build();
 
-        Path8 = follower.pathBuilder().addPath(
+        leave = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(51.000, 93.000),
 
@@ -170,7 +170,7 @@ public class blue_12 extends OpMode {
                     autologic.preSpin();
 
 
-                    follower.followPath(Path1, 0.9, true);
+                    follower.followPath(shoot1, 0.9, true);
                     setPathState(PathState.START_SCORE);
 
 
@@ -191,7 +191,7 @@ public class blue_12 extends OpMode {
             case DRIVE_TO_INTAKE1:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.8) {
                     autologic.stopShooter();
-                    follower.followPath(Path2, 0.9,true);
+                    follower.followPath(intake1, 0.9,true);
                     autologic.startIntake();
                     pathTimer.resetTimer();
                     setPathState(PathState.COLLECT1);
@@ -201,18 +201,18 @@ public class blue_12 extends OpMode {
             case COLLECT1:
                 if (!follower.isBusy() &&  pathTimer.getElapsedTimeSeconds() > 0.2) {
                     autologic.stopIntake();
-                    follower.followPath(PathD,0.9, true);
+                    follower.followPath(gate,0.9, true);
                     pathTimer.resetTimer();
-                    setPathState(PathState.DRIVE_TO_GATE);
+                    setPathState(PathState.DRIVE_TO_gate);
 
                 }
                 break;
 
-            case DRIVE_TO_GATE:
+            case DRIVE_TO_gate:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.5) {
                     autologic.preSpin();
 
-                    follower.followPath(Path3,0.9, true);
+                    follower.followPath(shoot2,0.9, true);
                     setPathState(PathState.SHOOT1);
                 }
 
@@ -233,7 +233,7 @@ public class blue_12 extends OpMode {
             case DRIVE_TO_INTAKE2:
                 if (!follower.isBusy() &&  pathTimer.getElapsedTimeSeconds() > 1.8 ) {
                     autologic.stopShooter();
-                    follower.followPath(Path4,0.9,true);
+                    follower.followPath(intake2,0.9,true);
                     autologic.startIntake();
                     pathTimer.resetTimer();
 
@@ -246,7 +246,7 @@ public class blue_12 extends OpMode {
                     autologic.stopIntake();
 
 
-                    follower.followPath(Path5,0.9, true);
+                    follower.followPath(shoot3,0.9, true);
                     setPathState(PathState.SHOOT2);
 
                         autologic.preSpin();
@@ -267,7 +267,7 @@ public class blue_12 extends OpMode {
             case DRIVE_TO_INTAKE3:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.8) {
                     autologic.stopShooter();
-                    follower.followPath(Path6,0.9,true);
+                    follower.followPath(intake3,0.9,true);
                     autologic.startIntake();
                     pathTimer.resetTimer();
                     setPathState(PathState.COLLECT3);
@@ -278,7 +278,7 @@ public class blue_12 extends OpMode {
                 if (!follower.isBusy() &&  pathTimer.getElapsedTimeSeconds() > 0.2) {
                     autologic.stopIntake();
 
-                    follower.followPath(Path7,0.9, true);
+                    follower.followPath(shoot4,0.9, true);
                     autologic.preSpin();
                     pathTimer.resetTimer();
                     setPathState(PathState.SHOOT3);
@@ -297,7 +297,7 @@ public class blue_12 extends OpMode {
 
             case END:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.8) {
-                    follower.followPath(Path8,0.9, true);
+                    follower.followPath(leave,0.9, true);
                 setPathState(PathState.PARk);
 
                 }

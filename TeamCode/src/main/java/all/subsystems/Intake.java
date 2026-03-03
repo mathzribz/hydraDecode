@@ -46,9 +46,6 @@ public class Intake extends SubsystemBase {
         motor.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
     }
 
-    // ==============================
-    // ===== SENSOR UPDATE ==========
-    // ==============================
 
     private void updateUpSensor() {
         upBlocked = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6.5;
