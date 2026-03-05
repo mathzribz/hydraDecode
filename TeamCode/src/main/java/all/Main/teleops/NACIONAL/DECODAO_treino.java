@@ -105,6 +105,14 @@ public class DECODAO_treino extends CommandOpMode {
             turret.applyVisionCorrection(ll.getTx(), offset);
 
         }
+        if (gamepad1Ex.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+            turret.adjustOffsetDegrees(-0.3);
+        }
+
+        if (gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+            turret.adjustOffsetDegrees(0.3);
+        }
+
 
         intakeWorking();
         shooterWorking();
@@ -131,9 +139,9 @@ public class DECODAO_treino extends CommandOpMode {
             intake.intakeOn();
         }
 
-        else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) ) {
-            intake.intakeOut();
-        }
+       // else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) ) {
+       //     intake.intakeOut();
+      //  }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
             intake.transferTeleop();

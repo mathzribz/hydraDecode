@@ -116,6 +116,13 @@ public class Turret extends SubsystemBase {
         relocalizationAngleOffset = wrap(relocalizationAngleOffset);
     }
 
+    public void adjustOffsetDegrees(double deltaDegrees) {
+
+        relocalizationAngleOffset += Math.toRadians(deltaDegrees);
+        relocalizationAngleOffset = wrap(relocalizationAngleOffset);
+
+    }
+
     public double getTickError(){
         return tickError;
     }
