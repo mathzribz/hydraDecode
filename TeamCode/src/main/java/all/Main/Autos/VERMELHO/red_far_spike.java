@@ -56,78 +56,97 @@ public class red_far_spike extends OpMode {
     public void Paths() {
 
         Path1 = follower.pathBuilder().addPath(
-                new BezierLine(
-                        new Pose(80.000, 8.000),
-                        new Pose(84.000, 21.000)
-                )
-        ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0)).build();
+                        new BezierLine(
+                                new Pose(80.000, 8.000),
+                                new Pose(84.000, 21.000)
+                        )
+                ).setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
 
         Path2 = follower.pathBuilder().addPath(
-                new BezierCurve(
-                        new Pose(84.000, 21.000),
-                        new Pose(80.328, 36.490),
-                        new Pose(119.360, 35.993),
-                        new Pose(130.301, 38)
-                )
-        ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0)).build();
+                        new BezierCurve(
+                                new Pose(84.000, 21.000),
+                                new Pose(80.328, 36.490),
+                                new Pose(119.360, 35.993),
+                                new Pose(130.301, 37.000)
+                        )
+                ).setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
 
         Path4 = follower.pathBuilder().addPath(
-                new BezierCurve(
-                        new Pose(131.301, 38),
-                        new Pose(88.139, 35.165),
-                        new Pose(84.000, 21.000)
-                )
-        ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0)).build();
+                        new BezierCurve(
+                                new Pose(130.301, 37.000),
+                                new Pose(88.139, 35.165),
+                                new Pose(84.000, 21.000)
+                        )
+                ).setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+
+        Path4 = follower.pathBuilder().addPath(
+                        new BezierCurve(
+                                new Pose(84.000, 21.000),
+                                new Pose(107.102, 20.770),
+                                new Pose(130.259, 14.198)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .build();
+
 
         Path5 = follower.pathBuilder().addPath(
-                new BezierCurve(
-                        new Pose(84.000, 21.000),
-                        new Pose(107.102, 20.770),
-                        new Pose(135.5, 25.774)
-                )
-        ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(25)).build();
+                        new BezierLine(
+                                new Pose(130.259, 14.198),
+                                new Pose(130.281, 8.339)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .build();
+
 
         Path6 = follower.pathBuilder().addPath(
-                new BezierLine(
-                        new Pose(135.5, 25.774),
-                        new Pose(135.5, 6.300)
-                )
-        ).setConstantHeadingInterpolation(Math.toRadians(25)).build();
+                        new BezierLine(
+                                new Pose(130.281, 8.339),
+                                new Pose(84.000, 21.000)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .build();
+
 
         Path7 = follower.pathBuilder().addPath(
-                new BezierLine(
-                        new Pose(134.302, 6.300),
-                        new Pose(84.000, 21.000)
-                )
-        ).setLinearHeadingInterpolation(Math.toRadians(25), Math.toRadians(0)).build();
+                        new BezierLine(
+                                new Pose(84.000, 21.000),
+                                new Pose(133.376, 10.699)
+                        )
+                ).setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
 
         Path8 = follower.pathBuilder().addPath(
-                new BezierLine(
-                        new Pose(84.000, 21.000),
-                        new Pose(133.376, 10.699)
-                )
-        ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
+                        new BezierLine(
+                                new Pose(133.376, 10.699),
+                                new Pose(84.000, 21.000)
+                        )
+                ).setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
 
         Path9 = follower.pathBuilder().addPath(
-                new BezierLine(
-                        new Pose(133.376, 10.699),
-                        new Pose(84.000, 21.000)
-                )
-        ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
+                        new BezierLine(
+                                new Pose(84.000, 21.000),
+                                new Pose(133.376, 10.699)
+                        )
+                ).setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
 
         Path10 = follower.pathBuilder().addPath(
-                new BezierLine(
-                        new Pose(84.000, 21.000),
-                        new Pose(133.376, 10.699)
-                )
-        ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
-
-        Path11 = follower.pathBuilder().addPath(
-                new BezierLine(
-                        new Pose(133.376, 10.699),
-                        new Pose(84.000, 21.000)
-                )
-        ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
+                        new BezierLine(
+                                new Pose(133.376, 10.699),
+                                new Pose(84.000, 21.000)
+                        )
+                ).setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
     }
 
     @Override
@@ -156,7 +175,7 @@ public class red_far_spike extends OpMode {
         follower.update();
 
         // turret invertida para lado vermelho
-        turret.holdRobotRelative(Math.toRadians(64.7), follower.getHeading());
+        turret.holdRobotRelative(Math.toRadians(65), follower.getHeading());
 
         autologic.update();
         statePathUpdate();
@@ -223,7 +242,7 @@ public class red_far_spike extends OpMode {
                     if ( pathTimer.getElapsedTimeSeconds() > 0.8) {
                         autologic.stopIntake();
                     }
-                    follower.followPath(Path4,0.9, true);
+                    follower.followPath(Path4,0.7, true);
                     autologic.preSpinFar();
                     pathTimer.resetTimer();
                     setPathState(PathState.SHOOT1);
@@ -232,7 +251,7 @@ public class red_far_spike extends OpMode {
 
 
             case SHOOT1:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1){
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2){
                     autologic.burstFireFar();
                     pathTimer.resetTimer();
                     setPathState(PathState.DRIVE_TO_LOAD);
@@ -246,29 +265,20 @@ public class red_far_spike extends OpMode {
             case DRIVE_TO_LOAD:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3.7) {
                     autologic.stopShooter();
-                    follower.followPath(Path5,0.9,true);
-
-                    setPathState(PathState.LOAD);
-                }
-                break;
-
-
-            case LOAD:
-                if (!follower.isBusy()) {
                     autologic.startIntake();
-                    follower.followPath(Path6,0.75, true);
-                    pathTimer.resetTimer();
+                    follower.followPath(Path4,0.9,true);
+
                     setPathState(PathState.COLLECT2);
-
-
                 }
                 break;
+
+
 
             case COLLECT2:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 0.5) {
                     autologic.stopIntake();
 
-                    follower.followPath(Path7,0.9, true);
+                    follower.followPath(Path6,0.7, true);
                     autologic.preSpinFar();
                     pathTimer.resetTimer();
                     setPathState(PathState.SHOOT2);
@@ -291,7 +301,7 @@ public class red_far_spike extends OpMode {
             case DRIVE_TO_LOAD2:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3.7) {
                     autologic.stopShooter();
-                    follower.followPath(Path8,0.9,true);
+                    follower.followPath(Path7 ,0.9,true);
                     autologic.startIntake();
                     setPathState(PathState.COLLECT3);
                 }
@@ -299,7 +309,6 @@ public class red_far_spike extends OpMode {
 
 
         }
-        
     }
 
     public void setPathState(PathState newState) {

@@ -23,7 +23,7 @@ public class Drive extends SubsystemBase {
 
     private LLMegatag ll;
 
-    private double driveSpeed = 0.85;
+    private double driveSpeed = 0.95;
 
     private double currentHeadingRad = 0.0;
     private double currentHeadingDeg = 0.0;

@@ -48,16 +48,17 @@ public class Test_teleop extends LinearOpMode {
     private static final double DEAD_ZONE = 0.25;
 
     public static double kI = 0.0;
-    public static double kP = 0.015    ;
+    public static double kP = 0.004    ;
     public static double kD = 0.0000;
-    public static double kF = 0.000215;
+    public static double kF = 0.000245;
 
     public static double TICKS_PER_REV = 28;
     public static double targetRPM = 1200;
     public static double targetTPS ;
     public static double finalPower;
-    public static double servo1pos = 0.7;
-    public static double servoPos = 0.3;
+    public static double servo1pos = 0.32;
+    public static double servoPos = 0.18;
+    public static double servoPos33 = 0.7;
 
 
 
@@ -95,7 +96,7 @@ public class Test_teleop extends LinearOpMode {
 
 
 
-//                capuz.setPosition(servo1pos);
+                capuz.setPosition(servoPos33);
 
 
             telemetry.addData("Drive Speed", driveSpeed);
@@ -147,7 +148,7 @@ public class Test_teleop extends LinearOpMode {
         Intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         ShooterR.setDirection(DcMotorSimple.Direction.REVERSE);
-        ShooterL.setDirection(DcMotorSimple.Direction.FORWARD);
+        ShooterL.setDirection(DcMotorSimple.Direction.REVERSE );
 
 
         ShooterL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -156,8 +157,7 @@ public class Test_teleop extends LinearOpMode {
 
 
 
-        up = hardwareMap.get(DistanceSensor.class, "up");
-        down = hardwareMap.get(DistanceSensor.class, "down");
+
 
     }
 
@@ -172,7 +172,7 @@ public class Test_teleop extends LinearOpMode {
 
         double x  = applyDeadZone(gamepad1.left_stick_x);   // x
         double y  = applyDeadZone(-gamepad1.left_stick_y);   // FORWARD/BACKWARD
-        double rx = applyDeadZone(-gamepad1.right_stick_x);   // ROTATION
+        double rx = applyDeadZone(gamepad1.right_stick_x);   // ROTATION
 
 
 
@@ -197,54 +197,17 @@ public class Test_teleop extends LinearOpMode {
 
     public void intake() {
 
-        double distanceUp   = up.getDistance(DistanceUnit.CM);
-        double distanceDown = down.getDistance(DistanceUnit.CM);
 
-        boolean upBlocked   = distanceUp < 8;
-        boolean downBlocked = distanceDown < 8;
 
         double intakePower = 0.0;
 
-        if (gamepad1.left_bumper) {
-            intakePower = -0.75;
-        }
-
-        if (upBlocked && downBlocked) {
-
-            if (!countingFull) {
-                fullTimer.reset();
-                countingFull = true;
-            }
-
-            if (fullTimer.seconds() >= 0.1) {
-                EnabledTransfer = false;
-            }
-
-        } else {
-            countingFull = false;
-            fullTimer.reset();
-        }
-
-        if (!gamepad1.right_bumper) {
-            if (gamepad1.left_trigger > 0.08 && EnabledTransfer) {
-                intakePower = 0.9;
-            }
-        }
-
         if (gamepad1.right_bumper) {
-            EnabledTransfer = true;
-            countingFull = false;
-            fullTimer.reset();
-            intakePower = 1.0;
+            Intake.setPower(1);
+        }
+        else{
+            Intake.setPower(0);
         }
 
-        if (gamepad1.dpad_left) {
-            porta.setPosition(0);
-        } else if (gamepad1.dpad_right) {
-            porta.setPosition(0.5);
-        }
-
-        Intake.setPower(intakePower);
 
 
     }

@@ -80,7 +80,7 @@ public class DECODAO_RED  extends CommandOpMode {
         allHubs = hardwareMap.getAll(LynxModule.class);
 
         for (LynxModule hub : allHubs) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
 
@@ -88,13 +88,16 @@ public class DECODAO_RED  extends CommandOpMode {
     @Override
     public void run() {
 
-
+        for (LynxModule hub : allHubs) {
+            hub.clearBulkCache();
+        }
 
         super.run();
 
         waitForStart();
         drive.updatePinpoint();
-        turret.followPose(BLUE_GOAL, drive.getPose(), drive.getHeadingRad());
+//     /   turret.followPose(RED_GOAL, drive.getPose(), drive.getHeadingRad());
+        turret.holdRobotRelative(Math.toRadians(44), drive.getHeadingRad());
 
 
         try {
@@ -104,22 +107,25 @@ public class DECODAO_RED  extends CommandOpMode {
         }
 
 
-        if (gamepad1Ex.getButton(GamepadKeys.Button.Y) && ll.isPoseReliable()) {
-            turret.applyVisionCorrection(ll.getTx(), offset);
 
+        if (gamepad2Ex.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
+            turret.adjustOffsetDegrees(1.5);
         }
+
+        if (gamepad2Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
+            turret.adjustOffsetDegrees(-1.5);
+        }
+
 
         intakeWorking();
         shooterWorking();
         led();
 
 
-        telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
 
-        telemetry.addData("cood pedro",drive.getPose());
-        telemetry.addData("target RPM",shooter.getTargetRPM());
-        telemetry.addData("current RPM",shooter.getCurrentRPM());
-        telemetry.addData("cood LL",ll.isPoseReliable());
+//        telemetry.addData("cood pedro",drive.getPose());
+//        telemetry.addData("target RPM",shooter.getTargetRPM());
+//        telemetry.addData("current RPM",shooter.getCurrentRPM());
         telemetry.addData("Loop Times", elapsedtime.milliseconds());
         telemetry.addData("current intake", intake.getCurrentAmps());
         elapsedtime.reset();
@@ -134,15 +140,15 @@ public class DECODAO_RED  extends CommandOpMode {
             intake.intakeOn();
         }
 
-        else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) ) {
-            intake.intakeOut();
-        }
+         else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) ) {
+             intake.intakeOut();
+          }
 
         else if(gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_BUMPER) ) {
             intake.transferTeleop();
         }
         else if(gamepad1Ex.getButton(GamepadKeys.Button.LEFT_BUMPER) ) {
-            intake.transferSensor();
+            intake.transferFarTeleop();
 
         }
         else { intake.intakeStop();}
@@ -153,7 +159,7 @@ public class DECODAO_RED  extends CommandOpMode {
 
 
         if (gamepad1Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1 || gamepad2Ex.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.1) {
-            shooter.putRpm(drive.getDistanceInInches(RED_GOAL,drive.getPose()));
+            shooter.setTargetRPM(2250);
             shooter.shooterOn();
 
         } else {
@@ -170,14 +176,14 @@ public class DECODAO_RED  extends CommandOpMode {
             intake.gateClose();
         }
 
-        shooter.putHood(drive.getDistanceInInches(BLUE_GOAL,drive.getPose()));
+        shooter.HoodLow();
 
 
     }
 
 
     public void led(){
-        double tolerance = 50.0;
+        double tolerance = 150.0;
         double atSpeed = Math.abs(shooter.getTargetRPM() - shooter.getCurrentRPM());
 
         boolean rpmled = atSpeed < tolerance;

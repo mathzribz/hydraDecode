@@ -16,12 +16,12 @@ public class Intake extends SubsystemBase {
     private final Servo gate;
 
     // ===== SENSOR UP =====
-    private final NormalizedColorSensor up;
+
     private boolean upBlocked = false;
     private boolean lastUpBlocked = false;
 
     private final ElapsedTime launchTimer = new ElapsedTime();
-    public static double MIN_LAUNCH_INTERVAL = 0.7;
+    public static double MIN_LAUNCH_INTERVAL = 0.4;
     private boolean launchCooldownActive = false;
 
     private double motorPower = 0;
@@ -41,15 +41,15 @@ public class Intake extends SubsystemBase {
     public Intake(HardwareMap hw) {
         motor = new MotorEx(hw, "intake");
         gate  = hw.get(Servo.class, "gate");
-        up    = hw.get(NormalizedColorSensor.class, "up");
+
 
         motor.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
     }
 
 
-    private void updateUpSensor() {
-        upBlocked = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6.5;
-    }
+//    private void updateUpSensor() {
+//        upBlocked = ((DistanceSensor) up).getDistance(DistanceUnit.CM) < 6.5;
+//    }
 
     private void runSensorTransferLogic() {
 
@@ -95,8 +95,8 @@ public class Intake extends SubsystemBase {
     // ===== GATE ===================
     // ==============================
 
-    public void gateOpen() { gate.setPosition(0.16); }
-    public void gateClose() { gate.setPosition(0.31); }
+    public void gateOpen() { gate.setPosition(0.18); }
+    public void gateClose() { gate.setPosition(0.323); }
 
     // ==============================
     // ===== PERIODIC ===============
@@ -105,7 +105,7 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
 
-        updateUpSensor();
+
 
         switch (mode) {
 
@@ -114,7 +114,7 @@ public class Intake extends SubsystemBase {
                 break;
 
             case INTAKE:
-                motorPower = -0.92;
+                motorPower = -0.85;
                 break;
 
             case OUTTAKE:
@@ -122,11 +122,11 @@ public class Intake extends SubsystemBase {
                 break;
 
             case TRANSFER:
-                motorPower = -1.0;
+                motorPower = -1;
                 break;
 
             case TRANSFERFAR:
-                motorPower = -0.4;
+                motorPower = -0.65;
                 break;
 
             case TRANSFER_SENSOR:

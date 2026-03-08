@@ -24,7 +24,7 @@ public class AutoLogic {
 
     public ShooterState state = ShooterState.IDLE;
 
-    private static final double MIN_RPM = 1900;
+    private static final double MIN_RPM = 2000;
     private static final double MAX_SPINUP_TIME = 2.0;
     private static final double BURST_TIME = 2; // tempo suficiente pra 3 bolas
     private static final double BURST_TIME_FAR = 4; // tempo suficiente pra 3 bolas
@@ -41,7 +41,7 @@ public class AutoLogic {
     public void preSpin() {
         state = ShooterState.PRESPIN;
             shooter.shooterOnAuto();
-            shooter.setTargetRPM(2235);
+            shooter.setTargetRPM(2320);
             shooter.HoodLow();
 
 
@@ -57,7 +57,7 @@ public class AutoLogic {
     public void preSpinFar() {
         state = ShooterState.PRESPIN;
         shooter.shooterOnAuto();
-        shooter.setTargetRPM(2870);
+        shooter.setTargetRPM(2860);
         shooter.HoodHigh();
 
     }

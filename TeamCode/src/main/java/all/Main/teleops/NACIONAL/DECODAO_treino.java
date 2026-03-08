@@ -77,7 +77,7 @@ public class DECODAO_treino extends CommandOpMode {
         allHubs = hardwareMap.getAll(LynxModule.class);
 
         for (LynxModule hub : allHubs) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
         }
 
 
@@ -85,7 +85,9 @@ public class DECODAO_treino extends CommandOpMode {
     @Override
     public void run() {
 
-
+        for (LynxModule hub : allHubs) {
+            hub.clearBulkCache();
+        }
 
         super.run();
 
@@ -101,16 +103,13 @@ public class DECODAO_treino extends CommandOpMode {
         }
 
 
-        if (gamepad1Ex.getButton(GamepadKeys.Button.Y) && ll.isPoseReliable()) {
-            turret.applyVisionCorrection(ll.getTx(), offset);
 
-        }
         if (gamepad1Ex.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-            turret.adjustOffsetDegrees(-0.3);
+            turret.adjustOffsetDegrees(2);
         }
 
         if (gamepad1Ex.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
-            turret.adjustOffsetDegrees(0.3);
+            turret.adjustOffsetDegrees(-2);
         }
 
 
@@ -119,12 +118,10 @@ public class DECODAO_treino extends CommandOpMode {
         led();
 
 
-        telemetry.addData("Drive Speed", "%.2f", drive.getDriveSpeed());
 
-        telemetry.addData("cood pedro",drive.getPose());
-        telemetry.addData("target RPM",shooter.getTargetRPM());
-        telemetry.addData("current RPM",shooter.getCurrentRPM());
-        telemetry.addData("cood LL",ll.isPoseReliable());
+//        telemetry.addData("cood pedro",drive.getPose());
+//        telemetry.addData("target RPM",shooter.getTargetRPM());
+//        telemetry.addData("current RPM",shooter.getCurrentRPM());
         telemetry.addData("Loop Times", elapsedtime.milliseconds());
         telemetry.addData("current intake", intake.getCurrentAmps());
         elapsedtime.reset();

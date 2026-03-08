@@ -20,7 +20,7 @@ import all.Configs.Auto.AutoLogic;
 import all.subsystems.Turret;
 
 @Autonomous
-public class blue_12_gate_teste extends OpMode {
+public class blue_12_gate extends OpMode {
 
     private Follower follower;
     private Timer pathTimer, opModeTimer;
@@ -81,8 +81,8 @@ public class blue_12_gate_teste extends OpMode {
         intake1 = follower.pathBuilder().addPath(
                         new BezierCurve(
                                 new Pose(41.000, 103.000),
-                                new Pose(71.017, 56.623),
-                                new Pose(56.952, 59.498),
+                                new Pose(73.017, 56.623),
+                                new Pose(58.952, 59.498),
                                 new Pose(16.531, 58.811)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -90,12 +90,11 @@ public class blue_12_gate_teste extends OpMode {
                 .build();
 
         shoot2 = follower.pathBuilder().addPath(
-                        new BezierLine(
-                                new Pose(16.531, 58.811),
-
-                                new Pose(41.000, 103.000)
-                        )
-                ).setConstantHeadingInterpolation(Math.toRadians(180))
+                new BezierCurve(
+                        new Pose(16.531, 58.811),
+                        new Pose(57.759, 67.542),
+                        new Pose(40.000, 103.000)
+                )).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
                 .build();
 
@@ -103,17 +102,17 @@ public class blue_12_gate_teste extends OpMode {
                         new BezierCurve(
                                 new Pose(41.000, 103.000),
                                 new Pose(39.824, 51.826),
-                                new Pose(10.756, 57.219)
+                                new Pose(10.656, 57.519)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(140))
 
                 .build();
 
         shoot3 = follower.pathBuilder().addPath(
-                        new BezierLine(
-                                new Pose(10.756, 57.219),
-
-                                new Pose(41.000, 103.000)
+                        new BezierCurve(
+                                new Pose(10.656, 57.519),
+                                new Pose(55.759, 67.542),
+                                new Pose(39.500, 103.000)
                         )
                 ).setConstantHeadingInterpolation(Math.toRadians(180))
 
@@ -123,7 +122,7 @@ public class blue_12_gate_teste extends OpMode {
                         new BezierCurve(
                                 new Pose(41.000, 103.000),
                                 new Pose(57.676, 80.508),
-                                new Pose(15.695, 84.505)
+                                new Pose(15.895, 84.505)
                         )
                 ).setConstantHeadingInterpolation(Math.toRadians(180))
 
@@ -131,11 +130,11 @@ public class blue_12_gate_teste extends OpMode {
 
         shoot4 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(15.695, 84.505),
+                                new Pose(15.95, 84.505),
 
-                                new Pose(41.000, 103.000)
+                                new Pose(39.000, 103.000)
                         )
-                ).setConstantHeadingInterpolation(Math.toRadians(180))
+                ).setLinearHeadingInterpolation(Math.toRadians(180),Math.toRadians(185))
 
                 .build();
 
@@ -145,7 +144,7 @@ public class blue_12_gate_teste extends OpMode {
 
                                 new Pose(21.000, 103.000)
                         )
-                ).setConstantHeadingInterpolation(Math.toRadians(180))
+                ).setConstantHeadingInterpolation(Math.toRadians(185))
 
                 .build();
     }
@@ -216,13 +215,12 @@ public class blue_12_gate_teste extends OpMode {
                     follower.followPath(intake2,0.9,true);
                     autologic.startIntake();
                     pathTimer.resetTimer();
-
                     setPathState(PathState.COLLECT2);
                 }
                 break;
 
             case COLLECT2:
-                if (!follower.isBusy() &&  pathTimer.getElapsedTimeSeconds() > 0.2) {
+                if (!follower.isBusy() &&  pathTimer.getElapsedTimeSeconds() > 6) {
                     autologic.stopIntake();
 
 
@@ -319,7 +317,7 @@ public class blue_12_gate_teste extends OpMode {
 
         CommandScheduler.getInstance().run();
         follower.update();
-        turret.holdRobotRelative(Math.toRadians(-40), follower.getHeading());
+        turret.holdRobotRelative(Math.toRadians(-45), follower.getHeading());
         turret.periodic();
         autologic.update();
         statePathUpdate();
@@ -332,5 +330,10 @@ public class blue_12_gate_teste extends OpMode {
         telemetry.addData("tickError", turret.getTickError());
         telemetry.addData("Loop Times", elapsedtime.milliseconds());
         elapsedtime.reset();
+    }
+
+    @Override
+    public void stop() {
+        autologic.stopAll();
     }
 }
