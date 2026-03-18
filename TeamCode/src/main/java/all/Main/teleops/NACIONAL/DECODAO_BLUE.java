@@ -63,7 +63,7 @@ public class DECODAO_BLUE  extends CommandOpMode {
 
         Pose startPos = new Pose(33, 111, Math.toRadians(180) );
 
-        drive.setStartingPose(startPos);
+        drive.setStartingPose(PoseStorage.currentPose);
         drive.updatePinpoint();
         turret.syncTargetToCurrent(drive.getHeadingRad());
 
